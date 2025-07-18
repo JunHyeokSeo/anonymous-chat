@@ -4,7 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.auth.AuthService;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginRequest;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginResponse;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,23 +21,11 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-		return ResponseEntity.ok(authService.login(request.nickname()));
+		return ResponseEntity.ok(authService.loginWithNickname(request.nickname()));
 	}
 
-	//todo: 이거 서비스랑 분리부터 시작
 	@PostMapping("/refresh")
-	public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
-		String refreshToken = request.refreshToken();
-
-		// 토큰 유효성 확인
-		if (!jwtTokenProvider.validateToken(refreshToken)) {
-			throw new JwtException("유효하지 않은 Refresh Token입니다.");
-		}
-
-		Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-		String newAccessToken = jwtTokenProvider.createAccessToken(userId);
-		String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
-
-		return ResponseEntity.ok(new TokenResponse(newAccessToken, newRefreshToken));
+	public ResponseEntity<RefreshTokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
+		return ResponseEntity.ok(authService.reissueAccessToken(request.refreshToken()));
 	}
 }
