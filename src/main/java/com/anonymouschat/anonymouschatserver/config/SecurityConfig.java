@@ -2,6 +2,8 @@ package com.anonymouschat.anonymouschatserver.config;
 
 import com.anonymouschat.anonymouschatserver.config.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.config.jwt.JwtTokenProvider;
+import com.anonymouschat.anonymouschatserver.global.util.ResponseUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,11 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(Customizer.withDefaults())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(exception -> exception
+						                                .authenticationEntryPoint((request, response, authException) -> {
+							                                ResponseUtil.writeUnauthorizedResponse(response, "인증이 필요합니다.");
+						                                })
+				)
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers("/api/v1/auth/**").permitAll()
 						                               .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -35,6 +42,7 @@ public class SecurityConfig {
 				.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
+
 	}
 
 	// (선택) AuthenticationManager bean 등록 - 필요 시
