@@ -36,7 +36,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // Swagger UI (API 문서 자동화)
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 
     // 테스트 라이브러리
     testImplementation("org.springframework.boot:spring-boot-starter-test")
