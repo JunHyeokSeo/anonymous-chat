@@ -1,12 +1,12 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
+import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileServiceResponse;
 import com.anonymouschat.anonymouschatserver.application.service.dto.RegisterUserServiceRequest;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
-import com.anonymouschat.anonymouschatserver.domain.user.User;
-import com.anonymouschat.anonymouschatserver.domain.user.UserProfileImage;
-import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.user.*;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,20 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
+	private final UserProfileImageRepository userProfileImageRepository;
 	private final FileStorage fileStorage;
 	private final ImageValidator imageValidator;
 
-
 	public Long register(RegisterUserServiceRequest request, List<MultipartFile> images) throws IOException {
-		User user = User.builder()
-				            .nickname(request.nickname())
-				            .gender(request.gender())
-				            .age(request.age())
-				            .region(request.region())
-				            .bio(request.bio())
-				            .provider(request.provider())
-				            .providerId(request.providerId())
-				            .build();
+		User user = request.toEntity();
 
 		if (images != null) {
 			for (int i = 0; i < images.size(); i++) {
@@ -45,7 +37,7 @@ public class UserService {
 						                                .imageUrl(imageUrl)
 						                                .isRepresentative(isRepresentative)
 						                                .build();
-				user.getProfileImages().add(profileImage);
+				user.addProfileImage(profileImage);
 			}
 		}
 
@@ -55,5 +47,15 @@ public class UserService {
 	@Transactional(readOnly = true)
 	public boolean checkNicknameDuplicate(String nickname) {
 		return userRepository.existsByNickname(nickname);
+	}
+
+	@Transactional(readOnly = true)
+	public GetMyProfileServiceResponse getMyProfile(OAuthProvider provider, String providerId){
+		User savedUser = userRepository.findByProviderAndProviderId(provider, providerId)
+				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+		List<UserProfileImage> userProfileImages = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(savedUser.getId(), Sort.sort(UserProfileImage.class).by(UserProfileImage::getUploadedAt).ascending());
+
+		return GetMyProfileServiceResponse.from(savedUser, userProfileImages);
 	}
 }
