@@ -8,16 +8,19 @@ import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
 	private final FileStorage fileStorage;
+
 
 	public Long register(RegisterUserServiceRequest request, List<MultipartFile> images) throws IOException {
 		User user = User.builder()
@@ -48,6 +51,7 @@ public class UserService {
 		return userRepository.save(user).getId();
 	}
 
+	@Transactional(readOnly = true)
 	public boolean checkNicknameDuplicate(String nickname) {
 		return userRepository.existsByNickname(nickname);
 	}
