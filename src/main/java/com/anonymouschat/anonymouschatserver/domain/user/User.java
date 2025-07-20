@@ -35,7 +35,7 @@ public class User {
 	private String providerId; // ex: sub 값 or user id from provider
 
 	// 사용자 정보
-	@Column(name = "nickname", nullable = false, length = 50)
+	@Column(name = "nickname", nullable = false, length = 50, unique = true)
 	private String nickname;
 
 	@Enumerated(EnumType.STRING)

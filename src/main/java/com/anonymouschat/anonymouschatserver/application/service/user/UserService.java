@@ -20,6 +20,7 @@ import java.util.List;
 public class UserService {
 	private final UserRepository userRepository;
 	private final FileStorage fileStorage;
+	private final ImageValidator imageValidator;
 
 
 	public Long register(RegisterUserServiceRequest request, List<MultipartFile> images) throws IOException {
@@ -38,7 +39,7 @@ public class UserService {
 				MultipartFile image = images.get(i);
 				boolean isRepresentative = (i == 0);
 
-				ImageValidator.validate(image);
+				imageValidator.validate(image);
 				String imageUrl = fileStorage.upload(image);
 				UserProfileImage profileImage = UserProfileImage.builder()
 						                                .imageUrl(imageUrl)

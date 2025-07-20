@@ -1,16 +1,18 @@
 package com.anonymouschat.anonymouschatserver.common.util;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Component
 public class ImageValidator {
 
 	private static final List<String> ALLOWED_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif");
 	private static final List<String> ALLOWED_CONTENT_TYPES = List.of("image/jpeg", "image/png", "image/gif");
 
-	public static void validate(MultipartFile file) {
+	public void validate(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
 			throw new IllegalArgumentException("파일이 비어 있습니다.");
 		}

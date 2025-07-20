@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.file;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockMultipartFile;
@@ -21,10 +22,11 @@ class LocalFileStorageTest {
 	@BeforeEach
 	void setUp() {
 		fileStorage = new LocalFileStorage();
-		fileStorage.uploadDir = tempDir.toString(); // 직접 주입
+		fileStorage.uploadDir = tempDir.toString();
 	}
 
 	@Test
+	@DisplayName("파일 업로드: 유효한 파일은 저장되어야 한다")
 	void upload_ValidFile_ShouldStoreFile() throws IOException {
 		// given
 		MockMultipartFile mockFile = new MockMultipartFile(
@@ -42,6 +44,7 @@ class LocalFileStorageTest {
 	}
 
 	@Test
+	@DisplayName("파일 삭제: 존재하는 파일은 삭제되어야 한다")
 	void delete_ExistingFile_ShouldRemoveFile() throws IOException {
 		// given
 		MockMultipartFile mockFile = new MockMultipartFile(
@@ -60,12 +63,13 @@ class LocalFileStorageTest {
 	}
 
 	@Test
+	@DisplayName("파일 삭제: 존재하지 않는 파일을 삭제해도 예외가 발생하지 않아야 한다")
 	void delete_NonExistentFile_ShouldDoNothing() {
-		// when/then: 예외 없이 잘 넘어가는지만 확인
 		fileStorage.delete("/images/nonexistent.jpg");
 	}
 
 	@Test
+	@DisplayName("파일 업로드: 확장자가 없는 파일은 예외를 발생시켜야 한다")
 	void upload_InvalidFileName_ShouldThrowException() {
 		// given
 		MockMultipartFile file = new MockMultipartFile("file", "invalidfile", "text/plain", "data".getBytes());

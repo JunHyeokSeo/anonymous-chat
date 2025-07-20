@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.service.dto.RegisterUse
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
+import lombok.Builder;
 
 public record RegisterUserCommand(
 		String nickname,
