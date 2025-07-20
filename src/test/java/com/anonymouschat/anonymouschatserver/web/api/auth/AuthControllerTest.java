@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.auth;
 
-import com.anonymouschat.anonymouschatserver.global.testsupport.AbstractIntegrationTest;
+import com.anonymouschat.anonymouschatserver.common.testsupport.AbstractIntegrationTest;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginRequest;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;

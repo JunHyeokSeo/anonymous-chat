@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.config.jwt;
+package com.anonymouschat.anonymouschatserver.common.jwt;
 
 import lombok.Getter;
 import lombok.Setter;

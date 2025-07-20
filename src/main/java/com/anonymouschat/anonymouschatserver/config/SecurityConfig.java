@@ -1,8 +1,10 @@
 package com.anonymouschat.anonymouschatserver.config;
 
-import com.anonymouschat.anonymouschatserver.config.jwt.JwtAuthenticationFilter;
-import com.anonymouschat.anonymouschatserver.config.jwt.JwtTokenProvider;
-import com.anonymouschat.anonymouschatserver.global.util.ResponseUtil;
+import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
+import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
+import com.anonymouschat.anonymouschatserver.common.security.OAuth2LoginSuccessHandler;
+import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserRepository userRepository;
+	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
+		return new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
+	}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -32,11 +41,14 @@ public class SecurityConfig {
 							                                ResponseUtil.writeUnauthorizedResponse(response, "인증이 필요합니다."))
 				)
 				.authorizeHttpRequests(auth -> auth
-						                               .requestMatchers("/api/v1/auth/**").permitAll()
+						                               .requestMatchers("/api/v1/auth/**", "/oauth2/**").permitAll()
 						                               .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						                               .anyRequest().authenticated()
 				)
-				.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+				.oauth2Login(oauth2 -> oauth2
+						                       .successHandler(oAuth2LoginSuccessHandler)
+				)
+				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 

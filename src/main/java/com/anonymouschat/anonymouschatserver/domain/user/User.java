@@ -25,10 +25,12 @@ public class User {
 	private Long id;
 
 	// OAuth 정보
+	@Getter
 	@Column(name = "provider", nullable = false, length = 20)
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider provider; // GOOGLE, APPLE 등
 
+	@Getter
 	@Column(name = "provider_id", nullable = false, length = 100)
 	private String providerId; // ex: sub 값 or user id from provider
 
@@ -69,18 +71,5 @@ public class User {
 		this.age = age;
 		this.region = Objects.requireNonNull(region);
 		this.bio = bio == null ? "" : bio;
-	}
-
-	/**
-	 * 테스트용 유저 생성자
-	 */
-	public User(String nickname) {
-		this.provider = OAuthProvider.APPLE;
-		this.providerId = "test providerId";
-		this.nickname = Objects.requireNonNull(nickname);
-		this.gender = Gender.MALE;
-		this.age = 29;
-		this.region = Region.BUSAN;
-		this.bio = "test bio";
 	}
 }

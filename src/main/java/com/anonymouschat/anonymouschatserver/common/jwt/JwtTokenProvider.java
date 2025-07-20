@@ -1,5 +1,6 @@
-package com.anonymouschat.anonymouschatserver.config.jwt;
+package com.anonymouschat.anonymouschatserver.common.jwt;
 
+import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -28,25 +29,27 @@ public class JwtTokenProvider {
 		this.secretKey = Keys.hmacShaKeyFor(secretKeyPlain.getBytes());
 	}
 
-	public String createAccessToken(Long userId) {
-		return createToken(userId, accessTokenValidityInSeconds);
+	public String createAccessToken(OAuthProvider provider, String providerId) {
+		return createToken(provider, providerId, accessTokenValidityInSeconds);
 	}
 
-	public String createRefreshToken(Long userId) {
-		return createToken(userId, refreshTokenValidityInSeconds);
+	public String createRefreshToken(OAuthProvider provider, String providerId) {
+		return createToken(provider, providerId, refreshTokenValidityInSeconds);
 	}
 
-	private String createToken(Long userId, long validitySeconds) {
+	private String createToken(OAuthProvider provider, String providerId, long validitySeconds) {
 		Date now = new Date();
 		Date expiry = new Date(now.getTime() + validitySeconds * 1000);
 
 		return Jwts.builder()
-				       .setSubject(String.valueOf(userId))
 				       .setIssuedAt(now)
 				       .setExpiration(expiry)
+				       .claim("provider", provider.name())
+				       .claim("providerId", providerId)
 				       .signWith(secretKey, SignatureAlgorithm.HS256)
 				       .compact();
 	}
+
 
 	public boolean validateToken(String token) {
 		try {
@@ -63,14 +66,16 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public Long getUserIdFromToken(String token) {
+	public JwtUserInfo getUserInfoFromToken(String token) {
 		Claims claims = Jwts.parserBuilder()
 				                .setSigningKey(secretKey)
 				                .build()
 				                .parseClaimsJws(token)
 				                .getBody();
 
-		return Long.parseLong(claims.getSubject());
+		OAuthProvider provider = claims.get("provider", OAuthProvider.class);
+		String providerId = claims.get("providerId", String.class);
+		return new JwtUserInfo(provider, providerId);
 	}
 }
 

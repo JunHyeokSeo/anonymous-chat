@@ -1,6 +1,10 @@
-package com.anonymouschat.anonymouschatserver.config.jwt;
+package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.global.util.ResponseUtil;
+import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.User;
+import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,9 +21,11 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserRepository userRepository;
 
-	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
 		this.jwtTokenProvider = jwtTokenProvider;
+		this.userRepository = userRepository;
 	}
 
 	@Override
@@ -33,9 +38,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		try {
 			if (token != null && jwtTokenProvider.validateToken(token)) {
-				Long userId = jwtTokenProvider.getUserIdFromToken(token);
-				Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
-				SecurityContextHolder.getContext().setAuthentication(auth);
+				JwtUserInfo userInfo = jwtTokenProvider.getUserInfoFromToken(token);
+				OAuthProvider provider = userInfo.provider();
+				String providerId = userInfo.providerId();
+
+				User user = userRepository.findByProviderAndProviderId(provider, providerId)
+						            .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
+
+				UsernamePasswordAuthenticationToken authentication =
+						new UsernamePasswordAuthenticationToken(user, null, List.of());
+
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 		} catch (JwtException e) {
 			SecurityContextHolder.clearContext();

@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.global.util;
+package com.anonymouschat.anonymouschatserver.common.util;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

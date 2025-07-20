@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.global.testsupport;
+package com.anonymouschat.anonymouschatserver.common.testsupport;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
