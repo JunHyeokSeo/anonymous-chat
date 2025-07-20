@@ -66,7 +66,7 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public JwtUserInfo getUserInfoFromToken(String token) {
+	public OAuthPrincipal getUserInfoFromToken(String token) {
 		Claims claims = Jwts.parserBuilder()
 				                .setSigningKey(secretKey)
 				                .build()
@@ -75,7 +75,7 @@ public class JwtTokenProvider {
 
 		OAuthProvider provider = claims.get("provider", OAuthProvider.class);
 		String providerId = claims.get("providerId", String.class);
-		return new JwtUserInfo(provider, providerId);
+		return new OAuthPrincipal(provider, providerId);
 	}
 }
 

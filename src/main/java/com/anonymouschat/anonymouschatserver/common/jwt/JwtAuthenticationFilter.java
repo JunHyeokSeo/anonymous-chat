@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		try {
 			if (token != null && jwtTokenProvider.validateToken(token)) {
-				JwtUserInfo userInfo = jwtTokenProvider.getUserInfoFromToken(token);
+				OAuthPrincipal userInfo = jwtTokenProvider.getUserInfoFromToken(token);
 				OAuthProvider provider = userInfo.provider();
 				String providerId = userInfo.providerId();
 

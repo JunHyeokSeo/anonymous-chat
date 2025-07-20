@@ -59,6 +59,7 @@ public class User {
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
 
+	@Getter
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserProfileImage> profileImages = new ArrayList<>();
 

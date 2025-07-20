@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.user;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
@@ -31,5 +32,11 @@ public class UserProfileImage {
 
 	public void markAsDeleted() {
 		this.deleted = true;
+	}
+
+	@Builder
+	public UserProfileImage(String imageUrl, boolean isRepresentative) {
+		this.imageUrl = imageUrl;
+		this.isRepresentative = isRepresentative;
 	}
 }

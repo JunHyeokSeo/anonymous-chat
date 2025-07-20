@@ -8,17 +8,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException e) {
-		String message = e.getBindingResult().getFieldErrors().stream()
-				                 .findFirst()
-				                 .map(field -> field.getField() + " " + field.getDefaultMessage())
-				                 .orElse("Validation error");
+	public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException ex) {
+		String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+				                      .map(error -> String.format("[%s] %s", error.getField(), error.getDefaultMessage()))
+				                      .collect(Collectors.joining(" / "));
 
-		return ResponseEntity.badRequest()
-				       .body(ApiResponse.error(ErrorCode.INVALID_INPUT, message));
+		return ResponseEntity.badRequest().body(
+				ApiResponse.error(ErrorCode.INVALID_INPUT, errorMessage));
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)

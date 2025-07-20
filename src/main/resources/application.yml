@@ -62,4 +62,8 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
 
+file:
+  upload-dir: /Users/jun/Documents/anonymous-chat/user-profile-images
+  access-url-prefix: /images
+
 

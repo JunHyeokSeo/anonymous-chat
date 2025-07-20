@@ -1,11 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.service.auth;
 
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
-import com.anonymouschat.anonymouschatserver.common.jwt.JwtUserInfo;
+import com.anonymouschat.anonymouschatserver.common.jwt.OAuthPrincipal;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.User;
-import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
-import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginResponse;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenResponse;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +23,7 @@ public class AuthService {
 			throw new JwtException("유효하지 않은 Refresh Token 입니다.");
 		}
 
-		JwtUserInfo userInfo = jwtTokenProvider.getUserInfoFromToken(refreshToken);
+		OAuthPrincipal userInfo = jwtTokenProvider.getUserInfoFromToken(refreshToken);
 		String key = buildKey(userInfo.provider(), userInfo.providerId());
 		if (!isValidRefreshToken(key, refreshToken)) {
 			throw new IllegalStateException("저장된 토큰과 일치하지 않습니다.");
