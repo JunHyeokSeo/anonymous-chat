@@ -12,25 +12,22 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user", uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"provider", "provider_id"})
 })
 public class User {
-
-	@Getter
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false)
 	private Long id;
 
 	// OAuth 정보
-	@Getter
 	@Column(name = "provider", nullable = false, length = 20)
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider provider; // GOOGLE, APPLE 등
 
-	@Getter
 	@Column(name = "provider_id", nullable = false, length = 100)
 	private String providerId; // ex: sub 값 or user id from provider
 
@@ -59,9 +56,13 @@ public class User {
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
 
-	@Getter
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserProfileImage> profileImages = new ArrayList<>();
+
+	public void addProfileImage(UserProfileImage image) {
+		profileImages.add(image);
+		image.setUser(this);
+	}
 
 	@Builder
 	public User(OAuthProvider provider, String providerId, String nickname, Gender gender, int age, Region region, String bio) {

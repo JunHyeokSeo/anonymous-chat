@@ -2,10 +2,14 @@ package com.anonymouschat.anonymouschatserver.domain.user;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@NoArgsConstructor
+@Getter
 @Table(name = "user_profile_image")
 public class UserProfileImage {
 
@@ -32,6 +36,10 @@ public class UserProfileImage {
 
 	public void markAsDeleted() {
 		this.deleted = true;
+	}
+
+	protected void setUser(User user) {
+		this.user = user;
 	}
 
 	@Builder
