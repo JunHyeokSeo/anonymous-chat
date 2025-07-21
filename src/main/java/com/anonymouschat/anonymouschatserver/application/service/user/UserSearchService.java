@@ -13,5 +13,6 @@ public class UserSearchService {
 
 	public UserSearchResult search(UserSearchCommand command) {
 
+		return null;
 	}
 }
