@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +14,7 @@ import java.util.List;
 public class RegisterUserUseCase {
 	private final UserService userService;
 
-	public Long register(RegisterUserUseCaseCommand command, List<MultipartFile> images) throws IOException {
+	public Long register(RegisterUserCommand command, List<MultipartFile> images) throws IOException {
 		if (images != null && images.size() > 3) {
 			throw new IllegalStateException("이미지는 최대 3장까지 업로드할 수 있습니다.");
 		}
@@ -22,6 +22,6 @@ public class RegisterUserUseCase {
 		if (userService.checkNicknameDuplicate(command.nickname()))
 			throw new IllegalStateException("동일한 닉네임을 가진 사용자가 있습니다.");
 
-		return userService.register(command.toServiceRequest(), images);
+		return userService.register(command, images);
 	}
 }

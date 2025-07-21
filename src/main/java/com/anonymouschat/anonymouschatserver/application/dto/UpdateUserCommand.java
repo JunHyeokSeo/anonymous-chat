@@ -1,9 +1,9 @@
-package com.anonymouschat.anonymouschatserver.application.service.dto;
+package com.anonymouschat.anonymouschatserver.application.dto;
 
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
 
-public record UpdateUserServiceCommand(
+public record UpdateUserCommand(
 		String nickname,
 		Gender gender,
 		int age,

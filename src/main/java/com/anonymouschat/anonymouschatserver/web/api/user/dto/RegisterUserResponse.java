@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-public record RegisterUserApiResponse(
+public record RegisterUserResponse(
 		Long userId
 ) { }
 

@@ -1,8 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
-import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileServiceResult;
+import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileUseCaseResult;
+import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.domain.user.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class GetMyProfileUseCaseTest {
 		User user = new User(OAuthProvider.GOOGLE, "abc123", "사용자", Gender.FEMALE, 30, Region.BUSAN, "소개");
 		ReflectionTestUtils.setField(user, "id", 10L);
 
-		GetMyProfileServiceResult mockResponse = GetMyProfileServiceResult.builder()
+		GetMyProfileResult mockResponse = GetMyProfileResult.builder()
 				                                           .id(user.getId())
 				                                           .provider(user.getProvider())
 				                                           .providerId(user.getProviderId())
@@ -42,7 +42,7 @@ class GetMyProfileUseCaseTest {
 		when(userService.getMyProfile(OAuthProvider.GOOGLE, "abc123")).thenReturn(mockResponse);
 
 		// when
-		GetMyProfileUseCaseResult result = useCase.getMyProfile(OAuthProvider.GOOGLE, "abc123");
+		GetMyProfileResult result = useCase.getMyProfile(OAuthProvider.GOOGLE, "abc123");
 
 		// then
 		assertThat(result.nickname()).isEqualTo("사용자");

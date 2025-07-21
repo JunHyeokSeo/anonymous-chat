@@ -1,12 +1,12 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
 import jakarta.validation.constraints.*;
 
-public record RegisterUserApiRequest(
+public record RegisterUserRequest(
 
 		@NotBlank(message = "닉네임은 필수 항목입니다.")
 		String nickname,
@@ -25,8 +25,8 @@ public record RegisterUserApiRequest(
 		String bio
 
 ) {
-	public RegisterUserUseCaseCommand toCommand(OAuthProvider provider, String providerId) {
-		return new RegisterUserUseCaseCommand(
+	public RegisterUserCommand toCommand(OAuthProvider provider, String providerId) {
+		return new RegisterUserCommand(
 				nickname, gender, age, region,
 				bio == null ? "" : bio,
 				provider, providerId

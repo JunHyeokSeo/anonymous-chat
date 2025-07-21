@@ -1,11 +1,11 @@
-package com.anonymouschat.anonymouschatserver.application.service.dto;
+package com.anonymouschat.anonymouschatserver.application.dto;
 
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
 import com.anonymouschat.anonymouschatserver.domain.user.User;
 
-public record RegisterUserServiceCommand(
+public record RegisterUserCommand(
 		String nickname,
 		Gender gender,
 		int age,

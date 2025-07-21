@@ -4,8 +4,6 @@ import com.anonymouschat.anonymouschatserver.application.service.auth.AuthServic
 import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;
 import com.anonymouschat.anonymouschatserver.common.response.ApiResponse;
 import com.anonymouschat.anonymouschatserver.domain.user.User;
-import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginRequest;
-import com.anonymouschat.anonymouschatserver.web.api.auth.dto.LoginResponse;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenRequest;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenResponse;
 import lombok.RequiredArgsConstructor;

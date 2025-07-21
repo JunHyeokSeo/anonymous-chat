@@ -1,7 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
-import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileServiceResult;
-import com.anonymouschat.anonymouschatserver.application.service.dto.RegisterUserServiceCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
+import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.user.*;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
@@ -40,7 +41,7 @@ class UserServiceTest {
 	@DisplayName("유저 등록 - 이미지 없이")
 	void registerUserWithoutImages() throws IOException {
 		// given
-		RegisterUserServiceCommand request = new RegisterUserServiceCommand(
+		RegisterUserCommand request = new RegisterUserCommand(
 				"testNick", Gender.MALE, 25, Region.SEOUL, "안녕하세요", OAuthProvider.GOOGLE, "providerId123"
 		);
 
@@ -60,7 +61,7 @@ class UserServiceTest {
 	@DisplayName("유저 등록 - 이미지 포함")
 	void registerUserWithImages() throws IOException {
 		// given
-		RegisterUserServiceCommand request = new RegisterUserServiceCommand(
+		RegisterUserCommand request = new RegisterUserCommand(
 				"testNick", Gender.FEMALE, 30, Region.BUSAN, "Hello!", OAuthProvider.APPLE, "appleId123"
 		);
 
@@ -118,7 +119,7 @@ class UserServiceTest {
 				.thenReturn(images);
 
 		// when
-		GetMyProfileServiceResult response = userService.getMyProfile(OAuthProvider.GOOGLE, "providerId123");
+		GetMyProfileResult response = userService.getMyProfile(OAuthProvider.GOOGLE, "providerId123");
 
 		// then
 		assertThat(response.nickname()).isEqualTo("닉네임");

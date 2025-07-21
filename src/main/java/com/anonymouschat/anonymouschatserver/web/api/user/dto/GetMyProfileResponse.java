@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileImageUseCaseResult;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileUseCaseResult;
+import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileImageResult;
+import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GetMyProfileApiResponse(
+public record GetMyProfileResponse(
 		Long id,
 		OAuthProvider provider,
 		String providerId,
@@ -21,11 +21,11 @@ public record GetMyProfileApiResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
-		List<GetMyProfileImageApiResponse> profileImages
+		List<GetMyProfileImageResponse> profileImages
 ) {
-	public static GetMyProfileApiResponse from(GetMyProfileUseCaseResult response) {
-		List<GetMyProfileImageUseCaseResult> images = response.profileImages();
-		return GetMyProfileApiResponse.builder()
+	public static GetMyProfileResponse from(GetMyProfileResult response) {
+		List<GetMyProfileImageResult> images = response.profileImages();
+		return GetMyProfileResponse.builder()
 				       .id(response.id())
 				       .provider(response.provider())
 				       .providerId(response.providerId())
@@ -35,7 +35,7 @@ public record GetMyProfileApiResponse(
 				       .region(response.region())
 				       .bio(response.bio())
 				       .createdAt(response.createdAt())
-				       .profileImages(images.stream().map(GetMyProfileImageApiResponse::from).toList())
+				       .profileImages(images.stream().map(GetMyProfileImageResponse::from).toList())
 				       .build();
 	}
 }

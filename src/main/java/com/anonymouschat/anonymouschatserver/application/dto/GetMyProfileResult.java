@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.application.service.dto;
+package com.anonymouschat.anonymouschatserver.application.dto;
 
 import com.anonymouschat.anonymouschatserver.domain.user.*;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GetMyProfileServiceResult(
+public record GetMyProfileResult(
 		Long id,
 		OAuthProvider provider,
 		String providerId,
@@ -17,10 +17,10 @@ public record GetMyProfileServiceResult(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
-		List<GetMyProfileImageServiceResult> profileImages
+		List<GetMyProfileImageResult> profileImages
 ) {
-	public static GetMyProfileServiceResult from(User user, List<UserProfileImage> images) {
-		return GetMyProfileServiceResult.builder()
+	public static GetMyProfileResult from(User user, List<UserProfileImage> images) {
+		return GetMyProfileResult.builder()
 				       .id(user.getId())
 				       .provider(user.getProvider())
 				       .providerId(user.getProviderId())
@@ -30,7 +30,7 @@ public record GetMyProfileServiceResult(
 				       .region(user.getRegion())
 				       .bio(user.getBio())
 				       .createdAt(user.getCreatedAt())
-				       .profileImages(images.stream().map(GetMyProfileImageServiceResult::from).toList())
+				       .profileImages(images.stream().map(GetMyProfileImageResult::from).toList())
 				       .build();
 	}
 }
