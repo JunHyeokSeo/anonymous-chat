@@ -19,10 +19,9 @@ public record GetMyProfileResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
-		List<GetMyProfileImageResponse> profileImages
+		List<UserProfileImageDto> profileImages
 ) {
 	public static GetMyProfileResponse from(GetMyProfileResult response) {
-		List<UserProfileImageDto> images = response.profileImages();
 		return GetMyProfileResponse.builder()
 				       .id(response.id())
 				       .nickname(response.nickname())
@@ -31,7 +30,7 @@ public record GetMyProfileResponse(
 				       .region(response.region())
 				       .bio(response.bio())
 				       .createdAt(response.createdAt())
-				       .profileImages(images.stream().map(GetMyProfileImageResponse::from).toList())
+				       .profileImages(response.profileImages())
 				       .build();
 	}
 }
