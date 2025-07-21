@@ -2,13 +2,14 @@ package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
-import com.anonymouschat.anonymouschatserver.domain.user.*;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;

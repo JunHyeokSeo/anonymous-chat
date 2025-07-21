@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.domain.user;
+package com.anonymouschat.anonymouschatserver.domain.user.type;
 
 public enum Region {
 

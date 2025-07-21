@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.domain.chatroom;
+package com.anonymouschat.anonymouschatserver.domain.chatroom.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -1,6 +1,9 @@
-package com.anonymouschat.anonymouschatserver.domain.user;
+package com.anonymouschat.anonymouschatserver.domain.user.entity;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserCommand;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

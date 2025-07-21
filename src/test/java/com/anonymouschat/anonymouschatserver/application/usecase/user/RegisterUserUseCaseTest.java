@@ -3,10 +3,9 @@ package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
-import com.anonymouschat.anonymouschatserver.domain.user.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.Region;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
 import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
-import com.anonymouschat.anonymouschatserver.domain.user.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.Region;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 import jakarta.validation.constraints.*;
 
 public record RegisterUserRequest(

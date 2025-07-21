@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.domain.user;
+package com.anonymouschat.anonymouschatserver.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;

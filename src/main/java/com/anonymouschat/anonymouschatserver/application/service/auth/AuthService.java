@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.application.service.auth;
 
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.common.jwt.OAuthPrincipal;
-import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenResponse;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;

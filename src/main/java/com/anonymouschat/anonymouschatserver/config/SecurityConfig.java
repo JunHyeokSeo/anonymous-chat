@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.config;
 
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.common.security.OAuth2LoginSuccessHandler;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;

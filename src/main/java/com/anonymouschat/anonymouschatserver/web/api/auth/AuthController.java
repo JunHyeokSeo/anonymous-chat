@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.api.auth;
 import com.anonymouschat.anonymouschatserver.application.service.auth.AuthService;
 import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;
 import com.anonymouschat.anonymouschatserver.common.response.ApiResponse;
-import com.anonymouschat.anonymouschatserver.domain.user.User;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenRequest;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.RefreshTokenResponse;
 import lombok.RequiredArgsConstructor;

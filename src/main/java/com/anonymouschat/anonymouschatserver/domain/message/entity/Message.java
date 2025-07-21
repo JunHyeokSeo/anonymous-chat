@@ -1,7 +1,7 @@
-package com.anonymouschat.anonymouschatserver.domain.message;
+package com.anonymouschat.anonymouschatserver.domain.message.entity;
 
-import com.anonymouschat.anonymouschatserver.domain.chatroom.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.user.User;
+import com.anonymouschat.anonymouschatserver.domain.chatroom.entity.ChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

@@ -2,7 +2,11 @@ package com.anonymouschat.anonymouschatserver.application.service.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
-import com.anonymouschat.anonymouschatserver.domain.user.*;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
+import com.anonymouschat.anonymouschatserver.domain.user.repository.UserProfileImageRepository;
+import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;

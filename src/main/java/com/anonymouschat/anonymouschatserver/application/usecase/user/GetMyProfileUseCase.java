@@ -2,9 +2,8 @@ package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
-import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
 import lombok.RequiredArgsConstructor;
 
 @UseCase

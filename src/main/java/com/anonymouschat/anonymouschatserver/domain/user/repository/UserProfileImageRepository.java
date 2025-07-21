@@ -1,5 +1,6 @@
-package com.anonymouschat.anonymouschatserver.domain.user;
+package com.anonymouschat.anonymouschatserver.domain.user.repository;
 
+import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Sort;
 

@@ -1,5 +1,7 @@
-package com.anonymouschat.anonymouschatserver.domain.user;
+package com.anonymouschat.anonymouschatserver.domain.user.repository;
 
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

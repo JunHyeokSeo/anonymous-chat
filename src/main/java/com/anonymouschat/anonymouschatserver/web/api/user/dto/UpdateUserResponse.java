@@ -2,8 +2,8 @@ package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserResult;
 import com.anonymouschat.anonymouschatserver.application.dto.UserProfileImageDto;
-import com.anonymouschat.anonymouschatserver.domain.user.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.Region;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

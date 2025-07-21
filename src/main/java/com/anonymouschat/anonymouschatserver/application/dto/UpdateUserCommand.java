@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
-import com.anonymouschat.anonymouschatserver.domain.user.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.Region;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
 
 public record UpdateUserCommand(
 		Long id,

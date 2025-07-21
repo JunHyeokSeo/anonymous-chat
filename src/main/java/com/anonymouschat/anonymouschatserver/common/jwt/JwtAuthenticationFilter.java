@@ -1,8 +1,8 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.User;
-import com.anonymouschat.anonymouschatserver.domain.user.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import io.jsonwebtoken.JwtException;

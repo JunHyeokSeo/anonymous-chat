@@ -1,6 +1,6 @@
-package com.anonymouschat.anonymouschatserver.domain.block;
+package com.anonymouschat.anonymouschatserver.domain.block.entity;
 
-import com.anonymouschat.anonymouschatserver.domain.user.User;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
