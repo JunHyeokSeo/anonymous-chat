@@ -19,6 +19,7 @@ public record GetMyProfileResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
+		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
 	public static GetMyProfileResponse from(GetMyProfileResult response) {
@@ -30,6 +31,7 @@ public record GetMyProfileResponse(
 				       .region(response.region())
 				       .bio(response.bio())
 				       .createdAt(response.createdAt())
+				       .lastActiveAt(response.lastActiveAt())
 				       .profileImages(response.profileImages())
 				       .build();
 	}

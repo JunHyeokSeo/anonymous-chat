@@ -15,6 +15,7 @@ public record GetMyProfileResult(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
+		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
 	public static GetMyProfileResult from(User user, List<UserProfileImage> images) {
@@ -26,6 +27,7 @@ public record GetMyProfileResult(
 				       .region(user.getRegion())
 				       .bio(user.getBio())
 				       .createdAt(user.getCreatedAt())
+				       .lastActiveAt(user.getLastActiveAt())
 				       .profileImages(images.stream().map(UserProfileImageDto::from).toList())
 				       .build();
 	}

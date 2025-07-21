@@ -18,6 +18,7 @@ public record UpdateUserResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
+		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
 	public static UpdateUserResponse from(UpdateUserResult result) {
@@ -29,6 +30,7 @@ public record UpdateUserResponse(
 				       .region(result.region())
 				       .bio(result.bio())
 				       .createdAt(result.createdAt())
+				       .lastActiveAt(result.lastActiveAt())
 				       .profileImages(result.profileImages())
 				       .build();
 	}

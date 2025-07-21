@@ -56,6 +56,9 @@ public class User {
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt = LocalDateTime.now();
 
+	@Column(name = "last_active_at", nullable = false)
+	private LocalDateTime lastActiveAt = LocalDateTime.now();
+
 	// 활성 여부 (soft delete 대비)
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
