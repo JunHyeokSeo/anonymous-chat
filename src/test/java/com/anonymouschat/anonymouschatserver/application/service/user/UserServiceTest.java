@@ -50,7 +50,7 @@ class UserServiceTest {
 		when(savedUser.getId()).thenReturn(1L);
 
 		// when
-		Long userId = userService.register(request, null);
+		Long userId = userService.register(request, List.of());
 
 		// then
 		assertThat(userId).isEqualTo(1L);

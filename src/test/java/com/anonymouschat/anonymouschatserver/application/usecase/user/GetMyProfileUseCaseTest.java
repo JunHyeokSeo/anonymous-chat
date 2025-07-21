@@ -26,18 +26,7 @@ class GetMyProfileUseCaseTest {
 		User user = new User(OAuthProvider.GOOGLE, "abc123", "사용자", Gender.FEMALE, 30, Region.BUSAN, "소개");
 		ReflectionTestUtils.setField(user, "id", 10L);
 
-		GetMyProfileResult mockResponse = GetMyProfileResult.builder()
-				                                           .id(user.getId())
-				                                           .provider(user.getProvider())
-				                                           .providerId(user.getProviderId())
-				                                           .nickname(user.getNickname())
-				                                           .gender(user.getGender())
-				                                           .age(user.getAge())
-				                                           .region(user.getRegion())
-				                                           .bio(user.getBio())
-				                                           .createdAt(LocalDateTime.now())
-				                                           .profileImages(List.of())
-				                                           .build();
+		GetMyProfileResult mockResponse = GetMyProfileResult.from(user, List.of());
 
 		when(userService.getMyProfile(OAuthProvider.GOOGLE, "abc123")).thenReturn(mockResponse);
 

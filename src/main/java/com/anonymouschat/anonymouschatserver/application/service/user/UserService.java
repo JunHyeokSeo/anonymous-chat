@@ -1,8 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
-import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
-import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
-import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.*;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.user.*;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
@@ -13,34 +11,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
+
 	private final UserRepository userRepository;
 	private final UserProfileImageRepository userProfileImageRepository;
 	private final FileStorage fileStorage;
 	private final ImageValidator imageValidator;
 
-	public Long register(RegisterUserCommand request, List<MultipartFile> images) throws IOException {
-		User user = request.toEntity();
+	public Long register(RegisterUserCommand command, List<MultipartFile> images) throws IOException {
+		User user = command.toEntity();
 
-		if (images != null) {
-			for (int i = 0; i < images.size(); i++) {
-				MultipartFile image = images.get(i);
-				boolean isRepresentative = (i == 0);
-
-				imageValidator.validate(image);
-				String imageUrl = fileStorage.upload(image);
-				UserProfileImage profileImage = UserProfileImage.builder()
-						                                .imageUrl(imageUrl)
-						                                .isRepresentative(isRepresentative)
-						                                .build();
-				user.addProfileImage(profileImage);
-			}
-		}
+		List<UserProfileImage> profileImages = convertToProfileImages(images);
+		profileImages.forEach(user::addProfileImage);
 
 		return userRepository.save(user).getId();
 	}
@@ -51,16 +39,61 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public GetMyProfileResult getMyProfile(OAuthProvider provider, String providerId){
-		User savedUser = userRepository.findByProviderAndProviderId(provider, providerId)
+	public GetMyProfileResult getMyProfile(OAuthProvider provider, String providerId) {
+		User user = userRepository.findByProviderAndProviderId(provider, providerId)
 				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
-		List<UserProfileImage> userProfileImages = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(savedUser.getId(), Sort.sort(UserProfileImage.class).by(UserProfileImage::getUploadedAt).ascending());
+		List<UserProfileImage> profileImages =
+				userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
+						user.getId(),
+						Sort.sort(UserProfileImage.class).by(UserProfileImage::getUploadedAt).ascending()
+				);
 
-		return GetMyProfileResult.from(savedUser, userProfileImages);
+		return GetMyProfileResult.from(user, profileImages);
 	}
 
-	public void updateUserProfile() {
+	public UpdateUserResult update(UpdateUserCommand command, List<MultipartFile> images) throws IOException {
+		User user = userRepository.findById(command.id())
+				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
+		user.update(command);
+
+		deletePrevProfileImages(user.getId());
+
+		List<UserProfileImage> newImages = convertToProfileImages(images);
+		newImages.forEach(user::addProfileImage);
+
+		return UpdateUserResult.from(user, newImages);
+	}
+
+	private void deletePrevProfileImages(Long userId) {
+		List<UserProfileImage> prevImages = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(userId);
+
+		for (UserProfileImage image : prevImages) {
+			fileStorage.delete(image.getImageUrl()); // 실제 파일 삭제
+			image.softDelete(); // 논리적 삭제 (deleted = true)
+		}
+	}
+
+	private List<UserProfileImage> convertToProfileImages(List<MultipartFile> images) throws IOException {
+		List<UserProfileImage> result = new ArrayList<>();
+
+		for (int i = 0; i < images.size(); i++) {
+			MultipartFile image = images.get(i);
+			boolean isRepresentative = (i == 0);
+
+			imageValidator.validate(image);
+			String imageUrl = fileStorage.upload(image);
+			result.add(toUserProfileImage(imageUrl, isRepresentative));
+		}
+
+		return result;
+	}
+
+	private UserProfileImage toUserProfileImage(String imageUrl, boolean isRepresentative) {
+		return UserProfileImage.builder()
+				       .imageUrl(imageUrl)
+				       .isRepresentative(isRepresentative)
+				       .build();
 	}
 }

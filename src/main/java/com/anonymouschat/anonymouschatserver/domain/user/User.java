@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.domain.user;
 
+import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserCommand;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -52,6 +53,9 @@ public class User {
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt = LocalDateTime.now();
 
+	@Column(name = "updated_at", nullable = false)
+	private LocalDateTime updatedAt = LocalDateTime.now();
+
 	// 활성 여부 (soft delete 대비)
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
@@ -62,6 +66,23 @@ public class User {
 	public void addProfileImage(UserProfileImage image) {
 		profileImages.add(image);
 		image.setUser(this);
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void update(UpdateUserCommand command) {
+		updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
+	}
+
+	private void updateProfile(String nickname, Gender gender, int age, Region region, String bio) {
+		this.nickname = Objects.requireNonNull(nickname);
+		this.gender = Objects.requireNonNull(gender);
+		this.age = age;
+		this.region = Objects.requireNonNull(region);
+		this.bio = bio == null ? "" : bio;
 	}
 
 	@Builder

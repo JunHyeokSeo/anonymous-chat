@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface UserProfileImageRepository extends JpaRepository<UserProfileImage, Long> {
 	List<UserProfileImage> findAllByUserIdAndDeletedIsFalse(Long userId, Sort sort);
+
+	List<UserProfileImage> findAllByUserIdAndDeletedIsFalse(Long userId);
 }

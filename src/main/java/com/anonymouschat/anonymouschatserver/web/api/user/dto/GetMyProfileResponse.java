@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileImageResult;
+import com.anonymouschat.anonymouschatserver.application.dto.UserProfileImageDto;
 import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
@@ -13,8 +13,6 @@ import java.util.List;
 @Builder
 public record GetMyProfileResponse(
 		Long id,
-		OAuthProvider provider,
-		String providerId,
 		String nickname,
 		Gender gender,
 		int age,
@@ -24,11 +22,9 @@ public record GetMyProfileResponse(
 		List<GetMyProfileImageResponse> profileImages
 ) {
 	public static GetMyProfileResponse from(GetMyProfileResult response) {
-		List<GetMyProfileImageResult> images = response.profileImages();
+		List<UserProfileImageDto> images = response.profileImages();
 		return GetMyProfileResponse.builder()
 				       .id(response.id())
-				       .provider(response.provider())
-				       .providerId(response.providerId())
 				       .nickname(response.nickname())
 				       .gender(response.gender())
 				       .age(response.age())

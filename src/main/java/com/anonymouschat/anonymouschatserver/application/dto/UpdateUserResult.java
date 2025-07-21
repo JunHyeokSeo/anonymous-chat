@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GetMyProfileResult(
+public record UpdateUserResult(
 		Long id,
 		String nickname,
 		Gender gender,
@@ -17,8 +17,8 @@ public record GetMyProfileResult(
 		LocalDateTime createdAt,
 		List<UserProfileImageDto> profileImages
 ) {
-	public static GetMyProfileResult from(User user, List<UserProfileImage> images) {
-		return GetMyProfileResult.builder()
+	public static UpdateUserResult from(User user, List<UserProfileImage> images) {
+		return UpdateUserResult.builder()
 				       .id(user.getId())
 				       .nickname(user.getNickname())
 				       .gender(user.getGender())

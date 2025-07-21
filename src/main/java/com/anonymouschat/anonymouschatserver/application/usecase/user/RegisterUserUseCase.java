@@ -15,7 +15,7 @@ public class RegisterUserUseCase {
 	private final UserService userService;
 
 	public Long register(RegisterUserCommand command, List<MultipartFile> images) throws IOException {
-		if (images != null && images.size() > 3) {
+		if (images.size() > 3) {
 			throw new IllegalStateException("이미지는 최대 3장까지 업로드할 수 있습니다.");
 		}
 

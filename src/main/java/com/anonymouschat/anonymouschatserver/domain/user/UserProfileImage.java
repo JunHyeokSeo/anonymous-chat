@@ -34,7 +34,7 @@ public class UserProfileImage {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	public void markAsDeleted() {
+	public void softDelete() {
 		this.deleted = true;
 	}
 

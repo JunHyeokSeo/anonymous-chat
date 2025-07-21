@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -37,7 +38,8 @@ public class UserController {
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		RegisterUserCommand command = request.toCommand(oAuthPrincipal.provider(), oAuthPrincipal.providerId());
-		Long userId = registerUserUseCase.register(command, images);
+		List<MultipartFile> safeImages = Optional.ofNullable(images).orElse(List.of());
+		Long userId = registerUserUseCase.register(command, safeImages);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				ApiResponse.success(SuccessCode.USER_REGISTERED, new RegisterUserResponse(userId)));
