@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.usecase.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileImageServiceResponse;
-import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileServiceResponse;
+import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileImageServiceResult;
+import com.anonymouschat.anonymouschatserver.application.service.dto.GetMyProfileServiceResult;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GetMyProfileUseCaseResponse(
+public record GetMyProfileUseCaseResult(
 		Long id,
 		OAuthProvider provider,
 		String providerId,
@@ -21,11 +21,11 @@ public record GetMyProfileUseCaseResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
-		List<GetMyProfileImageUseCaseResponse> profileImages
+		List<GetMyProfileImageUseCaseResult> profileImages
 ) {
-	public static GetMyProfileUseCaseResponse from(GetMyProfileServiceResponse response) {
-		List<GetMyProfileImageServiceResponse> images = response.profileImages();
-		return GetMyProfileUseCaseResponse.builder()
+	public static GetMyProfileUseCaseResult from(GetMyProfileServiceResult response) {
+		List<GetMyProfileImageServiceResult> images = response.profileImages();
+		return GetMyProfileUseCaseResult.builder()
 				       .id(response.id())
 				       .provider(response.provider())
 				       .providerId(response.providerId())
@@ -35,7 +35,7 @@ public record GetMyProfileUseCaseResponse(
 				       .region(response.region())
 				       .bio(response.bio())
 				       .createdAt(response.createdAt())
-				       .profileImages(images.stream().map(GetMyProfileImageUseCaseResponse::from).toList())
+				       .profileImages(images.stream().map(GetMyProfileImageUseCaseResult::from).toList())
 				       .build();
 	}
 }

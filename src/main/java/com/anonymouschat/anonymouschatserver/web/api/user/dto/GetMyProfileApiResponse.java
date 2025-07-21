@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileImageUseCaseResponse;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileUseCaseResponse;
+import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileImageUseCaseResult;
+import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.GetMyProfileUseCaseResult;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
@@ -23,8 +23,8 @@ public record GetMyProfileApiResponse(
 		LocalDateTime createdAt,
 		List<GetMyProfileImageApiResponse> profileImages
 ) {
-	public static GetMyProfileApiResponse from(GetMyProfileUseCaseResponse response) {
-		List<GetMyProfileImageUseCaseResponse> images = response.profileImages();
+	public static GetMyProfileApiResponse from(GetMyProfileUseCaseResult response) {
+		List<GetMyProfileImageUseCaseResult> images = response.profileImages();
 		return GetMyProfileApiResponse.builder()
 				       .id(response.id())
 				       .provider(response.provider())

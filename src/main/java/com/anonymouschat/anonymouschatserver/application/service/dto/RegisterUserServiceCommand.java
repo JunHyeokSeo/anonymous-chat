@@ -5,7 +5,7 @@ import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
 import com.anonymouschat.anonymouschatserver.domain.user.User;
 
-public record RegisterUserServiceRequest(
+public record RegisterUserServiceCommand(
 		String nickname,
 		Gender gender,
 		int age,

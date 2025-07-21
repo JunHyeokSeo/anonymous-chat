@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseRequest;
+import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseCommand;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
@@ -25,8 +25,8 @@ public record RegisterUserApiRequest(
 		String bio
 
 ) {
-	public RegisterUserUseCaseRequest toCommand(OAuthProvider provider, String providerId) {
-		return new RegisterUserUseCaseRequest(
+	public RegisterUserUseCaseCommand toCommand(OAuthProvider provider, String providerId) {
+		return new RegisterUserUseCaseCommand(
 				nickname, gender, age, region,
 				bio == null ? "" : bio,
 				provider, providerId

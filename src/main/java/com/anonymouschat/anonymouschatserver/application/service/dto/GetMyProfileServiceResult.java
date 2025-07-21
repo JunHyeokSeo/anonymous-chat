@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GetMyProfileServiceResponse(
+public record GetMyProfileServiceResult(
 		Long id,
 		OAuthProvider provider,
 		String providerId,
@@ -17,10 +17,10 @@ public record GetMyProfileServiceResponse(
 		Region region,
 		String bio,
 		LocalDateTime createdAt,
-		List<GetMyProfileImageServiceResponse> profileImages
+		List<GetMyProfileImageServiceResult> profileImages
 ) {
-	public static GetMyProfileServiceResponse from(User user, List<UserProfileImage> images) {
-		return GetMyProfileServiceResponse.builder()
+	public static GetMyProfileServiceResult from(User user, List<UserProfileImage> images) {
+		return GetMyProfileServiceResult.builder()
 				       .id(user.getId())
 				       .provider(user.getProvider())
 				       .providerId(user.getProviderId())
@@ -30,7 +30,7 @@ public record GetMyProfileServiceResponse(
 				       .region(user.getRegion())
 				       .bio(user.getBio())
 				       .createdAt(user.getCreatedAt())
-				       .profileImages(images.stream().map(GetMyProfileImageServiceResponse::from).toList())
+				       .profileImages(images.stream().map(GetMyProfileImageServiceResult::from).toList())
 				       .build();
 	}
 }

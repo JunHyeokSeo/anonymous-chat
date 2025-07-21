@@ -1,9 +1,9 @@
 
 package com.anonymouschat.anonymouschatserver.application.usecase.user;
 
-import com.anonymouschat.anonymouschatserver.application.service.dto.RegisterUserServiceRequest;
+import com.anonymouschat.anonymouschatserver.application.service.dto.RegisterUserServiceCommand;
 import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseRequest;
+import com.anonymouschat.anonymouschatserver.application.usecase.user.dto.RegisterUserUseCaseCommand;
 import com.anonymouschat.anonymouschatserver.domain.user.Gender;
 import com.anonymouschat.anonymouschatserver.domain.user.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.user.Region;
@@ -32,17 +32,17 @@ class RegisterUserUseCaseTest {
 	@InjectMocks
 	private RegisterUserUseCase registerUserUseCase;
 
-	private RegisterUserUseCaseRequest createCommand(String nickname) {
-		return new RegisterUserUseCaseRequest(nickname, Gender.FEMALE, 25, Region.SEOUL, "소개", OAuthProvider.APPLE, "testId");
+	private RegisterUserUseCaseCommand createCommand(String nickname) {
+		return new RegisterUserUseCaseCommand(nickname, Gender.FEMALE, 25, Region.SEOUL, "소개", OAuthProvider.APPLE, "testId");
 	}
 
 	@Test
 	@DisplayName("정상적으로 유저 등록에 성공하면 userId를 반환한다")
 	void registerUserSuccessfully() throws IOException {
-		RegisterUserUseCaseRequest command = createCommand("uniqueNick");
+		RegisterUserUseCaseCommand command = createCommand("uniqueNick");
 
 		when(userService.checkNicknameDuplicate("uniqueNick")).thenReturn(false);
-		when(userService.register(any(RegisterUserServiceRequest.class), any())).thenReturn(1L);
+		when(userService.register(any(RegisterUserServiceCommand.class), any())).thenReturn(1L);
 
 		Long userId = registerUserUseCase.register(command, List.of());
 
@@ -52,7 +52,7 @@ class RegisterUserUseCaseTest {
 	@Test
 	@DisplayName("중복된 닉네임일 경우 예외가 발생한다")
 	void shouldThrowWhenNicknameIsDuplicated() {
-		RegisterUserUseCaseRequest command = createCommand("duplicateNick");
+		RegisterUserUseCaseCommand command = createCommand("duplicateNick");
 
 		when(userService.checkNicknameDuplicate("duplicateNick")).thenReturn(true);
 
@@ -64,7 +64,7 @@ class RegisterUserUseCaseTest {
 	@Test
 	@DisplayName("이미지가 3장을 초과하면 예외가 발생한다")
 	void shouldThrowWhenImagesExceedLimit() {
-		RegisterUserUseCaseRequest command = createCommand("someNick");
+		RegisterUserUseCaseCommand command = createCommand("someNick");
 
 		List<MultipartFile> images = List.of(
 				mock(MultipartFile.class),
