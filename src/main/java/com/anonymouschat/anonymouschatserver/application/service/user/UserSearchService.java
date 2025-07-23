@@ -8,12 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserSearchService {
 	private final UserRepository userRepository;
 
-	public Slice<UserSearchResult> search(Long userId, UserSearchCondition condition, Pageable pageable) {
-		return userRepository.searchUsers(userId, condition, pageable);
+	public Slice<UserSearchResult> search(Long userId, UserSearchCondition condition, List<Long> blockedUserIds, Pageable pageable) {
+		return userRepository.searchUsers(userId, condition, blockedUserIds, pageable);
 	}
 }

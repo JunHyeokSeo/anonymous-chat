@@ -1,10 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.api.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.GetMyProfileUseCase;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.RegisterUserUseCase;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.UpdateUserUseCase;
-import com.anonymouschat.anonymouschatserver.application.usecase.user.UserSearchUseCase;
+import com.anonymouschat.anonymouschatserver.application.usecase.user.*;
 import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;
 import com.anonymouschat.anonymouschatserver.common.response.ApiResponse;
 import com.anonymouschat.anonymouschatserver.common.security.PrincipalType;
@@ -33,11 +30,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-
-	private final RegisterUserUseCase registerUserUseCase;
-	private final GetMyProfileUseCase getMyProfileUseCase;
-	private final UpdateUserUseCase updateUserUseCase;
-	private final UserSearchUseCase userSearchUseCase;
+	private final UserUseCase userUseCase;
 
 	/**
 	 * 회원 가입
@@ -52,7 +45,7 @@ public class UserController {
 	) throws IOException {
 		RegisterUserCommand command = request.toCommand(principal.provider(), principal.providerId());
 		List<MultipartFile> safeImages = Optional.ofNullable(images).orElse(List.of());
-		Long userId = registerUserUseCase.register(command, safeImages);
+		Long userId = userUseCase.register(command, safeImages);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				ApiResponse.success(SuccessCode.USER_REGISTERED, new RegisterUserResponse(userId)));
@@ -67,7 +60,7 @@ public class UserController {
 			@ValidPrincipal(PrincipalType.ACCESS)
 			@AuthenticationPrincipal UserPrincipal principal
 	) {
-		GetMyProfileResult result = getMyProfileUseCase.getMyProfile(principal.userId());
+		GetMyProfileResult result = userUseCase.getMyProfile(principal.userId());
 
 		return ResponseEntity.ok(
 				ApiResponse.success(SuccessCode.SUCCESS, GetMyProfileResponse.from(result)));
@@ -86,7 +79,7 @@ public class UserController {
 	) throws IOException {
 		UpdateUserCommand command = request.toCommand(principal.userId());
 		List<MultipartFile> safeImages = Optional.ofNullable(images).orElse(List.of());
-		UpdateUserResult result = updateUserUseCase.update(command, safeImages);
+		UpdateUserResult result = userUseCase.update(command, safeImages);
 
 		return ResponseEntity.ok(
 				ApiResponse.success(SuccessCode.USER_PROFILE_UPDATED, UpdateUserResponse.from(result)));
@@ -103,7 +96,7 @@ public class UserController {
 			@ModelAttribute UserSearchCondition condition,
 			@PageableDefault(size = 30, sort = "lastActiveAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Slice<UserSearchResult> results = userSearchUseCase.search(principal.userId(), condition, pageable);
+		Slice<UserSearchResult> results = userUseCase.search(principal.userId(), condition, pageable);
 
 		Slice<UserSearchResponse> response = results.map(UserSearchResponse::from);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.USER_LIST_FETCHED, response));

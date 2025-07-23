@@ -25,7 +25,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Slice<UserSearchResult> searchUsers(Long currentUserId, UserSearchCondition cond, Pageable pageable) {
+	public Slice<UserSearchResult> searchUsers(Long currentUserId, UserSearchCondition cond, List<Long> blockedUserIds, Pageable pageable) {
 		QUser user = QUser.user;
 		QUserProfileImage image = QUserProfileImage.userProfileImage;
 
@@ -45,8 +45,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 						                                     .and(image.isRepresentative.isTrue())
 						                                     .and(image.deleted.isFalse()))
 				                                 .where(
+						                                 user.id.notIn(blockedUserIds),
 						                                 excludeCurrentUser(currentUserId),
-						                                 excludeBlockedUsers(currentUserId),
 						                                 genderEquals(cond.gender()),
 						                                 ageBetween(cond.minAge(), cond.maxAge()),
 						                                 regionEquals(cond.region())
@@ -66,23 +66,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
 	private BooleanExpression excludeCurrentUser(Long currentUserId) {
 		return currentUserId != null ? QUser.user.id.ne(currentUserId) : null;
-	}
-
-	private BooleanExpression excludeBlockedUsers(Long currentUserId) {
-		if (currentUserId == null) return null;
-
-		QBlock block = QBlock.block;
-		QUser user = QUser.user;
-
-		return JPAExpressions
-				       .selectOne()
-				       .from(block)
-				       .where(
-						       block.blocker.id.eq(currentUserId),
-						       block.blocked.id.eq(user.id),
-						       block.active.isTrue()
-				       )
-				       .notExists();
 	}
 
 	private BooleanExpression genderEquals(Gender gender) {
