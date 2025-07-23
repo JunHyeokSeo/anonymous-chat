@@ -1,9 +1,11 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
-import com.anonymouschat.anonymouschatserver.application.dto.UserSearchCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.UserSearchCondition;
 import com.anonymouschat.anonymouschatserver.application.dto.UserSearchResult;
 import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,8 +13,7 @@ import org.springframework.stereotype.Service;
 public class UserSearchService {
 	private final UserRepository userRepository;
 
-	public UserSearchResult search(UserSearchCommand command) {
-
-		return null;
+	public Slice<UserSearchResult> search(Long userId, UserSearchCondition condition, Pageable pageable) {
+		return userRepository.searchUsers(userId, condition, pageable);
 	}
 }
