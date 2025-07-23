@@ -229,4 +229,39 @@ class UserServiceTest {
 		assertThat(exception.getMessage()).isEqualTo("이미지 형식 오류");
 		verify(fileStorage, never()).upload(any());
 	}
+
+	@Test
+	@DisplayName("회원 탈퇴 성공")
+	void withdrawUser_success() {
+		// given
+		Long userId = 1L;
+		User user = createMockUser(userId, "userToDelete");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+		// when
+		userService.withdraw(userId);
+
+		// then
+		assertThat(user.isActive()).isFalse(); // 소프트 삭제 확인
+		verify(userRepository).findById(userId);
+	}
+
+	@Test
+	@DisplayName("회원 탈퇴 실패 - 사용자 없음")
+	void withdrawUser_userNotFound() {
+		// given
+		Long invalidUserId = 999L;
+		when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
+
+		// when & then
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> userService.withdraw(invalidUserId)
+		);
+
+		assertThat(exception.getMessage()).isEqualTo("사용자를 찾을 수 없습니다.");
+		verify(userRepository).findById(invalidUserId);
+	}
+
 }

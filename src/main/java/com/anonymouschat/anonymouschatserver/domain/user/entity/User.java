@@ -69,14 +69,14 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserProfileImage> profileImages = new ArrayList<>();
 
-	public void addProfileImage(UserProfileImage image) {
-		profileImages.add(image);
-		image.setUser(this);
-	}
-
 	@PreUpdate
 	public void preUpdate() {
 		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void addProfileImage(UserProfileImage image) {
+		profileImages.add(image);
+		image.setUser(this);
 	}
 
 	public void update(UpdateUserCommand command) {
@@ -89,6 +89,10 @@ public class User {
 		this.age = age;
 		this.region = Objects.requireNonNull(region);
 		this.bio = bio == null ? "" : bio;
+	}
+
+	public void markWithDraw() {
+		this.active = false;
 	}
 
 	@Builder

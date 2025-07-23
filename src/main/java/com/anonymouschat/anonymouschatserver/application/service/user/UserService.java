@@ -44,8 +44,7 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public GetMyProfileResult getMyProfile(Long userId) {
-		User user = userRepository.findById(userId)
-				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+		User user = findUserById(userId);
 
 		List<UserProfileImage> profileImages =
 				userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
@@ -57,8 +56,7 @@ public class UserService {
 	}
 
 	public UpdateUserResult update(UpdateUserCommand command, List<MultipartFile> images) throws IOException {
-		User user = userRepository.findById(command.id())
-				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+		User user = findUserById(command.id());
 
 		user.update(command);
 
@@ -68,6 +66,11 @@ public class UserService {
 		newImages.forEach(user::addProfileImage);
 
 		return UpdateUserResult.from(user, newImages);
+	}
+
+	public void withdraw(Long userId) {
+		User user = findUserById(userId);
+		user.markWithDraw();
 	}
 
 	private void deletePrevProfileImages(Long userId) {
@@ -99,5 +102,10 @@ public class UserService {
 				       .imageUrl(imageUrl)
 				       .isRepresentative(isRepresentative)
 				       .build();
+	}
+
+	private User findUserById(Long userId) {
+		return userRepository.findById(userId)
+				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 	}
 }
