@@ -21,22 +21,22 @@ public class AuthService {
 	/**
 	 * refreshToken을 이용해 accessToken 재발급
 	 */
-	public RefreshTokenResponse reissueAccessToken(String refreshToken) {
-		if (!jwtTokenProvider.validateToken(refreshToken)) {
-			throw new JwtException("유효하지 않은 Refresh Token 입니다.");
-		}
-
-		Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-		if (!isValidRefreshToken(userId, refreshToken)) {
-			throw new IllegalStateException("저장된 토큰과 일치하지 않습니다.");
-		}
-
-		String newAccessToken = jwtTokenProvider.createUserToken(userId);
-		String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
-		refreshTokenStore.put(userId, newRefreshToken);
-
-		return new RefreshTokenResponse(newAccessToken, newRefreshToken);
-	}
+//	public RefreshTokenResponse reissueAccessToken(String refreshToken) {
+//		if (!jwtTokenProvider.validateToken(refreshToken)) {
+//			throw new JwtException("유효하지 않은 Refresh Token 입니다.");
+//		}
+//
+//		Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+//		if (!isValidRefreshToken(userId, refreshToken)) {
+//			throw new IllegalStateException("저장된 토큰과 일치하지 않습니다.");
+//		}
+//
+//		String newAccessToken = jwtTokenProvider.createUserToken(userId);
+//		String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
+//		refreshTokenStore.put(userId, newRefreshToken);
+//
+//		return new RefreshTokenResponse(newAccessToken, newRefreshToken);
+//	}
 
 	/**
 	 * 로그아웃 시 RefreshToken 폐기

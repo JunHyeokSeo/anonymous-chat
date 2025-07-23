@@ -29,14 +29,14 @@ class GetMyProfileUseCaseTest {
 
 		GetMyProfileResult mockResponse = GetMyProfileResult.from(user, List.of());
 
-		when(userService.getMyProfile(OAuthProvider.GOOGLE, "abc123")).thenReturn(mockResponse);
+		when(userService.getMyProfile(10L)).thenReturn(mockResponse);
 
 		// when
-		GetMyProfileResult result = useCase.getMyProfile(OAuthProvider.GOOGLE, "abc123");
+		GetMyProfileResult result = useCase.getMyProfile(10L);
 
 		// then
 		assertThat(result.nickname()).isEqualTo("사용자");
 		assertThat(result.region()).isEqualTo(Region.BUSAN);
-		verify(userService).getMyProfile(OAuthProvider.GOOGLE, "abc123");
+		verify(userService).getMyProfile(10L);
 	}
 }

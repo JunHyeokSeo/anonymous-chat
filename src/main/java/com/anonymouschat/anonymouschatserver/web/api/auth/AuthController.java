@@ -21,15 +21,15 @@ public class AuthController {
 
 	private final AuthService authService;
 
-	@PostMapping("/refresh")
-	public ResponseEntity<ApiResponse<RefreshTokenResponse>> refresh(@RequestBody RefreshTokenRequest request) {
-		return ResponseEntity.ok(ApiResponse.success(authService.reissueAccessToken(request.refreshToken())));
-	}
+//	@PostMapping("/refresh")
+//	public ResponseEntity<ApiResponse<RefreshTokenResponse>> refresh(@RequestBody RefreshTokenRequest request) {
+//		return ResponseEntity.ok(ApiResponse.success(authService.reissueAccessToken(request.refreshToken())));
+//	}
 
-	@PostMapping("/logout")
-	public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal User user) {
-		authService.logout(user.getProvider(), user.getProviderId());
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.USER_LOGGED_OUT));
-	}
+//	@PostMapping("/logout")
+//	public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal User user) {
+//		authService.logout(user.getProvider(), user.getProviderId());
+//		return ResponseEntity.ok(ApiResponse.success(SuccessCode.USER_LOGGED_OUT));
+//	}
 
 }

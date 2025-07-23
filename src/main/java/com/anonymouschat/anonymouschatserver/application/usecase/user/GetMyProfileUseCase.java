@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class GetMyProfileUseCase {
 	private final UserService userService;
 
-	public GetMyProfileResult getMyProfile (OAuthProvider provider, String providerId) {
-		return userService.getMyProfile(provider, providerId);
+	public GetMyProfileResult getMyProfile (Long userId) {
+		return userService.getMyProfile(userId);
 	}
 }

@@ -142,10 +142,10 @@ class UserServiceTest {
 				new UserProfileImage("https://image.com/2.jpg", false)
 		);
 
-		when(userRepository.findByProviderAndProviderId(OAuthProvider.GOOGLE, "providerId123")).thenReturn(Optional.of(user));
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(eq(1L), any(Sort.class))).thenReturn(images);
 
-		GetMyProfileResult response = userService.getMyProfile(OAuthProvider.GOOGLE, "providerId123");
+		GetMyProfileResult response = userService.getMyProfile(1L);
 
 		assertThat(response.nickname()).isEqualTo("닉네임");
 		assertThat(response.profileImages()).hasSize(2);
@@ -155,13 +155,13 @@ class UserServiceTest {
 	@DisplayName("프로필 조회 실패 - 사용자 없음")
 	void getMyProfile_userNotFound() {
 		// given
-		when(userRepository.findByProviderAndProviderId(any(), any()))
+		when(userRepository.findById(any()))
 				.thenReturn(Optional.empty());
 
 		// when & then
 		IllegalStateException exception = assertThrows(
 				IllegalStateException.class,
-				() -> userService.getMyProfile(OAuthProvider.GOOGLE, "missing-user-id")
+				() -> userService.getMyProfile(1L)
 		);
 
 		assertThat(exception.getMessage()).isEqualTo("사용자를 찾을 수 없습니다.");

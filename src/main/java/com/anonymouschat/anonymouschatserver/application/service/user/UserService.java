@@ -43,8 +43,8 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public GetMyProfileResult getMyProfile(OAuthProvider provider, String providerId) {
-		User user = userRepository.findByProviderAndProviderId(provider, providerId)
+	public GetMyProfileResult getMyProfile(Long userId) {
+		User user = userRepository.findById(userId)
 				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
 		List<UserProfileImage> profileImages =
