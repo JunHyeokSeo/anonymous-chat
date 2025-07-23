@@ -13,6 +13,7 @@ public enum SuccessCode {
     USER_REGISTERED(HttpStatus.CREATED, "사용자가 성공적으로 등록되었습니다."),
     USER_LOGGED_OUT(HttpStatus.OK, "로그아웃이 완료되었습니다."),
     USER_PROFILE_UPDATED(HttpStatus.OK, "사용자 프로필이 수정되었습니다."),
+	USER_LIST_FETCHED(HttpStatus.OK, "사용자 목록이 조회되었습니다."),
 
     // 이미지
     IMAGE_UPLOADED(HttpStatus.CREATED, "이미지가 업로드되었습니다."),

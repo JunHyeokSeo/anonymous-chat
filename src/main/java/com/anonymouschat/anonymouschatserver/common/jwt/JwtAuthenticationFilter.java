@@ -1,10 +1,12 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
+import com.anonymouschat.anonymouschatserver.common.security.PrincipalType;
+import com.anonymouschat.anonymouschatserver.common.security.UserPrincipal;
+import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
-import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +22,8 @@ import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+	private static final String ATTR_PRINCIPAL = "AuthenticatedPrincipal";
+
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
 
@@ -34,37 +38,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	                                @NonNull FilterChain filterChain)
 			throws ServletException, IOException {
 
-		String token = resolveToken(request);
-
 		try {
+			String token = resolveToken(request);
+
 			if (token != null && jwtTokenProvider.validateToken(token)) {
-				OAuthPrincipal userInfo = jwtTokenProvider.getUserInfoFromToken(token);
-				OAuthProvider provider = userInfo.provider();
-				String providerId = userInfo.providerId();
+				OAuthPrincipal principal = jwtTokenProvider.getPrincipalFromToken(token);
 
-				User user = userRepository.findByProviderAndProviderId(provider, providerId)
-						            .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
+				// ✅ 모든 principal은 request에 주입
+				request.setAttribute(ATTR_PRINCIPAL, principal);
 
-				UsernamePasswordAuthenticationToken authentication =
-						new UsernamePasswordAuthenticationToken(user, null, List.of());
+				// ✅ ACCESS principal만 Spring Security 인증 처리
+				if (principal.getType() == PrincipalType.ACCESS) {
+					if (!(principal instanceof UserPrincipal userPrincipal)) {
+						throw new JwtException("ACCESS 토큰의 Principal 타입이 올바르지 않습니다.");
+					}
 
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+					User user = userRepository.findById(userPrincipal.userId())
+							            .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
+
+					var authentication = new UsernamePasswordAuthenticationToken(user, null, List.of());
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				}
+				// REGISTRATION은 인증 스킵 (단, request에는 주입함 → ArgumentResolver에서 처리)
 			}
+
 		} catch (JwtException e) {
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeUnauthorizedResponse(response, e.getMessage());
-			return; // 필수
+			return;
 		}
 
 		filterChain.doFilter(request, response);
 	}
 
 	private String resolveToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader("Authorization");
-
-		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-			return bearerToken.substring(7); // "Bearer " 이후
+		String bearer = request.getHeader("Authorization");
+		if (bearer != null && bearer.startsWith("Bearer ")) {
+			return bearer.substring(7);
 		}
 		return null;
+	}
+
+	public static OAuthPrincipal extractPrincipal(HttpServletRequest request) {
+		return (OAuthPrincipal) request.getAttribute(ATTR_PRINCIPAL);
 	}
 }

@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.config;
+package com.anonymouschat.anonymouschatserver.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
