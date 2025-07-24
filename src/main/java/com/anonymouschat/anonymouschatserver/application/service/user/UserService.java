@@ -73,6 +73,10 @@ public class UserService {
 		user.markWithDraw();
 	}
 
+	public User findUser(Long userId) {
+		return findUserById(userId);
+	}
+
 	private void deletePrevProfileImages(Long userId) {
 		List<UserProfileImage> prevImages = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(userId);
 
