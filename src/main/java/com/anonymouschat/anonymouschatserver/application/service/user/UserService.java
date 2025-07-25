@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -80,9 +81,8 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public User findByProviderAndProviderId(OAuthProvider provider, String providerId) {
-		return userRepository.findByProviderAndProviderId(provider, providerId)
-				       .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
+	public Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId) {
+		return userRepository.findByProviderAndProviderIdAndActiveTrue(provider, providerId);
 	}
 
 	private void deletePrevProfileImages(Long userId) {

@@ -1,8 +1,7 @@
 package com.anonymouschat.anonymouschatserver.common.security;
 
+import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +18,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
+	private final UserService userService;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
 
 	@Override
@@ -32,12 +31,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 		Object rawSub = oAuth2User.getAttribute("sub");
 		if (rawSub == null) {
-			throw new IllegalArgumentException("Google OAuth response does not contain 'sub'");
+			throw new IllegalArgumentException("Google OAuth 응답에 'sub' 값이 포함되어 있지 않습니다.");
 		}
 		String providerId = rawSub.toString();
 		OAuthProvider provider = oAuth2ProviderResolver.resolve(request, oAuth2User);
 
-		boolean isNewUser = userRepository.findByProviderAndProviderId(provider, providerId).isEmpty();
+		boolean isNewUser = userService.findByProviderAndProviderId(provider, providerId).isEmpty();
 
 		String accessToken = jwtTokenProvider.createAccessToken(provider, providerId);
 		String refreshToken = jwtTokenProvider.createRefreshToken(provider, providerId);
