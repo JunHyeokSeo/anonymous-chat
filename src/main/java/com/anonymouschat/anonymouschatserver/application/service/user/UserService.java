@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
@@ -73,8 +74,15 @@ public class UserService {
 		user.markWithDraw();
 	}
 
+	@Transactional(readOnly = true)
 	public User findUser(Long userId) {
 		return findUserById(userId);
+	}
+
+	@Transactional(readOnly = true)
+	public User findByProviderAndProviderId(OAuthProvider provider, String providerId) {
+		return userRepository.findByProviderAndProviderId(provider, providerId)
+				       .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
 	}
 
 	private void deletePrevProfileImages(Long userId) {

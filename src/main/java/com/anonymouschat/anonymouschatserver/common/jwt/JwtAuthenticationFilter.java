@@ -1,11 +1,7 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
-import com.anonymouschat.anonymouschatserver.common.security.PrincipalType;
-import com.anonymouschat.anonymouschatserver.common.security.UserPrincipal;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -44,24 +40,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (token != null && jwtTokenProvider.validateToken(token)) {
 				OAuthPrincipal principal = jwtTokenProvider.getPrincipalFromToken(token);
 
-				// ✅ 모든 principal은 request에 주입
+				// request에 항상 주입 (ArgumentResolver 등에서 사용 가능)
 				request.setAttribute(ATTR_PRINCIPAL, principal);
 
-				// ✅ ACCESS principal만 Spring Security 인증 처리
-				if (principal.getType() == PrincipalType.ACCESS) {
-					if (!(principal instanceof UserPrincipal userPrincipal)) {
-						throw new JwtException("ACCESS 토큰의 Principal 타입이 올바르지 않습니다.");
-					}
-
-					User user = userRepository.findById(userPrincipal.userId())
-							            .orElseThrow(() -> new IllegalStateException(ErrorCode.UNAUTHORIZED.getMessage()));
-
-					var authentication = new UsernamePasswordAuthenticationToken(user, null, List.of());
+				// userId가 포함된 경우만 인증 처리
+				if (principal.getUserId() != null) {
+					var authentication = new UsernamePasswordAuthenticationToken(
+							principal, null, List.of()
+					);
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
-				// REGISTRATION은 인증 스킵 (단, request에는 주입함 → ArgumentResolver에서 처리)
 			}
-
 		} catch (JwtException e) {
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeUnauthorizedResponse(response, e.getMessage());

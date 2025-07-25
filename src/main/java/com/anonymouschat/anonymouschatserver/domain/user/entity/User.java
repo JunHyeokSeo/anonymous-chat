@@ -27,13 +27,18 @@ public class User {
 	@Column(name = "id", nullable = false)
 	private Long id;
 
-	// OAuth 정보
+	/**
+	 * 인증 공급자 (GOOGLE, KAKAO 등)
+	 */
 	@Column(name = "provider", nullable = false, length = 20)
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider provider; // GOOGLE, APPLE 등
 
+	/**
+	 * OAuth 공급자(provider)가 보장하는 고유 식별자 (ex. JWT의 sub 값)
+	 */
 	@Column(name = "provider_id", nullable = false, length = 100)
-	private String providerId; // ex: sub 값 or user id from provider
+	private String providerId;
 
 	// 사용자 정보
 	@Column(name = "nickname", nullable = false, length = 50, unique = true)

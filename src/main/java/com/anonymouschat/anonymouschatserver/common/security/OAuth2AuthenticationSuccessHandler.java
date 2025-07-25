@@ -16,10 +16,11 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
+	private final OAuth2ProviderResolver oAuth2ProviderResolver;
 
 	@Override
 	public void onAuthenticationSuccess(
@@ -34,38 +35,21 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 			throw new IllegalArgumentException("Google OAuth response does not contain 'sub'");
 		}
 		String providerId = rawSub.toString();
-		OAuthProvider provider = OAuthProvider.GOOGLE;
+		OAuthProvider provider = oAuth2ProviderResolver.resolve(request, oAuth2User);
 
-		// 기존 회원 여부 확인
-		User user = userRepository.findByProviderAndProviderId(provider, providerId).orElse(null);
+		boolean isNewUser = userRepository.findByProviderAndProviderId(provider, providerId).isEmpty();
 
-		String json;
-		if (user == null) {
-			// 신규 회원 → 임시 토큰 발급
-			String temporaryToken = jwtTokenProvider.createTemporaryToken(provider, providerId);
+		String accessToken = jwtTokenProvider.createAccessToken(provider, providerId);
+		String refreshToken = jwtTokenProvider.createRefreshToken(provider, providerId);
 
-			json = String.format("""
-			{
-				"accessToken": "%s",
-				"isNewUser": true
-			}
-			""", temporaryToken);
-
-		} else {
-			// 기존 회원 → 실제 토큰 및 리프레시 토큰 발급
-			String accessToken = jwtTokenProvider.createUserToken(user.getId());
-			String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
-
-			json = String.format("""
-			{
-				"accessToken": "%s",
-				"refreshToken": "%s",
-				"isNewUser": false
-			}
-			""", accessToken, refreshToken);
+		String json = String.format("""
+		{
+			"accessToken": "%s",
+			"refreshToken": "%s",
+			"isNewUser": %s
 		}
+		""", accessToken, refreshToken, isNewUser);
 
-		// 응답 전송
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);

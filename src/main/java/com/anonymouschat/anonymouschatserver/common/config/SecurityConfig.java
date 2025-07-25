@@ -2,13 +2,12 @@ package com.anonymouschat.anonymouschatserver.common.config;
 
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
+import com.anonymouschat.anonymouschatserver.common.security.OAuth2AuthenticationSuccessHandler;
 import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.common.security.OAuth2LoginSuccessHandler;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,52 +23,48 @@ public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
-	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http
-				// ✅ CSRF 비활성화 & CORS 기본 설정
+				//CORS + CSRF 비활성화
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(Customizer.withDefaults())
 
-				// ✅ 세션 stateless 설정 (JWT 기반)
+				//세션 정책: STATELESS
 				.sessionManagement(session -> session
 						                              .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-				// ✅ 인증 실패 시 JSON 에러 반환
+				//인증 실패 시 JSON 응답
 				.exceptionHandling(exception -> exception
 						                                .authenticationEntryPoint((request, response, authException) ->
 								                                                          ResponseUtil.writeUnauthorizedResponse(response, "인증이 필요합니다."))
 				)
 
-				// ✅ 경로별 접근 제어 설정
+				//접근 허용 경로 설정
 				.authorizeHttpRequests(auth -> auth
-						                               // 회원가입 완료 전 접근 가능한 경로
 						                               .requestMatchers(
 								                               "/api/v1/auth/**",           // 로그인, 회원가입
-								                               "/oauth2/**"                 // OAuth2 callback
-						                               ).permitAll()
-
-						                               // 문서화 및 헬스체크
-						                               .requestMatchers(
+								                               "/oauth2/**",                // OAuth2 로그인
 								                               "/swagger-ui.html",
 								                               "/swagger-ui/**",
 								                               "/v3/api-docs/**",
 								                               "/actuator/health"
 						                               ).permitAll()
-
-						                               // 나머지 모든 경로는 인증 필요
 						                               .anyRequest().authenticated()
 				)
 
-				// ✅ OAuth2 성공 후 JWT 반환 핸들러 연결
+				//OAuth2 로그인 성공 시 토큰 발급 핸들러 연결
 				.oauth2Login(oauth2 -> oauth2
-						                       .successHandler(oAuth2LoginSuccessHandler)
+						                       .successHandler(oAuth2AuthenticationSuccessHandler)
 				)
 
-				// ✅ JWT 인증 필터 등록 (Spring Security 필터 체인 앞에 위치)
+				//불필요한 form 로그인 제거
+				.formLogin(AbstractHttpConfigurer::disable)
+
+				//JWT 인증 필터 추가
 				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
@@ -80,4 +75,3 @@ public class SecurityConfig {
 		return new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
 	}
 }
-
