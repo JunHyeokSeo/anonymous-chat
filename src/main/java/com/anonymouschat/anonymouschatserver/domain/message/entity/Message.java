@@ -31,6 +31,7 @@ public class Message {
 	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
+	@Builder.Default
 	@Column(name = "is_read", nullable = false)
 	private boolean isRead = false;
 
