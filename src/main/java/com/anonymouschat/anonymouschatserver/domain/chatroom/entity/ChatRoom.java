@@ -63,6 +63,10 @@ public class ChatRoom {
 		updateStatusIfBothExited();
 	}
 
+	public LocalDateTime getLastExitedAt(Long userId) {
+		return this.exit.getExitTime(userId, user1.getId(), user2.getId());
+	}
+
 	public void validateParticipant(Long userId) {
 		if (!isParticipant(userId))
 			throw new IllegalStateException("유저가 속한 채팅방이 아닙니다.");

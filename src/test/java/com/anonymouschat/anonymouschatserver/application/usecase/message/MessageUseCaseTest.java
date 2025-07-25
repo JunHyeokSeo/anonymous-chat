@@ -1,0 +1,127 @@
+package com.anonymouschat.anonymouschatserver.application.usecase.message;
+
+import com.anonymouschat.anonymouschatserver.application.dto.GetMessagesCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.MarkMessagesAsReadCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.SendMessageCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.MessageResult;
+import com.anonymouschat.anonymouschatserver.application.service.chatroom.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.service.message.MessageService;
+import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
+import com.anonymouschat.anonymouschatserver.domain.chatroom.entity.ChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.chatroom.type.ChatRoomStatus;
+import com.anonymouschat.anonymouschatserver.domain.message.entity.Message;
+import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+class MessageUseCaseTest {
+
+	@Mock private MessageService messageService;
+	@Mock private ChatRoomService chatRoomService;
+	@Mock private UserService userService;
+	@InjectMocks private MessageUseCase messageUseCase;
+
+	private User user;
+	private ChatRoom chatRoom;
+	private Message message;
+
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
+
+		user = User.builder()
+				       .provider(OAuthProvider.GOOGLE)
+				       .providerId("pid")
+				       .nickname("tester")
+				       .gender(Gender.MALE)
+				       .age(25)
+				       .region(Region.SEOUL)
+				       .bio("hello")
+				       .build();
+		ReflectionTestUtils.setField(user, "id", 1L);
+
+		chatRoom = ChatRoom.builder()
+				           .user1(user)
+				           .user2(user)
+				           .build();
+		ReflectionTestUtils.setField(chatRoom, "id", 1L);
+		ReflectionTestUtils.setField(chatRoom, "status", ChatRoomStatus.ACTIVE);
+
+		message = Message.builder()
+				          .chatRoom(chatRoom)
+				          .sender(user)
+				          .content("hi")
+				          .build();
+		ReflectionTestUtils.setField(message, "id", 1L);
+		ReflectionTestUtils.setField(message, "sentAt", LocalDateTime.now());
+	}
+
+	@Nested
+	@DisplayName("sendMessage 메서드는")
+	class SendMessage {
+
+		@Test
+		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
+		void sendMessage() {
+			SendMessageCommand command = new SendMessageCommand(1L, 1L, "hi");
+			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
+			when(userService.findUser(1L)).thenReturn(user);
+			when(messageService.sendMessage(chatRoom, user, "hi")).thenReturn(message);
+
+			MessageResult result = messageUseCase.sendMessage(command);
+
+			assertThat(result.content()).isEqualTo("hi");
+			assertThat(result.senderId()).isEqualTo(1L);
+		}
+	}
+
+	@Nested
+	@DisplayName("getMessages 메서드는")
+	class GetMessages {
+
+		@Test
+		@DisplayName("해당 유저의 퇴장 이후 메시지를 페이징하여 가져온다.")
+		void getMessages() {
+			GetMessagesCommand command = new GetMessagesCommand(1L, 1L, null, 20);
+			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
+			when(messageService.getMessages(eq(chatRoom), any(), eq(null), eq(20))).thenReturn(List.of(message));
+
+			List<MessageResult> results = messageUseCase.getMessages(command);
+
+			assertThat(results).hasSize(1);
+			assertThat(results.getFirst().content()).isEqualTo("hi");
+		}
+	}
+
+	@Nested
+	@DisplayName("markMessagesAsRead 메서드는")
+	class MarkMessagesAsRead {
+
+		@Test
+		@DisplayName("메시지 읽음 처리만 수행한다.")
+		void markMessagesAsRead() {
+			MarkMessagesAsReadCommand command = new MarkMessagesAsReadCommand(1L, 1L);
+
+			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
+
+			messageUseCase.markMessagesAsRead(command);
+
+			verify(messageService).markMessagesAsRead(1L, 1L);
+		}
+	}
+}
