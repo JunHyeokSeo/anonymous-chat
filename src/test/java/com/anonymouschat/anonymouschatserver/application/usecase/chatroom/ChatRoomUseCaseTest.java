@@ -105,7 +105,7 @@ class ChatRoomUseCaseTest {
 	class ExitChatRoom {
 
 		@Test
-		@DisplayName("채팅방 나가기 위임")
+		@DisplayName("채팅방 나가기")
 		void exitRoom() {
 			chatRoomUseCase.exitChatRoom(1L, 100L);
 
