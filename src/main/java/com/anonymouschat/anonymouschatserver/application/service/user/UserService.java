@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
-import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
