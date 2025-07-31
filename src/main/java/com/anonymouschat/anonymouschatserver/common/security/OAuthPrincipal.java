@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.security;
 
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import lombok.Getter;
 
 @Getter

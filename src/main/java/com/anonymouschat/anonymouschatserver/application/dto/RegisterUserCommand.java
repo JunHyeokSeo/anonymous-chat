@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 
 public record RegisterUserCommand(
 		String nickname,

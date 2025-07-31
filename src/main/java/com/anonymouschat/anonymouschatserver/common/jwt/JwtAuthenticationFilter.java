@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.common.jwt;
 
 import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

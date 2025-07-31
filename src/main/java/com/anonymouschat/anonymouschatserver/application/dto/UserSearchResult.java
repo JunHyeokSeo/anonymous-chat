@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.querydsl.core.annotations.QueryProjection;
 
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.security;
 
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;

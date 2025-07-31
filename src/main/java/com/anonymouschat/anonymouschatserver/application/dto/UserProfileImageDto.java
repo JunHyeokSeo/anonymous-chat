@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
-import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
+import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 
 public record UserProfileImageDto(
 		Long id,

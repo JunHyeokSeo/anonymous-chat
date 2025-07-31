@@ -1,15 +1,16 @@
 package com.anonymouschat.anonymouschatserver.application.service.user;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
+import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.UserProfileImage;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserProfileImageRepository;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
-import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
+import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
+import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.common.file.FileStorage;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

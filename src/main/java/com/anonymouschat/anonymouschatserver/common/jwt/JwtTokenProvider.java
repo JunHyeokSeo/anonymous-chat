@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
 import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

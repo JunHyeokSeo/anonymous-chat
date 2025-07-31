@@ -1,8 +1,8 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserCommand;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 
 public record UpdateUserRequest(
 		String nickname,

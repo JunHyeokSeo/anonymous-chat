@@ -1,12 +1,13 @@
 package com.anonymouschat.anonymouschatserver.application.service.block;
 
-import com.anonymouschat.anonymouschatserver.domain.block.entity.Block;
-import com.anonymouschat.anonymouschatserver.domain.block.repository.BlockRepository;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import com.anonymouschat.anonymouschatserver.application.service.BlockService;
+import com.anonymouschat.anonymouschatserver.domain.entity.Block;
+import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

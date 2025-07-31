@@ -1,8 +1,8 @@
 package com.anonymouschat.anonymouschatserver.common.security;
 
-import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
+import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.common.config;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.common.security.OAuth2AuthenticationSuccessHandler;
-import com.anonymouschat.anonymouschatserver.domain.user.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

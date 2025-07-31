@@ -1,4 +1,7 @@
 spring:
+  h2:
+    console:
+      enabled: true
   application:
     name: ${APP_NAME:anonymous-chat-server}
   security:
@@ -21,10 +24,10 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/anonymous_chat?serverTimezone=Asia/Seoul
+    url: ${DATASOURCE_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: ${DRIVER_CLASS_NAME}
 
   jpa:
     hibernate:
@@ -33,7 +36,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.H2Dialect
         default_batch_fetch_size: 50
     open-in-view: false
 

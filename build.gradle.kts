@@ -32,9 +32,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-    // JPA + MySQL
+    // JPA + H2
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("com.h2database:h2")
 
     // QueryDSL
     implementation ("io.github.openfeign.querydsl:querydsl-jpa:7.0")
@@ -58,7 +58,6 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:mysql")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
 }
 

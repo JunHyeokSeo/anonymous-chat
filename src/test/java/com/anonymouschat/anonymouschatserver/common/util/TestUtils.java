@@ -1,14 +1,13 @@
 package com.anonymouschat.anonymouschatserver.common.util;
 
-import com.anonymouschat.anonymouschatserver.domain.chatroom.entity.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.message.entity.Message;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.entity.Message;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 
 public class TestUtils {
     public static User createUser(Long id) throws Exception {

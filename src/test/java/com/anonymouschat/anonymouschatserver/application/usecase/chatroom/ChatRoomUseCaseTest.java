@@ -1,13 +1,14 @@
 package com.anonymouschat.anonymouschatserver.application.usecase.chatroom;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
-import com.anonymouschat.anonymouschatserver.application.service.chatroom.ChatRoomService;
-import com.anonymouschat.anonymouschatserver.application.service.user.UserService;
-import com.anonymouschat.anonymouschatserver.domain.chatroom.entity.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.user.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.user.type.Region;
+import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.service.UserService;
+import com.anonymouschat.anonymouschatserver.application.usecase.ChatRoomUseCase;
+import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

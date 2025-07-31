@@ -1,10 +1,11 @@
 package com.anonymouschat.anonymouschatserver.application.service.message;
 
+import com.anonymouschat.anonymouschatserver.application.service.MessageService;
 import com.anonymouschat.anonymouschatserver.common.util.TestUtils;
-import com.anonymouschat.anonymouschatserver.domain.chatroom.entity.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.message.entity.Message;
-import com.anonymouschat.anonymouschatserver.domain.message.repository.MessageRepository;
-import com.anonymouschat.anonymouschatserver.domain.user.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.entity.Message;
+import com.anonymouschat.anonymouschatserver.domain.repository.MessageRepository;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
