@@ -1,6 +1,5 @@
-package com.anonymouschat.anonymouschatserver.application.service.block;
+package com.anonymouschat.anonymouschatserver.application.service;
 
-import com.anonymouschat.anonymouschatserver.application.service.BlockService;
 import com.anonymouschat.anonymouschatserver.domain.entity.Block;
 import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;

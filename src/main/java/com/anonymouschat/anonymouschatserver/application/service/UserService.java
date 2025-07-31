@@ -29,54 +29,44 @@ public class UserService {
 	private final FileStorage fileStorage;
 	private final ImageValidator imageValidator;
 
-	public Long register(RegisterUserCommand command, List<MultipartFile> images) throws IOException {
+	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
+		validateNicknameDuplication(command.nickname());
 		User user = command.toEntity();
-
 		List<UserProfileImage> profileImages = convertToProfileImages(images);
 		profileImages.forEach(user::addProfileImage);
-
 		return userRepository.save(user).getId();
 	}
 
 	@Transactional(readOnly = true)
-	public boolean checkNicknameDuplicate(String nickname) {
-		return userRepository.existsByNickname(nickname);
+	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
+		User user = findUser(userId);
+		List<UserProfileImage> images = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
+				user.getId(),
+				Sort.sort(UserProfileImage.class).by(UserProfileImage::getUploadedAt).ascending()
+		);
+		return UserServiceDto.ProfileResult.from(user, images);
 	}
 
-	@Transactional(readOnly = true)
-	public GetMyProfileResult getMyProfile(Long userId) {
-		User user = findUserById(userId);
+	public UserServiceDto.UpdateResult update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
+		User user = findUser(command.userId());
 
-		List<UserProfileImage> profileImages =
-				userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
-						user.getId(),
-						Sort.sort(UserProfileImage.class).by(UserProfileImage::getUploadedAt).ascending()
-				);
-
-		return GetMyProfileResult.from(user, profileImages);
-	}
-
-	public UpdateUserResult update(UpdateUserCommand command, List<MultipartFile> images) throws IOException {
-		User user = findUserById(command.id());
+		//닉네임 중복 검사
+		validateNicknameDuplication(command.nickname());
 
 		user.update(command);
 
-		deletePrevProfileImages(user.getId());
+		//기존 프로필 이미지 삭제
+		deletePreviousImages(user.getId());
 
+		//새 프로필 이미지 등록
 		List<UserProfileImage> newImages = convertToProfileImages(images);
 		newImages.forEach(user::addProfileImage);
 
-		return UpdateUserResult.from(user, newImages);
+		return UserServiceDto.UpdateResult.from(user, newImages);
 	}
 
 	public void withdraw(Long userId) {
-		User user = findUserById(userId);
-		user.markWithDraw();
-	}
-
-	@Transactional(readOnly = true)
-	public User findUser(Long userId) {
-		return findUserById(userId);
+		findUser(userId).markWithDraw();
 	}
 
 	@Transactional(readOnly = true)
@@ -84,39 +74,36 @@ public class UserService {
 		return userRepository.findByProviderAndProviderIdAndActiveTrue(provider, providerId);
 	}
 
-	private void deletePrevProfileImages(Long userId) {
-		List<UserProfileImage> prevImages = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(userId);
+	@Transactional(readOnly = true)
+	public User findUser(Long userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+	}
 
-		for (UserProfileImage image : prevImages) {
-			fileStorage.delete(image.getImageUrl()); // 실제 파일 삭제
-			image.softDelete(); // 논리적 삭제 (deleted = true)
+	private void validateNicknameDuplication(String nickname) {
+		if (userRepository.existsByNickname(nickname)) {
+			throw new IllegalStateException("동일한 닉네임이 존재합니다.");
+		}
+	}
+
+	private void deletePreviousImages(Long userId) {
+		List<UserProfileImage> images = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(userId);
+		for (UserProfileImage image : images) {
+			fileStorage.delete(image.getImageUrl());
+			image.softDelete();
 		}
 	}
 
 	private List<UserProfileImage> convertToProfileImages(List<MultipartFile> images) throws IOException {
 		List<UserProfileImage> result = new ArrayList<>();
-
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile image = images.get(i);
-			boolean isRepresentative = (i == 0);
-
 			imageValidator.validate(image);
-			String imageUrl = fileStorage.upload(image);
-			result.add(toUserProfileImage(imageUrl, isRepresentative));
+			String url = fileStorage.upload(image);
+			result.add(UserProfileImage.builder()
+					           .imageUrl(url)
+					           .isRepresentative(i == 0)
+					           .build());
 		}
-
 		return result;
-	}
-
-	private UserProfileImage toUserProfileImage(String imageUrl, boolean isRepresentative) {
-		return UserProfileImage.builder()
-				       .imageUrl(imageUrl)
-				       .isRepresentative(isRepresentative)
-				       .build();
-	}
-
-	private User findUserById(Long userId) {
-		return userRepository.findById(userId)
-				            .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 	}
 }

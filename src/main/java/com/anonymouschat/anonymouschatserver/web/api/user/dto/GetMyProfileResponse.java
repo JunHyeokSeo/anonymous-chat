@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserProfileImageDto;
-import com.anonymouschat.anonymouschatserver.application.dto.GetMyProfileResult;
+import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public record GetMyProfileResponse(
 		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
-	public static GetMyProfileResponse from(GetMyProfileResult response) {
+	public static GetMyProfileResponse from(UserUseCaseDto.Profile response) {
 		return GetMyProfileResponse.builder()
 				       .id(response.id())
 				       .nickname(response.nickname())

@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserResult;
 import com.anonymouschat.anonymouschatserver.application.dto.UserProfileImageDto;
+import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public record UpdateUserResponse(
 		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
-	public static UpdateUserResponse from(UpdateUserResult result) {
+	public static UpdateUserResponse from(UserUseCaseDto.UpdateResult result) {
 		return UpdateUserResponse.builder()
 				       .id(result.id())
 				       .nickname(result.nickname())

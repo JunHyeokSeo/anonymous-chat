@@ -1,8 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.repository;
 
-import com.anonymouschat.anonymouschatserver.application.dto.QUserSearchResult;
-import com.anonymouschat.anonymouschatserver.application.dto.UserSearchCondition;
-import com.anonymouschat.anonymouschatserver.application.dto.UserSearchResult;
+import com.anonymouschat.anonymouschatserver.application.dto.QUserServiceDto_SearchResult;
+import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.domain.entity.QUser;
 import com.anonymouschat.anonymouschatserver.domain.entity.QUserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
@@ -22,12 +21,12 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Slice<UserSearchResult> searchUsers(Long currentUserId, UserSearchCondition cond, List<Long> blockedUserIds, Pageable pageable) {
+	public Slice<UserServiceDto.SearchResult> searchUsers(UserServiceDto.SearchCommand cond, Pageable pageable) {
 		QUser user = QUser.user;
 		QUserProfileImage image = QUserProfileImage.userProfileImage;
 
-		List<UserSearchResult> results = queryFactory
-				                                 .select(new QUserSearchResult(
+		List<UserServiceDto.SearchResult> results = queryFactory
+				                                 .select(new QUserServiceDto_SearchResult(
 						                                 user.id,
 						                                 user.nickname,
 						                                 user.gender,
@@ -42,8 +41,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 						                                     .and(image.isRepresentative.isTrue())
 						                                     .and(image.deleted.isFalse()))
 				                                 .where(
-						                                 user.id.notIn(blockedUserIds),
-						                                 excludeCurrentUser(currentUserId),
+						                                 user.id.notIn(cond.blockedUserIds()),
+						                                 excludeCurrentUser(cond.id()),
 						                                 genderEquals(cond.gender()),
 						                                 ageBetween(cond.minAge(), cond.maxAge()),
 						                                 regionEquals(cond.region())

@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.application.usecase.message;
+package com.anonymouschat.anonymouschatserver.application.usecase;
 
 import com.anonymouschat.anonymouschatserver.application.dto.GetMessagesCommand;
 import com.anonymouschat.anonymouschatserver.application.dto.MarkMessagesAsReadCommand;
@@ -7,7 +7,6 @@ import com.anonymouschat.anonymouschatserver.application.dto.MessageResult;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.MessageService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
-import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;

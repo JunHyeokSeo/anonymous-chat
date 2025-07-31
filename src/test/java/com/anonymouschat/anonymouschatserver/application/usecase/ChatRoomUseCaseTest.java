@@ -1,9 +1,8 @@
-package com.anonymouschat.anonymouschatserver.application.usecase.chatroom;
+package com.anonymouschat.anonymouschatserver.application.usecase;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
-import com.anonymouschat.anonymouschatserver.application.usecase.ChatRoomUseCase;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;

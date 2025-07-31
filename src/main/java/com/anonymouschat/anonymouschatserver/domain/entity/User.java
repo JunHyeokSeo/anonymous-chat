@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
-import com.anonymouschat.anonymouschatserver.application.dto.UpdateUserCommand;
+import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
@@ -55,24 +55,24 @@ public class User {
 	@Column(name = "region", nullable = false, length = 50)
 	private Region region;
 
-	@Column(name = "bio", length = 255)
+	@Column(name = "bio")
 	private String bio;
 
 	@Column(name = "created_at", nullable = false)
-	private LocalDateTime createdAt = LocalDateTime.now();
+	private final LocalDateTime createdAt = LocalDateTime.now();
 
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt = LocalDateTime.now();
 
 	@Column(name = "last_active_at", nullable = false)
-	private LocalDateTime lastActiveAt = LocalDateTime.now();
+	private final LocalDateTime lastActiveAt = LocalDateTime.now();
 
 	// 활성 여부 (soft delete 대비)
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserProfileImage> profileImages = new ArrayList<>();
+	private final List<UserProfileImage> profileImages = new ArrayList<>();
 
 	@PreUpdate
 	public void preUpdate() {
@@ -80,11 +80,15 @@ public class User {
 	}
 
 	public void addProfileImage(UserProfileImage image) {
+		if (profileImages.size() >= 3) {
+			throw new IllegalStateException("프로필 이미지는 최대 3장까지만 등록할 수 있습니다.");
+		}
+
 		profileImages.add(image);
 		image.setUser(this);
 	}
 
-	public void update(UpdateUserCommand command) {
+	public void update(UserServiceDto.UpdateCommand command) {
 		updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 	}
 

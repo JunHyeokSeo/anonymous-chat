@@ -1,6 +1,5 @@
-package com.anonymouschat.anonymouschatserver.application.service.chatroom;
+package com.anonymouschat.anonymouschatserver.application.service;
 
-import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;

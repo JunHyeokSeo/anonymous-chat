@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.dto.UserSearchResult;
+import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import lombok.Builder;
 
 @Builder
@@ -12,7 +12,7 @@ public record UserSearchResponse(
 		String profileImageUrl,
 		String lastActiveDisplay
 ) {
-	public static UserSearchResponse from(UserSearchResult result) {
+	public static UserSearchResponse from(UserUseCaseDto.SearchResult result) {
 		return UserSearchResponse.builder()
 				       .userId(result.userId())
 				       .nickname(result.nickname())

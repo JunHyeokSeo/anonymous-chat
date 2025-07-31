@@ -1,8 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.api.user.dto;
 
-import com.anonymouschat.anonymouschatserver.application.dto.RegisterUserCommand;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import jakarta.validation.constraints.*;
 
@@ -24,12 +22,4 @@ public record RegisterUserRequest(
 		@Size(max = 255, message = "자기소개는 255자 이하로 입력해주세요.")
 		String bio
 
-) {
-	public RegisterUserCommand toCommand(OAuthProvider provider, String providerId) {
-		return new RegisterUserCommand(
-				nickname, gender, age, region,
-				bio == null ? "" : bio,
-				provider, providerId
-		);
-	}
-}
+) {}
