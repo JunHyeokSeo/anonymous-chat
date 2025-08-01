@@ -42,11 +42,11 @@ class MessageServiceTest {
 	}
 
 	@Nested
-	@DisplayName("sendMessage 메서드는")
-	class SendMessageTest {
+	@DisplayName("saveMessage 메서드는")
+	class SaveMessageTest {
 		@Test
 		@DisplayName("정상적으로 메시지를 저장한다")
-		void sendMessage_success() {
+		void saveMessage_success() {
 			// given
 			String content = "Hello";
 
@@ -92,7 +92,7 @@ class MessageServiceTest {
 
 			// then
 			assertThat(result).hasSize(2);
-			assertThat(result.get(0).getChatRoom()).isEqualTo(chatRoom);
+			assertThat(result.getFirst().getChatRoom()).isEqualTo(chatRoom);
 		}
 	}
 
