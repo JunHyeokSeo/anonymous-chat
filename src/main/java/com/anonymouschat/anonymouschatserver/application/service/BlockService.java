@@ -13,12 +13,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BlockService {
 	private final BlockRepository blockRepository;
-	private final UserRepository userRepository;
 
-	public void block(Long blockerId, Long blockedId) {
-		User blocker = findUserById(blockerId);
-		User blocked = findUserById(blockedId);
-
+	public void block(User blocker, User blocked) {
 		Block block = Block.builder()
 				              .blocker(blocker)
 				              .blocked(blocked)
@@ -34,11 +30,6 @@ public class BlockService {
 
 	public List<Long> getBlockedUserIds(Long blockerId) {
 		return blockRepository.findAllBlockedUserIdsByBlockerId(blockerId);
-	}
-
-	private User findUserById(Long userId) {
-		return userRepository.findById(userId)
-				       .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 	}
 
 	private Block findBlockByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {

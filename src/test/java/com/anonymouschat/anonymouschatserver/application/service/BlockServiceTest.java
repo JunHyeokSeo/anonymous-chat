@@ -51,36 +51,9 @@ class BlockServiceTest {
 			User blocker = createRealUserWithId(blockerId);
 			User blocked = createRealUserWithId(blockedId);
 
-			when(userRepository.findById(blockerId)).thenReturn(Optional.of(blocker));
-			when(userRepository.findById(blockedId)).thenReturn(Optional.of(blocked));
-
-			blockService.block(blockerId, blockedId);
+			blockService.block(blocker, blocked);
 
 			verify(blockRepository).save(any(Block.class));
-		}
-
-		@Test
-		@DisplayName("차단 실패 - 차단자 없음")
-		void block_fail_noBlocker() {
-			when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-			IllegalStateException ex = assertThrows(IllegalStateException.class,
-					() -> blockService.block(1L, 2L));
-
-			assertThat(ex.getMessage()).isEqualTo("사용자를 찾을 수 없습니다.");
-		}
-
-		@Test
-		@DisplayName("차단 실패 - 피차단자 없음")
-		void block_fail_noBlocked() {
-			User blocker = createRealUserWithId(1L);
-			when(userRepository.findById(1L)).thenReturn(Optional.of(blocker));
-			when(userRepository.findById(2L)).thenReturn(Optional.empty());
-
-			IllegalStateException ex = assertThrows(IllegalStateException.class,
-					() -> blockService.block(1L, 2L));
-
-			assertThat(ex.getMessage()).isEqualTo("사용자를 찾을 수 없습니다.");
 		}
 	}
 
