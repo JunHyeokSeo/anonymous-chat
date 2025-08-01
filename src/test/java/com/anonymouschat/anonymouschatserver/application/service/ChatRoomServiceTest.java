@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
+import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,8 +99,41 @@ class ChatRoomServiceTest {
 	}
 
 	@Nested
-	@DisplayName("getChatRoomDetail")
-	class GetChatRoomDetail {
+	@DisplayName("getMyActiveChatRooms")
+	class GetMyActiveChatRooms {
+
+		@Test
+		@DisplayName("사용자가 참여 중인 활성 채팅방 목록을 정상적으로 조회한다")
+		void getMyActiveChatRooms_shouldReturnChatRoomSummaries() {
+			// given
+			Long userId = 1L;
+			List<ChatRoomServiceDto.Summary> mockResult = List.of(
+					new ChatRoomServiceDto.Summary(
+							10L,
+							2L,
+							"상대닉네임",
+							25,
+							"SEOUL",
+							"https://example.com/profile.jpg",
+							LocalDateTime.now()
+					)
+			);
+
+			when(chatRoomRepository.findActiveChatRoomsByUser(userId, ChatRoomStatus.ACTIVE))
+					.thenReturn(mockResult);
+
+			// when
+			List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(userId);
+
+			// then
+			assertThat(result).isEqualTo(mockResult);
+			verify(chatRoomRepository).findActiveChatRoomsByUser(userId, ChatRoomStatus.ACTIVE);
+		}
+	}
+
+	@Nested
+	@DisplayName("getVerifiedChatRoomOrThrow")
+	class GetVerifiedChatRoomOrThrow {
 
 		@Test
 		@DisplayName("유효한 채팅방이면 반환")
