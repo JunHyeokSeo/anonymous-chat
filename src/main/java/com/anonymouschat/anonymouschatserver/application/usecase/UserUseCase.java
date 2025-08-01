@@ -29,8 +29,8 @@ public class UserUseCase {
 		return UserUseCaseDto.Profile.from(userService.getMyProfile(userId));
 	}
 
-	public UserUseCaseDto.UpdateResult update(UserUseCaseDto.Update update, List<MultipartFile> images) throws IOException {
-		return UserUseCaseDto.UpdateResult.from(userService.update(UserServiceDto.UpdateCommand.from(update), images));
+	public void update(UserUseCaseDto.Update update, List<MultipartFile> images) throws IOException {
+		userService.update(UserServiceDto.UpdateCommand.from(update), images);
 	}
 
 	public void withdraw(Long userId) {

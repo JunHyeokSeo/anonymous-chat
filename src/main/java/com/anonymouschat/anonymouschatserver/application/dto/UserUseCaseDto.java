@@ -55,33 +55,6 @@ public class UserUseCaseDto {
 		}
 	}
 
-	@Builder
-	public record UpdateResult(
-			Long id,
-			String nickname,
-			Gender gender,
-			int age,
-			Region region,
-			String bio,
-			LocalDateTime createdAt,
-			LocalDateTime lastActiveAt,
-			List<UserProfileImageDto> profileImages
-	) {
-		public static UpdateResult from(UserServiceDto.UpdateResult result) {
-			return UpdateResult.builder()
-					       .id(result.id())
-					       .nickname(result.nickname())
-					       .gender(result.gender())
-					       .age(result.age())
-					       .region(result.region())
-					       .bio(result.bio())
-					       .createdAt(result.createdAt())
-					       .lastActiveAt(result.lastActiveAt())
-					       .profileImages(result.profileImages())
-					       .build();
-		}
-	}
-
 	public record SearchCondition(
 			Long id,
 			Gender gender,

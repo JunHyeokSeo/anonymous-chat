@@ -116,33 +116,6 @@ public class UserServiceDto {
 	}
 
 	@Builder
-	public record UpdateResult(
-			Long id,
-			String nickname,
-			Gender gender,
-			int age,
-			Region region,
-			String bio,
-			LocalDateTime createdAt,
-			LocalDateTime lastActiveAt,
-			List<UserProfileImageDto> profileImages
-	) {
-		public static UpdateResult from(User user, List<UserProfileImage> images) {
-			return UpdateResult.builder()
-					       .id(user.getId())
-					       .nickname(user.getNickname())
-					       .gender(user.getGender())
-					       .age(user.getAge())
-					       .region(user.getRegion())
-					       .bio(user.getBio())
-					       .createdAt(user.getCreatedAt())
-					       .lastActiveAt(user.getLastActiveAt())
-					       .profileImages(images.stream().map(UserProfileImageDto::from).toList())
-					       .build();
-		}
-	}
-
-	@Builder
 	public record SearchResult(
 			Long userId,
 			String nickname,

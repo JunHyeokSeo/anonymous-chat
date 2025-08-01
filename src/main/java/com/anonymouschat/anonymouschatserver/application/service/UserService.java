@@ -47,7 +47,7 @@ public class UserService {
 		return UserServiceDto.ProfileResult.from(user, images);
 	}
 
-	public UserServiceDto.UpdateResult update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
+	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
 		User user = findUser(command.userId());
 
 		//닉네임 중복 검사
@@ -61,8 +61,6 @@ public class UserService {
 		//새 프로필 이미지 등록
 		List<UserProfileImage> newImages = convertToProfileImages(images);
 		newImages.forEach(user::addProfileImage);
-
-		return UserServiceDto.UpdateResult.from(user, newImages);
 	}
 
 	public void withdraw(Long userId) {
