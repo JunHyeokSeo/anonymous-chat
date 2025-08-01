@@ -18,7 +18,7 @@ public class MessageService {
 
 	private final MessageRepository messageRepository;
 
-	public Message sendMessage(ChatRoom chatRoom, User sender, String content) {
+	public Message saveMessage(ChatRoom chatRoom, User sender, String content) {
 		Message message = Message.builder()
 				                .chatRoom(chatRoom)
 				                .sender(sender)

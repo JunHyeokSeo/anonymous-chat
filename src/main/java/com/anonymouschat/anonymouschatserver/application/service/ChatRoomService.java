@@ -33,7 +33,7 @@ public class ChatRoomService {
 
 	// 채팅방 상세 조회 (유저 포함 여부 확인 포함)
 	@Transactional(readOnly = true)
-	public ChatRoom getChatRoomDetail(Long userId, Long chatRoomId) {
+	public ChatRoom getVerifiedChatRoomOrThrow(Long userId, Long chatRoomId) {
 		ChatRoom chatRoom = findChatRoomById(chatRoomId);
 		chatRoom.validateParticipant(userId);
 

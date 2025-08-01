@@ -58,7 +58,7 @@ class MessageServiceTest {
 					});
 
 			// when
-			Message result = messageService.sendMessage(chatRoom, user1, content);
+			Message result = messageService.saveMessage(chatRoom, user1, content);
 
 			// then
 			assertThat(result).isNotNull();

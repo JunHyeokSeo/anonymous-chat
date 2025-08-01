@@ -105,7 +105,7 @@ class ChatRoomServiceTest {
 			ChatRoom room = new ChatRoom(user1, user2);
 			when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-			ChatRoom result = chatRoomService.getChatRoomDetail(1L, 1L);
+			ChatRoom result = chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L);
 
 			assertThat(result).isEqualTo(room);
 		}
@@ -116,7 +116,7 @@ class ChatRoomServiceTest {
 			ChatRoom room = new ChatRoom(user1, user2);
 			when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-			assertThatThrownBy(() -> chatRoomService.getChatRoomDetail(99L, 1L))
+			assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(99L, 1L))
 					.isInstanceOf(IllegalStateException.class);
 		}
 	}

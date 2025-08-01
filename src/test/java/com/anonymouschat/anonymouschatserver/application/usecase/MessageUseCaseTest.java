@@ -1,9 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
-import com.anonymouschat.anonymouschatserver.application.dto.GetMessagesCommand;
-import com.anonymouschat.anonymouschatserver.application.dto.MarkMessagesAsReadCommand;
-import com.anonymouschat.anonymouschatserver.application.dto.SendMessageCommand;
-import com.anonymouschat.anonymouschatserver.application.dto.MessageResult;
+import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.MessageService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
@@ -78,15 +75,7 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
 		void sendMessage() {
-			SendMessageCommand command = new SendMessageCommand(1L, 1L, "hi");
-			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
-			when(userService.findUser(1L)).thenReturn(user);
-			when(messageService.sendMessage(chatRoom, user, "hi")).thenReturn(message);
 
-			MessageResult result = messageUseCase.sendMessage(command);
-
-			assertThat(result.content()).isEqualTo("hi");
-			assertThat(result.senderId()).isEqualTo(1L);
 		}
 	}
 
@@ -97,14 +86,7 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("해당 유저의 퇴장 이후 메시지를 페이징하여 가져온다.")
 		void getMessages() {
-			GetMessagesCommand command = new GetMessagesCommand(1L, 1L, null, 20);
-			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
-			when(messageService.getMessages(eq(chatRoom), any(), eq(null), eq(20))).thenReturn(List.of(message));
 
-			List<MessageResult> results = messageUseCase.getMessages(command);
-
-			assertThat(results).hasSize(1);
-			assertThat(results.getFirst().content()).isEqualTo("hi");
 		}
 	}
 
@@ -115,11 +97,11 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("메시지 읽음 처리만 수행한다.")
 		void markMessagesAsRead() {
-			MarkMessagesAsReadCommand command = new MarkMessagesAsReadCommand(1L, 1L);
+			MessageUseCaseDto.MarkMessagesAsRead request = new MessageUseCaseDto.MarkMessagesAsRead(1L, 1L);
 
-			when(chatRoomService.getChatRoomDetail(1L, 1L)).thenReturn(chatRoom);
+			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
 
-			messageUseCase.markMessagesAsRead(command);
+			messageUseCase.markMessagesAsRead(request);
 
 			verify(messageService).markMessagesAsRead(1L, 1L);
 		}

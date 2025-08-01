@@ -21,48 +21,33 @@ public class MessageUseCase {
 	private final UserService userService;
 
 	// 메시지 전송
-	public MessageResult sendMessage(SendMessageCommand command) {
-		ChatRoom chatRoom = chatRoomService.getChatRoomDetail(command.senderId(), command.chatRoomId());
-		User sender = userService.findUser(command.senderId());
-		Message message = messageService.sendMessage(chatRoom, sender, command.content());
-
-		return toResult(message, command.senderId());
+	public void sendMessage(MessageUseCaseDto.SendMessage request) {
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.senderId(), request.chatRoomId());
+		User sender = userService.findUser(request.senderId());
+		messageService.saveMessage(chatRoom, sender, request.content());
 	}
 
 	// 메시지 목록 조회 (Cursor 방식)
-	public List<MessageResult> getMessages(GetMessagesCommand command) {
-		ChatRoom chatRoom = chatRoomService.getChatRoomDetail(command.userId(), command.chatRoomId());
-		LocalDateTime lastExitedAt = chatRoom.getLastExitedAt(command.userId());
+	public List<MessageUseCaseDto.MessageResult> getMessages(MessageUseCaseDto.GetMessages request) {
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
+		LocalDateTime lastExitedAt = chatRoom.getLastExitedAt(request.userId());
 
 		List<Message> messages = messageService.getMessages(
 				chatRoom,
 				lastExitedAt,
-				command.lastMessageId(),
-				command.limit()
+				request.lastMessageId(),
+				request.limit()
 		);
 
 		return messages.stream()
-				       .map(m -> toResult(m, command.userId()))
+				       .map(m -> MessageUseCaseDto.MessageResult.from(m, request.userId()))
 				       .toList();
 	}
 
 
 	// 메시지 읽음 처리
-	public void markMessagesAsRead(MarkMessagesAsReadCommand command) {
-		chatRoomService.getChatRoomDetail(command.userId(), command.chatRoomId());
-		messageService.markMessagesAsRead(command.chatRoomId(), command.userId());
-	}
-
-	private MessageResult toResult(Message message, Long userId) {
-		boolean isMine = message.isSentBy(userId);
-		return new MessageResult(
-				message.getId(),
-				message.getChatRoom().getId(),
-				message.getSender().getId(),
-				message.getContent(),
-				message.isRead(),
-				message.getSentAt(),
-				isMine
-		);
+	public void markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
+		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
+		messageService.markMessagesAsRead(request.chatRoomId(), request.userId());
 	}
 }
