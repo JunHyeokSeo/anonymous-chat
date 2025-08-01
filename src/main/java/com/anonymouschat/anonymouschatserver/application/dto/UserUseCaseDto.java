@@ -55,6 +55,7 @@ public class UserUseCaseDto {
 		}
 	}
 
+	@Builder
 	public record SearchCondition(
 			Long id,
 			Gender gender,
