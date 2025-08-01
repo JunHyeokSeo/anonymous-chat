@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
-import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;

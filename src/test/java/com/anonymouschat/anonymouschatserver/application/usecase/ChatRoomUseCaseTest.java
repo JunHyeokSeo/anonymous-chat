@@ -1,6 +1,5 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
-import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
@@ -14,8 +13,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
