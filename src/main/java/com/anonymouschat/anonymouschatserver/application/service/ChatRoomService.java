@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
+import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
@@ -32,7 +33,7 @@ public class ChatRoomService {
 	}
 
 	// 채팅방 상세 조회 (유저 포함 여부 확인 포함)
-	@Transactional(readOnly = true)
+	@Transactional
 	public ChatRoom getVerifiedChatRoomOrThrow(Long userId, Long chatRoomId) {
 		ChatRoom chatRoom = findChatRoomById(chatRoomId);
 		chatRoom.validateParticipant(userId);
@@ -42,7 +43,7 @@ public class ChatRoomService {
 
 	// 내가 참여한 채팅방 목록 조회
 	@Transactional(readOnly = true)
-	public List<ChatRoomSummaryResult> getMyActiveChatRooms(Long userId) {
+	public List<ChatRoomServiceDto.Summary> getMyActiveChatRooms(Long userId) {
 		return chatRoomRepository.findActiveChatRoomsByUser(userId, ChatRoomStatus.ACTIVE);
 	}
 

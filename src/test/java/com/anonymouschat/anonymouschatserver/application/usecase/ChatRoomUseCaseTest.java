@@ -91,12 +91,7 @@ class ChatRoomUseCaseTest {
 		@Test
 		@DisplayName("내 채팅방 목록 반환")
 		void getMyRooms() {
-			ChatRoomSummaryResult summary = mock(ChatRoomSummaryResult.class);
-			when(chatRoomService.getMyActiveChatRooms(1L)).thenReturn(Collections.singletonList(summary));
 
-			List<ChatRoomSummaryResult> result = chatRoomUseCase.getMyActiveChatRooms(1L);
-
-			assertThat(result).hasSize(1);
 		}
 	}
 

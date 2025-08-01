@@ -1,6 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
+import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomSummaryResult;
+import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
@@ -21,8 +23,11 @@ public class ChatRoomUseCase {
 		return chatRoomService.createOrFind(initiator, recipient).getId();
 	}
 
-	public List<ChatRoomSummaryResult> getMyActiveChatRooms(Long userId) {
-		return chatRoomService.getMyActiveChatRooms(userId);
+	public List<ChatRoomUseCaseDto.Summary> getMyActiveChatRooms(Long userId) {
+		List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(userId);
+		return result.stream()
+				       .map(ChatRoomUseCaseDto.Summary::from)
+				       .toList();
 	}
 
 	public void exitChatRoom(Long userId, Long chatRoomId){
