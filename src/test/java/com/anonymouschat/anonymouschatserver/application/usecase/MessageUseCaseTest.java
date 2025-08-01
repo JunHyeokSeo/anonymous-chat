@@ -15,14 +15,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import static org.mockito.Mockito.*;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@DisplayName("MessageUseCase 테스트")
 class MessageUseCaseTest {
 
 	@Mock private MessageService messageService;
@@ -61,7 +65,7 @@ class MessageUseCaseTest {
 				          .sender(user)
 				          .content("hi")
 				          .build();
-		ReflectionTestUtils.setField(message, "id", 1L);
+		ReflectionTestUtils.setField(message, "id", 10L);
 		ReflectionTestUtils.setField(message, "sentAt", LocalDateTime.now());
 	}
 
@@ -72,7 +76,23 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
 		void sendMessage() {
+			// given
+			var request = MessageUseCaseDto.SendMessage.builder()
+					              .chatRoomId(1L)
+					              .senderId(1L)
+					              .content("hello")
+					              .build();
 
+			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
+			when(userService.findUser(1L)).thenReturn(user);
+
+			// when
+			messageUseCase.sendMessage(request);
+
+			// then
+			verify(chatRoomService).getVerifiedChatRoomOrThrow(1L, 1L);
+			verify(userService).findUser(1L);
+			verify(messageService).saveMessage(chatRoom, user, "hello");
 		}
 	}
 
@@ -83,7 +103,27 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("해당 유저의 퇴장 이후 메시지를 페이징하여 가져온다.")
 		void getMessages() {
+			// given
+			var request = MessageUseCaseDto.GetMessages.builder()
+					              .chatRoomId(1L)
+					              .userId(1L)
+					              .lastMessageId(null)
+					              .limit(20)
+					              .build();
 
+			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
+			when(messageService.getMessages(any(), any(), any(), anyInt()))
+					.thenReturn(List.of(message));
+
+			// when
+			var results = messageUseCase.getMessages(request);
+
+			// then
+			assertThat(results).hasSize(1);
+			assertThat(results.getFirst().messageId()).isEqualTo(10L);
+
+			verify(chatRoomService).getVerifiedChatRoomOrThrow(1L, 1L);
+			verify(messageService).getMessages(any(), any(), any(), eq(20));
 		}
 	}
 
@@ -94,13 +134,21 @@ class MessageUseCaseTest {
 		@Test
 		@DisplayName("메시지 읽음 처리만 수행한다.")
 		void markMessagesAsRead() {
-			MessageUseCaseDto.MarkMessagesAsRead request = new MessageUseCaseDto.MarkMessagesAsRead(1L, 1L);
+			// given
+			var request = MessageUseCaseDto.MarkMessagesAsRead.builder()
+					              .chatRoomId(1L)
+					              .userId(1L)
+					              .build();
 
 			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
 
+			// when
 			messageUseCase.markMessagesAsRead(request);
 
+			// then
+			verify(chatRoomService).getVerifiedChatRoomOrThrow(1L, 1L);
 			verify(messageService).markMessagesAsRead(1L, 1L);
 		}
 	}
 }
+
