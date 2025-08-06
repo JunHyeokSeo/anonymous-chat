@@ -15,6 +15,10 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+//todo: 채팅방 상태 관리 구체화 필요
+// "대화하기"로 채팅방 생성 뒤 메시지를 입력하지 않은 경우.
+// 한 명이 나간 뒤 나간 사용자가 다시 채팅을 시작할 때.
+// 한 명이 나간 뒤 나가지 않은 사용자가 다시 채팅을 시작할 때.
 public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 
@@ -56,5 +60,14 @@ public class ChatRoomService {
 		return chatRoomRepository
 				       .findById(chatRoomId)
 				       .orElseThrow(() -> new IllegalStateException("채팅방이 존재하지 않습니다."));
+	}
+
+	public void markActiveIfInactive(Long chatRoomId) {
+		ChatRoom chatRoom = findChatRoomById(chatRoomId);
+
+		if (chatRoom.getStatus() == ChatRoomStatus.INACTIVE) {
+			chatRoom.activate();
+			chatRoomRepository.save(chatRoom);
+		}
 	}
 }

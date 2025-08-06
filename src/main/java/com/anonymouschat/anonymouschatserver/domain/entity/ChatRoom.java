@@ -29,6 +29,7 @@ public class ChatRoom {
 	@JoinColumn(name = "user2_id", nullable = false)
 	private User user2;
 
+	@Getter
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 20)
 	private ChatRoomStatus status;
@@ -75,6 +76,12 @@ public class ChatRoom {
 		return user1.getId().equals(userId) || user2.getId().equals(userId);
 	}
 
+	public void activate() {
+		if (this.status == ChatRoomStatus.INACTIVE) {
+			this.status = ChatRoomStatus.ACTIVE;
+		}
+	}
+
 	private void updateStatusIfBothExited() {
 		if (exit.bothExited()) {
 			this.status = ChatRoomStatus.INACTIVE;
@@ -85,7 +92,7 @@ public class ChatRoom {
 	public ChatRoom(User user1, User user2) {
 		this.user1 = user1;
 		this.user2 = user2;
-		this.status = ChatRoomStatus.ACTIVE;
+		this.status = ChatRoomStatus.INACTIVE;
 		this.exit = new ChatRoomExit();
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
