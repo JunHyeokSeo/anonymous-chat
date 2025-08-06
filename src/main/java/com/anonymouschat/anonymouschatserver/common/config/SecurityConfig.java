@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.common.config;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.common.security.OAuth2AuthenticationSuccessHandler;
-import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
 	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
 	@Bean
@@ -72,6 +69,6 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
+		return new JwtAuthenticationFilter(jwtTokenProvider);
 	}
 }

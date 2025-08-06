@@ -53,6 +53,16 @@ dependencies {
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
+    // WebSocket + STOMP 지원
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // SockJS fallback
+    implementation("org.webjars:sockjs-client:1.5.1")
+    implementation("org.webjars:stomp-websocket:2.3.4")
+
+    // 테스트용 WebSocket 클라이언트
+    testImplementation("org.springframework:spring-messaging")
+
     // 테스트
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-core:5.10.0")

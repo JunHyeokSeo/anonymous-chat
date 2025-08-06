@@ -1,8 +1,7 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
+import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
-import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,11 +21,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final String ATTR_PRINCIPAL = "AuthenticatedPrincipal";
 
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
 
-	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
 		this.jwtTokenProvider = jwtTokenProvider;
-		this.userRepository = userRepository;
 	}
 
 	@Override
@@ -38,15 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String token = resolveToken(request);
 
 			if (token != null && jwtTokenProvider.validateToken(token)) {
-				OAuthPrincipal principal = jwtTokenProvider.getPrincipalFromToken(token);
+				CustomPrincipal principal = jwtTokenProvider.getPrincipalFromToken(token);
 
 				// request에 항상 주입 (ArgumentResolver 등에서 사용 가능)
 				request.setAttribute(ATTR_PRINCIPAL, principal);
 
-				// userId가 포함된 경우만 인증 처리
-				if (principal.getUserId() != null) {
+				// userId가 포함된 경우만 SecurityContext에 주입
+				if (principal.isAuthenticatedUser()) {
 					var authentication = new UsernamePasswordAuthenticationToken(
-							principal, null, List.of()
+							principal, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
 					);
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
@@ -68,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		return null;
 	}
 
-	public static OAuthPrincipal extractPrincipal(HttpServletRequest request) {
-		return (OAuthPrincipal) request.getAttribute(ATTR_PRINCIPAL);
+	public static CustomPrincipal extractPrincipal(HttpServletRequest request) {
+		return (CustomPrincipal) request.getAttribute(ATTR_PRINCIPAL);
 	}
 }

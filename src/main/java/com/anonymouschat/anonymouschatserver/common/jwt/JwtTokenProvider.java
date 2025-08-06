@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
-import com.anonymouschat.anonymouschatserver.common.security.OAuthPrincipal;
+import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -84,16 +84,15 @@ public class JwtTokenProvider {
 		} catch (SecurityException | MalformedJwtException e) {
 			throw new JwtException("잘못된 JWT 서명입니다.", e);
 		} catch (ExpiredJwtException e) {
-			throw new JwtException("만료된 JWT입니다.", e);
+			throw new JwtException("만료된 JWT 입니다.", e);
 		} catch (UnsupportedJwtException e) {
-			throw new JwtException("지원하지 않는 JWT입니다.", e);
+			throw new JwtException("지원하지 않는 JWT 입니다.", e);
 		} catch (IllegalArgumentException e) {
 			throw new JwtException("JWT claims 문자열이 비어있습니다.", e);
 		}
 	}
 
-	//Principal 추출: 회원가입 전
-	public OAuthPrincipal getPrincipalFromToken(String token) {
+	public CustomPrincipal getPrincipalFromToken(String token) {
 		Claims claims = parse(token);
 
 		String providerName = claims.get("provider", String.class);
@@ -104,17 +103,20 @@ public class JwtTokenProvider {
 		}
 
 		OAuthProvider provider = OAuthProvider.valueOf(providerName);
-		return new OAuthPrincipal(provider, providerId);
-	}
 
-	//userId 추출: 회원가입 완료 후
-	public Long getUserIdFromToken(String token) {
-		Claims claims = parse(token);
-		Object raw = claims.get("userId");
-		if (raw == null) {
-			throw new JwtException("userId 정보가 JWT에 존재하지 않습니다.");
+		Object userIdRaw = claims.get("userId");
+		if (userIdRaw != null) {
+			Long userId = Long.valueOf(userIdRaw.toString());
+			return CustomPrincipal.builder()
+					       .userId(userId)
+					       .provider(provider)
+					       .providerId(providerId)
+					       .build();
 		}
-		return Long.valueOf(raw.toString());
+		return CustomPrincipal.builder()
+				       .provider(provider)
+				       .providerId(providerId)
+				       .build();
 	}
 
 	private Claims parse(String token) {
