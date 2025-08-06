@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.socket;
 
+import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSaveEvent;
 import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSentEvent;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
@@ -77,7 +78,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 					                            .timestamp(Instant.now())
 					                            .build();
 
-			applicationEventPublisher.publishEvent(new ChatMessageSentEvent(inbound.roomId()));
+			//채팅방 상태 변경 Inactive -> Active 이벤트 발행
+			applicationEventPublisher.publishEvent(
+					ChatMessageSentEvent.builder()
+							.roomId(inbound.roomId())
+							.build());
+
+
+			//메시지 저장 이벤트 발행
+			applicationEventPublisher.publishEvent(
+					ChatMessageSaveEvent.builder()
+							.chatRoomId(inbound.roomId())
+							.senderId(senderId)
+							.content(inbound.content()).build());
 
 			// 채팅방 참여자에게 메시지 전송
 			Set<Long> participants = sessionManager.getParticipants(inbound.roomId());
