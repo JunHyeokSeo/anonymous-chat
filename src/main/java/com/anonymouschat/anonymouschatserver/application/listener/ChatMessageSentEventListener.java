@@ -17,7 +17,7 @@ public class ChatMessageSentEventListener {
 	@EventListener
 	public void handle(ChatMessageSentEvent event) {
 		try {
-			chatRoomService.markActiveIfPending(event.roomId());
+			chatRoomService.markActiveIfInactive(event.roomId());
 		} catch (Exception e) {
 			log.warn("채팅방 상태 변경 실패: roomId={} - {}", event.roomId(), e.getMessage());
 		}
