@@ -43,8 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 				// userId가 포함된 경우만 SecurityContext에 주입
 				if (principal.isAuthenticatedUser()) {
+					var authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 					var authentication = new UsernamePasswordAuthenticationToken(
-							principal, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+							principal, null, authorities
 					);
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}

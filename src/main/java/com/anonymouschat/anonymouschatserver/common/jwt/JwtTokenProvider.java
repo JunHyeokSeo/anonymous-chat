@@ -32,19 +32,11 @@ public class JwtTokenProvider {
 	}
 
 	//회원가입 전 토큰
-	public String createAccessToken(OAuthProvider provider, String providerId) {
+	public String createAccessTokenForOAuthLogin(OAuthProvider provider, String providerId) {
 		return createToken(builder -> builder
 				                              .claim("provider", provider.name())
 				                              .claim("providerId", providerId),
 				accessTokenValidityInSeconds
-		);
-	}
-
-	public String createRefreshToken(OAuthProvider provider, String providerId) {
-		return createToken(builder -> builder
-				                              .claim("provider", provider.name())
-				                              .claim("providerId", providerId),
-				refreshTokenValidityInSeconds
 		);
 	}
 
@@ -93,30 +85,25 @@ public class JwtTokenProvider {
 	}
 
 	public CustomPrincipal getPrincipalFromToken(String token) {
-		Claims claims = parse(token);
+		Claims c = parse(token);
+		Long userId = c.get("userId", Long.class);
+		String providerName = c.get("provider", String.class);
+		String providerId = c.get("providerId", String.class);
 
-		String providerName = claims.get("provider", String.class);
-		String providerId = claims.get("providerId", String.class);
-
-		if (providerName == null || providerId == null) {
-			throw new JwtException("provider 정보가 JWT에 존재하지 않습니다.");
-		}
-
-		OAuthProvider provider = OAuthProvider.valueOf(providerName);
-
-		Object userIdRaw = claims.get("userId");
-		if (userIdRaw != null) {
-			Long userId = Long.valueOf(userIdRaw.toString());
+		if (userId != null) {
 			return CustomPrincipal.builder()
 					       .userId(userId)
-					       .provider(provider)
+					       .build();
+		}
+
+		// OAuth 임시 사용자의 경우만 provider 정보 검사
+		if (providerName != null && providerId != null) {
+			return CustomPrincipal.builder()
+					       .provider(OAuthProvider.valueOf(providerName))
 					       .providerId(providerId)
 					       .build();
 		}
-		return CustomPrincipal.builder()
-				       .provider(provider)
-				       .providerId(providerId)
-				       .build();
+		throw new JwtException("유효한 클레임이 JWT에 존재하지 않습니다.");
 	}
 
 	private Claims parse(String token) {

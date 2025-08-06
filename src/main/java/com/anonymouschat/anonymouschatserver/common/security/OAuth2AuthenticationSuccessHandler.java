@@ -37,17 +37,14 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		OAuthProvider provider = oAuth2ProviderResolver.resolve(request, oAuth2User);
 
 		boolean isNewUser = userService.findByProviderAndProviderId(provider, providerId).isEmpty();
-
-		String accessToken = jwtTokenProvider.createAccessToken(provider, providerId);
-		String refreshToken = jwtTokenProvider.createRefreshToken(provider, providerId);
+		String accessToken = jwtTokenProvider.createAccessTokenForOAuthLogin(provider, providerId);
 
 		String json = String.format("""
 		{
 			"accessToken": "%s",
-			"refreshToken": "%s",
 			"isNewUser": %s
 		}
-		""", accessToken, refreshToken, isNewUser);
+		""", accessToken, isNewUser);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
