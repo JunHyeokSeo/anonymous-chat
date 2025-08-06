@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.jwt;
 
+import com.anonymouschat.anonymouschatserver.common.enums.UserRole;
 import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import io.jsonwebtoken.*;
@@ -34,6 +35,7 @@ public class JwtTokenProvider {
 	//회원가입 전 토큰
 	public String createAccessTokenForOAuthLogin(OAuthProvider provider, String providerId) {
 		return createToken(builder -> builder
+				                              .claim("role", UserRole.ROLE_GUEST.getAuthority())
 				                              .claim("provider", provider.name())
 				                              .claim("providerId", providerId),
 				accessTokenValidityInSeconds
@@ -41,15 +43,17 @@ public class JwtTokenProvider {
 	}
 
 	//회원가입 완료 후 토큰 (userId 기반)
-	public String createAccessToken(Long userId) {
+	public String createAccessToken(Long userId, String role) {
 		return createToken(builder -> builder
+				                              .claim("role", role)
 				                              .claim("userId", userId),
 				accessTokenValidityInSeconds
 		);
 	}
 
-	public String createRefreshToken(Long userId) {
+	public String createRefreshToken(Long userId, String role) {
 		return createToken(builder -> builder
+				                              .claim("role", role)
 				                              .claim("userId", userId),
 				refreshTokenValidityInSeconds
 		);
@@ -89,10 +93,12 @@ public class JwtTokenProvider {
 		Long userId = c.get("userId", Long.class);
 		String providerName = c.get("provider", String.class);
 		String providerId = c.get("providerId", String.class);
+		String role = c.get("role", String.class);
 
 		if (userId != null) {
 			return CustomPrincipal.builder()
 					       .userId(userId)
+					       .role(role)
 					       .build();
 		}
 
@@ -101,6 +107,7 @@ public class JwtTokenProvider {
 			return CustomPrincipal.builder()
 					       .provider(OAuthProvider.valueOf(providerName))
 					       .providerId(providerId)
+					       .role(role)
 					       .build();
 		}
 		throw new JwtException("유효한 클레임이 JWT에 존재하지 않습니다.");

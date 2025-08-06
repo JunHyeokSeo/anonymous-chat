@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.config;
 
-import com.anonymouschat.anonymouschatserver.common.jwt.JwtAuthenticationFilter;
-import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
+import com.anonymouschat.anonymouschatserver.common.jwt.*;
 import com.anonymouschat.anonymouschatserver.common.security.OAuth2AuthenticationSuccessHandler;
 import com.anonymouschat.anonymouschatserver.common.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +18,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-	private final JwtTokenProvider jwtTokenProvider;
 	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+	private final JwtTokenResolver tokenResolver;
+	private final JwtValidator jwtValidator;
+	private final JwtAuthenticationFactory authFactory;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -62,13 +63,17 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 
 				//JWT 인증 필터 추가
-				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
 
 	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtTokenProvider);
+	public JwtAuthenticationFilter jwtAuthenticationFilter(
+			JwtTokenResolver tokenResolver,
+			JwtValidator jwtValidator,
+			JwtAuthenticationFactory authFactory
+	) {
+		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory);
 	}
 }

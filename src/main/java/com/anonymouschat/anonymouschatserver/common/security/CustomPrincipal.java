@@ -12,9 +12,14 @@ import java.util.Objects;
  * @param userId     Nullable
  * @param provider   Nullable
  * @param providerId Nullable
+ * @param role       NotNull
  */
 @Builder
-public record CustomPrincipal(Long userId, OAuthProvider provider, String providerId) implements Principal {
+public record CustomPrincipal(
+		Long userId,
+		OAuthProvider provider,
+		String providerId,
+		String role) implements Principal {
 	public CustomPrincipal {
 		//userId가 없으면 provider + providerId는 있어야 한다
 		if (userId == null) {

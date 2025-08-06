@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.example;
 
+import com.anonymouschat.anonymouschatserver.common.enums.UserRole;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class JwtAuthenticationIntegrationTest {
 	void 인증된_사용자는_ROLE_USER_권한으로_요청할_수_있다() throws Exception {
 		// given
 		Long userId = 1L;
-		String accessToken = jwtTokenProvider.createAccessToken(userId);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, UserRole.ROLE_USER.getAuthority());
 
 		// when & then
 		mockMvc.perform(get("/api/v1/test/me")
