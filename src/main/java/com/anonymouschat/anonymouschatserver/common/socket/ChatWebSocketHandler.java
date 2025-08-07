@@ -170,14 +170,24 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	private void broadcastToRoom(Long roomId, ChatOutboundMessage message) {
 		try {
 			String payload = objectMapper.writeValueAsString(message);
+
 			for (Long participantId : sessionManager.getParticipants(roomId)) {
 				WebSocketSession targetSession = sessionManager.getSession(participantId);
-				if (targetSession != null && targetSession.isOpen()) {
+
+				if (targetSession == null || !targetSession.isOpen()) {
+					log.warn("메시지 전송 대상 세션 없음 or 닫힘: userId={}", participantId);
+					continue;
+				}
+
+				try {
 					targetSession.sendMessage(new TextMessage(payload));
+				} catch (IOException e) {
+					log.warn("메시지 전송 실패: userId={} - 세션 종료 처리", participantId);
+					closeSession(targetSession, CloseStatus.SERVER_ERROR);
 				}
 			}
 		} catch (Exception e) {
-			log.error("브로드캐스트 실패: {}", e.getMessage(), e);
+			log.error("브로드캐스트 실패 (전체): {}", e.getMessage(), e);
 		}
 	}
 
