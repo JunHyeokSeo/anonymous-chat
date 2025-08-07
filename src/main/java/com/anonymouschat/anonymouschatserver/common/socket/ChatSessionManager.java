@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,10 @@ public class ChatSessionManager {
 
 	// 채팅방 ID → 참여 중인 userId 목록
 	private final Map<Long, Set<Long>> roomParticipants = new ConcurrentHashMap<>();
+
+	// 사용자 ID → 마지막 활동 시각
+	private final Map<Long, Instant> lastActiveAtMap = new ConcurrentHashMap<>();
+
 
 	/**
 	 * 연결된 사용자를 등록합니다.
@@ -50,6 +55,9 @@ public class ChatSessionManager {
 
 		// 모든 채팅방에서 사용자 제거
 		roomParticipants.values().forEach(set -> set.remove(userId));
+
+		// 사용자의 마지막 활동 시각 삭제
+		lastActiveAtMap.remove(userId);
 	}
 
 	/**
@@ -118,5 +126,34 @@ public class ChatSessionManager {
 				       .filter(entry -> entry.getValue().contains(userId))
 				       .map(Map.Entry::getKey)
 				       .collect(Collectors.toSet());
+	}
+
+
+	/**
+	 * 사용자의 마지막 활동 시각 업데이트
+	 *
+	 * @param userId 사용자 ID
+	 */
+	public void updateLastActiveAt(Long userId) {
+		lastActiveAtMap.put(userId, Instant.now());
+	}
+
+	/**
+	 * 사용자의 마지막 활동 시각 반환
+	 *
+	 * @param userId 사용자 ID
+	 * @return lastActiveAt 마지막 활동 시각
+	 */
+	public Instant getLastActiveAt(Long userId) {
+		return lastActiveAtMap.getOrDefault(userId, Instant.EPOCH);
+	}
+
+	/**
+	 * 사용자의 마지막 활동 시각 삭제
+	 *
+	 * @param userId 사용자 ID
+	 */
+	public void removeLastActiveAt(Long userId) {
+		lastActiveAtMap.remove(userId);
 	}
 }

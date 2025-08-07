@@ -103,11 +103,22 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		}
 	}
 
-
 	@Override
 	public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
 		log.error("WebSocket 전송 오류 발생: {}", exception.getMessage());
 		closeSession(session, CloseStatus.SERVER_ERROR);
+	}
+
+	@Override
+	public void handlePongMessage(@NonNull WebSocketSession session, @NonNull PongMessage message) {
+		try {
+			CustomPrincipal principal = extractPrincipal(session);
+			Long userId = principal.userId();
+			sessionManager.updateLastActiveAt(userId);
+			log.debug("[PONG] userId={} pong 수신", userId);
+		} catch (Exception e) {
+			log.warn("pong 처리 중 오류: {}", e.getMessage());
+		}
 	}
 
 	private void handleEnter(Long userId, Long roomId) {
@@ -205,18 +216,24 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	 */
 	@Scheduled(fixedRate = 30_000)
 	public void sendPingToAllSessions() {
+		Instant now = Instant.now();
 		sessionManager.getAllSessions().forEach((userId, session) -> {
-			if (session.isOpen()) {
-				try {
-					ByteBuffer payload = ByteBuffer.wrap("ping".getBytes());
-					session.sendMessage(new PingMessage(payload));
-				} catch (IOException e) {
-					log.warn("Ping 실패: userId={} - 세션 종료 처리", userId);
-					try {
-						session.close();
-					} catch (IOException ignored) {
-					}
-				}
+			if (!session.isOpen()) return;
+
+			// Ping 전송
+			try {
+				session.sendMessage(new PingMessage(ByteBuffer.wrap("ping".getBytes())));
+			} catch (IOException e) {
+				log.warn("Ping 실패: userId={} - 세션 종료 처리", userId);
+				closeSession(session, CloseStatus.SERVER_ERROR);
+				return;
+			}
+
+			// 마지막 활동 시간 체크
+			Instant lastActiveAt = sessionManager.getLastActiveAt(userId);
+			if (lastActiveAt.plusSeconds(60).isBefore(now)) { // 1분 이상 응답 없음
+				log.warn("세션 유휴 상태 감지: userId={} - 세션 종료", userId);
+				closeSession(session, CloseStatus.SESSION_NOT_RELIABLE);
 			}
 		});
 	}
