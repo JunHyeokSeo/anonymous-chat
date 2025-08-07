@@ -5,6 +5,7 @@ import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.common.jwt.JwtValidator;
 import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.NonNull;
@@ -44,12 +45,18 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 			jwtValidator.validate(token);
 			CustomPrincipal principal = authFactory.createPrincipal(token);
 
+			//인증된 사용자만 연결 허용
+			if (!principal.isAuthenticatedUser()) {
+				response.setStatusCode(HttpStatus.UNAUTHORIZED);
+				return false;
+			}
+
 			attributes.put("principal", principal);
 			return true;
 
 		} catch (Exception e) {
 			// 연결 거부: 클라이언트에게 401로 응답 (WebSocket은 HTTP 기반 handshake)
-			response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
+			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return false;
 		}
 	}
