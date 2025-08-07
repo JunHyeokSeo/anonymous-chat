@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 /**
  * WebSocket 연결된 사용자들의 세션 및 채팅방 참여자를 관리하는 컴포넌트입니다.
@@ -106,5 +107,16 @@ public class ChatSessionManager {
 	 */
 	public Map<Long, WebSocketSession> getAllSessions() {
 		return userSessions;
+	}
+
+	/**
+	 * 현재 사용자가 참여중인 모든 채팅방 반환
+	 * afterConnectionClosed 등 소켓 연결 종료 시 사용.
+	 */
+	public Set<Long> getJoinedRoomsByUser(Long userId) {
+		return roomParticipants.entrySet().stream()
+				       .filter(entry -> entry.getValue().contains(userId))
+				       .map(Map.Entry::getKey)
+				       .collect(Collectors.toSet());
 	}
 }
