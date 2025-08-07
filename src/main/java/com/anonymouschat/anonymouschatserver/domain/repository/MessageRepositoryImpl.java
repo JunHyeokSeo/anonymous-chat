@@ -36,20 +36,50 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 	}
 
 	@Override
-	public void updateMessagesAsRead(Long chatRoomId, Long userId) {
+	public Long updateMessagesAsRead(Long chatRoomId, Long userId) {
 		QMessage m = QMessage.message;
 
+		//읽을 메시지 ID 조회 (isRead = false, 내가 보낸 것 아님)
+		List<Long> targetMessageIds = queryFactory
+				                              .select(m.id)
+				                              .from(m)
+				                              .where(
+						                              m.chatRoom.id.eq(chatRoomId),
+						                              m.sender.id.ne(userId),
+						                              m.isRead.isFalse()
+				                              )
+				                              .fetch();
+
+		if (targetMessageIds.isEmpty()) {
+			return null;
+		}
+
+		//읽음 처리
 		queryFactory
-                    .update(m)
-                    .set(m.isRead, true)
-                    .where(
-		                    m.chatRoom.id.eq(chatRoomId),
-		                    m.sender.id.ne(userId),           // 내가 보낸 건 제외
-		                    m.isRead.isFalse()                // 아직 읽지 않은 메시지
-                    )
-                    .execute();
+				.update(m)
+				.set(m.isRead, true)
+				.where(m.id.in(targetMessageIds))
+				.execute();
 
 		entityManager.clear();
+
+		//마지막 메시지 ID 반환
+		return targetMessageIds.stream().max(Long::compareTo).orElse(null);
+	}
+
+	@Override
+	public Long findMaxReadMessageId(Long chatRoomId, Long senderId) {
+		QMessage m = QMessage.message;
+
+		return queryFactory
+				       .select(m.id.max())
+				       .from(m)
+				       .where(
+						       m.chatRoom.id.eq(chatRoomId),
+						       m.sender.id.eq(senderId),
+						       m.isRead.isTrue()
+				       )
+				       .fetchOne();
 	}
 }
 

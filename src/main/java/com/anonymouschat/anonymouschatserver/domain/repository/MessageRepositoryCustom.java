@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface MessageRepositoryCustom {
 	List<Message> findMessagesAfterExitTimeWithCursor(Long chatRoomId, LocalDateTime lastExitedAt, Long lastMessageId, int limit);
-	void updateMessagesAsRead(Long chatRoomId, Long userId);
+	Long updateMessagesAsRead(Long chatRoomId, Long userId);
+	Long findMaxReadMessageId(Long chatRoomId, Long senderId);
 }

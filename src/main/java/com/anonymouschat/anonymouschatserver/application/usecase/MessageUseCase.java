@@ -44,10 +44,14 @@ public class MessageUseCase {
 				       .toList();
 	}
 
-
 	// 메시지 읽음 처리
-	public void markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
+	public Long markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
 		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
-		messageService.markMessagesAsRead(request.chatRoomId(), request.userId());
+		return messageService.markMessagesAsRead(request.chatRoomId(), request.userId());
+	}
+
+	public Long getLastReadMessageIdByOpponent(MessageUseCaseDto.GetLastReadMessage request) {
+		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
+		return messageService.findLastReadMessageIdByReceiver(request.chatRoomId(), request.userId());
 	}
 }

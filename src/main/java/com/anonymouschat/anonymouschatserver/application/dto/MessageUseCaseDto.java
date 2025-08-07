@@ -11,7 +11,6 @@ public class MessageUseCaseDto {
 			Long chatRoomId,
 			Long senderId,
 			String content,
-			boolean isRead,
 			LocalDateTime sentAt,
 			boolean isMine
 	) {
@@ -22,7 +21,6 @@ public class MessageUseCaseDto {
 					       .chatRoomId(message.getChatRoom().getId())
 					       .senderId(message.getSender().getId())
 					       .content(message.getContent())
-					       .isRead(message.isRead())
 					       .sentAt(message.getSentAt())
 					       .isMine(isMine)
 					       .build();
@@ -49,4 +47,10 @@ public class MessageUseCaseDto {
 			Long chatRoomId,
 			Long userId
 	) {}
+
+	@Builder
+	public record GetLastReadMessage(
+			Long chatRoomId,
+			Long userId
+	) { }
 }
