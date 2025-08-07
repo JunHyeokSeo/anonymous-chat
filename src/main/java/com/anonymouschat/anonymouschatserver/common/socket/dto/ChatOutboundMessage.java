@@ -16,7 +16,7 @@ public record ChatOutboundMessage(
 	public static ChatOutboundMessage systemMessage(Long roomId, Long senderId, String content) {
 		return ChatOutboundMessage.builder()
 				       .roomId(roomId)
-				       .type(MessageType.MESSAGE) // 시스템 메시지도 일반 메시지 타입으로 보냄
+				       .type(MessageType.CHAT) // 시스템 메시지도 일반 메시지 타입으로 보냄
 				       .senderId(senderId)
 				       .senderNickname("[시스템]")
 				       .content(content)
