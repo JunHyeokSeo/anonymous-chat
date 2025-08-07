@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.common.socket.handler;
 import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSaveEvent;
 import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSentEvent;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
-import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.common.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.common.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.common.socket.dto.ChatOutboundMessage;
@@ -17,6 +16,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.time.Instant;
+
+import static com.anonymouschat.anonymouschatserver.common.socket.support.WebSocketUtil.extractUserId;
 
 @Slf4j
 @Component
@@ -60,10 +61,5 @@ public class ChatMessageHandler implements MessageHandler {
 			log.error("메시지 처리 중 예외: {}", e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
-	}
-
-	private Long extractUserId(WebSocketSession session) {
-		CustomPrincipal principal = (CustomPrincipal) session.getAttributes().get("principal");
-		return principal.userId();
 	}
 }

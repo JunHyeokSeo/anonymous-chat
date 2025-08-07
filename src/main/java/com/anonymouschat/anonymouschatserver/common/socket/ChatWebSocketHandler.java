@@ -15,6 +15,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+import static com.anonymouschat.anonymouschatserver.common.socket.support.WebSocketUtil.extractPrincipal;
+
 /**
  * 실시간 채팅 처리를 위한 WebSocket 핸들러.
  */
@@ -25,8 +27,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	private final ChatMessageDispatcher dispatcher;
 	private final ChatSessionManager sessionManager;
 	private final ObjectMapper objectMapper;
-
-	private static final String ATTR_PRINCIPAL = "principal";
 
 	@Override
 	public void afterConnectionEstablished(@NonNull WebSocketSession session) {
@@ -84,17 +84,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		} catch (Exception e) {
 			log.warn("pong 처리 중 오류: {}", e.getMessage());
 		}
-	}
-
-	private CustomPrincipal extractPrincipal(WebSocketSession session) {
-		Object attr = session.getAttributes().get(ATTR_PRINCIPAL);
-		if (attr instanceof CustomPrincipal principal) {
-			if (!principal.isAuthenticatedUser()) {
-				throw new IllegalStateException("인증되지 않은 사용자는 메시지를 보낼 수 없습니다.");
-			}
-			return principal;
-		}
-		throw new IllegalStateException("WebSocket 세션에 인증 정보가 없습니다.");
 	}
 
 	/**
