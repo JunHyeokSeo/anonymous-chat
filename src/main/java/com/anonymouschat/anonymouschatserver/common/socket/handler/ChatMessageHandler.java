@@ -25,7 +25,6 @@ import static com.anonymouschat.anonymouschatserver.common.socket.support.WebSoc
 public class ChatMessageHandler implements MessageHandler {
 	private final ChatSessionManager sessionManager;
 	private final ApplicationEventPublisher publisher;
-	private final UserService userService;
 	private final MessageBroadcaster broadcaster;
 
 	@Override
@@ -39,13 +38,11 @@ public class ChatMessageHandler implements MessageHandler {
 			Long senderId = extractUserId(session);
 			Long roomId = inbound.roomId();
 			String content = inbound.content();
-			String nickname = userService.findUser(senderId).getNickname();
 
 			ChatOutboundMessage outbound = ChatOutboundMessage.builder()
 					                               .roomId(roomId)
 					                               .type(MessageType.CHAT)
 					                               .senderId(senderId)
-					                               .senderNickname(nickname)
 					                               .content(content)
 					                               .timestamp(Instant.now())
 					                               .build();

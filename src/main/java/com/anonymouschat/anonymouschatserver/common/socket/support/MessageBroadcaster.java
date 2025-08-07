@@ -17,9 +17,16 @@ public class MessageBroadcaster {
 	private final ObjectMapper objectMapper;
 
 	public void broadcast(Long roomId, ChatOutboundMessage message) {
+		broadcastExcept(roomId, message, null);
+	}
+
+	public void broadcastExcept(Long roomId, ChatOutboundMessage message, Long excludeUserId) {
 		try {
 			String payload = objectMapper.writeValueAsString(message);
 			for (Long participantId : sessionManager.getParticipants(roomId)) {
+				if (participantId.equals(excludeUserId))
+					continue;
+
 				WebSocketSession session = sessionManager.getSession(participantId);
 				if (session != null && session.isOpen()) {
 					session.sendMessage(new TextMessage(payload));
@@ -29,4 +36,5 @@ public class MessageBroadcaster {
 			log.error("브로드캐스트 실패: {}", e.getMessage(), e);
 		}
 	}
+
 }

@@ -9,18 +9,7 @@ public record ChatOutboundMessage(
 		Long roomId,
 		MessageType type,
 		Long senderId,
-		String senderNickname,
 		String content,
-		Instant timestamp
-) {
-	public static ChatOutboundMessage systemMessage(Long roomId, Long senderId, String content) {
-		return ChatOutboundMessage.builder()
-				       .roomId(roomId)
-				       .type(MessageType.CHAT) // 시스템 메시지도 일반 메시지 타입으로 보냄
-				       .senderId(senderId)
-				       .senderNickname("[시스템]")
-				       .content(content)
-				       .timestamp(Instant.now())
-				       .build();
-	}
-}
+		Instant timestamp,
+        Long lastReadMessageId // nullable: READ 타입일 때만 사용.
+) { }
