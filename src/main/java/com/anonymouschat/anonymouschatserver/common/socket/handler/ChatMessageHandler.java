@@ -2,7 +2,6 @@ package com.anonymouschat.anonymouschatserver.common.socket.handler;
 
 import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSaveEvent;
 import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSentEvent;
-import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.common.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.common.socket.dto.ChatOutboundMessage;
