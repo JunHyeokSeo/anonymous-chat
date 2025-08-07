@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -18,6 +19,7 @@ import java.util.Map;
  * WebSocket 핸드셰이크 요청 시 JWT 토큰을 검증하고,
  * 인증된 사용자 정보를 WebSocket 세션에 주입하는 인터셉터입니다.
  */
+@Component
 @RequiredArgsConstructor
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
