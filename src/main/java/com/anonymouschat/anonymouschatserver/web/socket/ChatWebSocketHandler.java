@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.web.socket;
 
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketRateLimitGuard;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocket
 @Component
 @RequiredArgsConstructor
 public class ChatWebSocketHandler extends TextWebSocketHandler {
+	private final WebSocketRateLimitGuard rateLimitGuard;
 	private final ChatMessageDispatcher dispatcher;
 	private final ChatSessionManager sessionManager;
 	private final ObjectMapper objectMapper;
@@ -46,6 +48,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage textMessage) {
 		try {
 			ChatInboundMessage inbound = objectMapper.readValue(textMessage.getPayload(), ChatInboundMessage.class);
+
+			Long userId = extractPrincipal(session).userId();
+			// 레이트 리밋 컷
+			if (!rateLimitGuard.allow(userId, inbound.type())) {
+				log.warn("[WS][ERR] rate limited userId={} type={} sessionId={}", userId, inbound.type(), session.getId());
+				sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
+				return;
+			}
+
 			log.debug("{}dispatch start sessionId={} type={} roomId={}", WsLogTag.sys(), session.getId(), inbound.type(), inbound.roomId());
 			dispatcher.dispatch(session, inbound);
 		} catch (UnsupportedOperationException | IllegalArgumentException bad) {
@@ -62,6 +73,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		try {
 			Long userId = extractPrincipal(session).userId();
 			log.info("{}disconnected userId={} sessionId={} status={}", WsLogTag.sys(), userId, session.getId(), status);
+			rateLimitGuard.clear(userId);
 			sessionManager.forceDisconnect(userId, status);
 		} catch (Exception e) {
 			log.warn("{}afterClose error sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
