@@ -2,11 +2,8 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.security.Principal;
-import java.util.Objects;
 
 /**
  * @param userId     Nullable

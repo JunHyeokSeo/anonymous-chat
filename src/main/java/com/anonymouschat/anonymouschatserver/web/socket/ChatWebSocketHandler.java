@@ -69,7 +69,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	}
 
 	@Override
-	public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
+	public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) {
 		log.error("{}transport error sessionId={} error={}", WsLogTag.err(), session.getId(), exception.getMessage(), exception);
 		sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 	}

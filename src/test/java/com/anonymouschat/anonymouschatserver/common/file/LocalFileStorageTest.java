@@ -76,8 +76,6 @@ class LocalFileStorageTest {
 		MockMultipartFile file = new MockMultipartFile("file", "invalidfile", "text/plain", "data".getBytes());
 
 		// when/then
-		org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			fileStorage.upload(file);
-		});
+		org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> fileStorage.upload(file));
 	}
 }
