@@ -7,7 +7,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.common.file.FileStorage;
+import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;

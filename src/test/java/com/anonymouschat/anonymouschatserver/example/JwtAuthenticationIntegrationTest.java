@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.example;
 
-import com.anonymouschat.anonymouschatserver.common.enums.UserRole;
-import com.anonymouschat.anonymouschatserver.common.jwt.JwtTokenProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

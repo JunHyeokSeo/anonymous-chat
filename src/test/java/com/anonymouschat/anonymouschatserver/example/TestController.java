@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.example;
 
-import com.anonymouschat.anonymouschatserver.common.security.CustomPrincipal;
+import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

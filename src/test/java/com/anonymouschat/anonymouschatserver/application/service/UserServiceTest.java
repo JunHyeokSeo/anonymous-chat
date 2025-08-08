@@ -6,7 +6,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.common.file.FileStorage;
+import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;

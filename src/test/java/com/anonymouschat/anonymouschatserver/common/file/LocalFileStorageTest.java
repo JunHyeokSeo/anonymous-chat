@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.file;
 
-import com.anonymouschat.anonymouschatserver.common.file.LocalFileStorage;
+import com.anonymouschat.anonymouschatserver.infra.file.LocalFileStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
