@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class ReadMessageHandler implements MessageHandler{
 	private final ChatSessionManager sessionManager;
 	private final MessageUseCase messageUseCase;
 	private final MessageBroadcaster broadcaster;
+	private final WebSocketAccessGuard guard;
 
 	@Override
 	public MessageType type() {
@@ -35,6 +37,9 @@ public class ReadMessageHandler implements MessageHandler{
 	public void handle(WebSocketSession session, ChatInboundMessage inbound) {
 		Long userId = extractUserId(session);
 		Long roomId = inbound.roomId();
+
+		if (!guard.ensureParticipant(session, roomId, userId))
+			return;
 
 		try {
 			// 메시지 읽음 처리

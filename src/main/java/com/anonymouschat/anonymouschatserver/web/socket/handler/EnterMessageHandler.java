@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.socket.handler;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocket
 @RequiredArgsConstructor
 public class EnterMessageHandler implements MessageHandler {
 	private final ChatSessionManager sessionManager;
+	private final WebSocketAccessGuard guard;
 
 	@Override
 	public MessageType type() {
@@ -25,7 +27,11 @@ public class EnterMessageHandler implements MessageHandler {
 	@Override
 	public void handle(WebSocketSession session, ChatInboundMessage inbound) {
 		Long userId = extractUserId(session);
-		sessionManager.joinRoom(inbound.roomId(), userId);
-		log.info("{}userId={} roomId={}", WsLogTag.enter(), userId, inbound.roomId());
+		Long roomId = inbound.roomId();
+
+		if (!guard.ensureEnterAllowed(session, roomId, userId)) return;
+
+		sessionManager.joinRoom(roomId, userId);
+		log.info("{}userId={} roomId={}", WsLogTag.enter(), userId, roomId);
 	}
 }

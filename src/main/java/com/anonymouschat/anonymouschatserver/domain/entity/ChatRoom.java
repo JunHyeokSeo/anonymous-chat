@@ -10,7 +10,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "chat_room")
+@Table(
+		name = "chat_room",
+		indexes = {
+				@Index(name = "idx_chat_room_user1_status_updated", columnList = "user1_id, status, updated_at"),
+				@Index(name = "idx_chat_room_user2_status_updated", columnList = "user2_id, status, updated_at")
+		}
+)
 public class ChatRoom {
 
 	@Getter

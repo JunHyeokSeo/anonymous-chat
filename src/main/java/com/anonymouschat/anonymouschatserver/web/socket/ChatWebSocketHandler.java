@@ -97,7 +97,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		}
 	}
 
-
 	/**
 	 * 현재 연결된 세션 목록을 순회하며 Ping 메시지를 보낸다.
 	 * 응답 없거나 예외 발생 시 세션 종료 처리할 수 있음.

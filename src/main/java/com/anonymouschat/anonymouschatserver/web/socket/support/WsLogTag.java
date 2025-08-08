@@ -10,4 +10,5 @@ public final class WsLogTag {
 	public static String leave() { return "[WS][LEAVE] "; }
 	public static String pong() { return "[WS][PONG] "; }
 	public static String bc()   { return "[WS][BC] "; }
+	public static String policy()   { return "[WS][POLICY] "; }
 }

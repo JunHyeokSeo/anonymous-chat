@@ -106,4 +106,8 @@ public class ChatSessionManager {
 	private String safeId(WebSocketSession s) {
 		try { return s.getId(); } catch (Exception ignored) { return "unknown"; }
 	}
+
+	public boolean isParticipant(Long roomId, Long userId) {
+		return getParticipants(roomId).contains(userId);
+	}
 }

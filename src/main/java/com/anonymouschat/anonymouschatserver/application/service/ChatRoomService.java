@@ -67,7 +67,11 @@ public class ChatRoomService {
 
 		if (chatRoom.getStatus() == ChatRoomStatus.INACTIVE) {
 			chatRoom.activate();
-			chatRoomRepository.save(chatRoom);
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public boolean isActiveMember(Long chatRoomId, Long userId) {
+		return chatRoomRepository.existsByIdAndParticipantIdAndStatus(chatRoomId, userId, ChatRoomStatus.ACTIVE);
 	}
 }
