@@ -34,16 +34,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 			CustomPrincipal principal = extractPrincipal(session);
 			Long userId = principal.userId();
 
-			// 기존 세션 제거 (중복 방지)
-			sessionManager.forceDisconnect(userId, CloseStatus.NORMAL);
-
-			sessionManager.registerSession(userId, session);
-			log.info("[Connected] userId={} sessionId={}", userId, session.getId());
+			// 중복 세션 교체 + lastActive 초기화까지 내부에서 처리
+			sessionManager.registerOrReplaceSession(userId, session);
+			log.info("[WS] Connected userId={} sessionId={}", userId, session.getId());
 		} catch (Exception e) {
-			log.warn("WebSocket 연결 실패: {}", e.getMessage());
+			log.warn("[WS] connection rejected: {}", e.getMessage());
 			sessionManager.forceDisconnect(session, CloseStatus.NOT_ACCEPTABLE);
 		}
 	}
+
 
 	@Override
 	protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage textMessage) {
@@ -80,14 +79,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void handlePongMessage(@NonNull WebSocketSession session, @NonNull PongMessage message) {
 		try {
-			CustomPrincipal principal = extractPrincipal(session);
-			Long userId = principal.userId();
+			Long userId = extractPrincipal(session).userId();
 			sessionManager.updateLastActiveAt(userId);
-			log.debug("[PONG] userId={} pong 수신", userId);
+			log.debug("[WS] PONG userId={}", userId);
 		} catch (Exception e) {
-			log.warn("pong 처리 중 오류: {}", e.getMessage());
+			log.warn("[WS] pong handle failed: {}", e.getMessage());
 		}
 	}
+
 
 	/**
 	 * 현재 연결된 세션 목록을 순회하며 Ping 메시지를 보낸다.
