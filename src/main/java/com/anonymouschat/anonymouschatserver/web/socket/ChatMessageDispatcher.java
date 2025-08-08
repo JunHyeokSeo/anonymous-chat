@@ -22,12 +22,26 @@ public class ChatMessageDispatcher {
 	}
 
 	public void dispatch(WebSocketSession session, ChatInboundMessage inbound) {
-		MessageType type = inbound.type();
-		MessageHandler handler = handlerMap.get(type);
+		validateInbound(inbound);
+		MessageHandler handler = handlerMap.get(inbound.type());
 		if (handler == null) {
-			log.warn("지원하지 않는 메시지 타입: {} (sessionId={})", type, session.getId());
-			return;
+			throw new UnsupportedOperationException("Unsupported message type: " + inbound.type());
 		}
 		handler.handle(session, inbound);
+	}
+
+	private void validateInbound(ChatInboundMessage inbound) {
+		if (inbound == null) {
+			throw new IllegalArgumentException("Inbound payload is required.");
+		}
+		if (inbound.type() == null) {
+			throw new IllegalArgumentException("Inbound.type is required.");
+		}
+		if (inbound.roomId() == null) {
+			throw new IllegalArgumentException("Inbound.roomId is required.");
+		}
+		if (inbound.type() == MessageType.CHAT && (inbound.content() == null || inbound.content().isBlank())) {
+		     throw new IllegalArgumentException("Inbound.content is required for CHAT.");
+		}
 	}
 }

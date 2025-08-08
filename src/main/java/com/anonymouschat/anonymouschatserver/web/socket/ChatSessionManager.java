@@ -22,6 +22,7 @@ public class ChatSessionManager {
 
 	public void registerSession(Long userId, WebSocketSession session) {
 		userSessions.put(userId, session);
+		updateLastActiveAt(userId);
 	}
 
 	public void unregisterSession(Long userId) {

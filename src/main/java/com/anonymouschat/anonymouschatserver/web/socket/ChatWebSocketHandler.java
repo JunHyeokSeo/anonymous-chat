@@ -50,8 +50,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		try {
 			ChatInboundMessage inbound = objectMapper.readValue(textMessage.getPayload(), ChatInboundMessage.class);
 			dispatcher.dispatch(session, inbound);
+		} catch (UnsupportedOperationException | IllegalArgumentException bad) {
+			log.warn("[WS-BAD_DATA] sessionId={} reason={}", session.getId(), bad.getMessage());
+			sessionManager.forceDisconnect(session, CloseStatus.BAD_DATA);
 		} catch (Exception e) {
-			log.error("WebSocket 메시지 처리 중 예외: {}", e.getMessage(), e);
+			log.error("[WS-ERROR] sessionId={} error={}", session.getId(), e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
 	}
