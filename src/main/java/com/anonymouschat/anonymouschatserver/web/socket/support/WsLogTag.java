@@ -7,6 +7,7 @@ public final class WsLogTag {
 	public static String chat() { return "[WS][CHAT] "; }
 	public static String enter(){ return "[WS][ENTER] "; }
 	public static String read() { return "[WS][READ] "; }
+	public static String leave() { return "[WS][LEAVE] "; }
 	public static String pong() { return "[WS][PONG] "; }
 	public static String bc()   { return "[WS][BC] "; }
 }

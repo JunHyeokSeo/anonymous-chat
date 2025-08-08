@@ -20,8 +20,8 @@ public record ChatInboundMessage(
 				if (content.length() > 2000)
 					throw new IllegalArgumentException("content length exceeds limit");
 			}
-			case READ, ENTER -> {
-				// READ/ENTER는 content 금지
+			case READ, ENTER, LEAVE -> {
+				// READ/ENTER/LEAVE는 content 금지
 				if (content != null && !content.isBlank())
 					throw new IllegalArgumentException("content must be empty for " + type);
 			}

@@ -66,13 +66,12 @@ public class ChatSessionManager {
 		roomParticipants.computeIfAbsent(roomId, id -> new CopyOnWriteArraySet<>()).add(userId);
 	}
 
-	public void leaveRoom(Long roomId, Long userId) {
+	public boolean leaveRoom(Long roomId, Long userId) {
 		Set<Long> set = roomParticipants.get(roomId);
-		if (set == null) return;
-		set.remove(userId);
-		if (set.isEmpty()) {
-			roomParticipants.remove(roomId);
-		}
+		if (set == null) return false;
+		boolean removed = set.remove(userId);
+		if (set.isEmpty()) roomParticipants.remove(roomId);
+		return removed;
 	}
 
 	/** 조회 계열은 불변 뷰로 노출 (외부에서 수정 불가) */
