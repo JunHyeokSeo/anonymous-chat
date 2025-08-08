@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,9 @@ public class ReadMessageHandler implements MessageHandler{
 						                               .lastReadMessageId(lastReadMessageId)
 						                               .timestamp(Instant.now())
 						                               .build();
+
+				//로깅
+				log.info("{}roomId={} userId={} lastReadMessageId={}", WsLogTag.read(), roomId, userId, lastReadMessageId);
 
 				// 브로드 캐스트
 				broadcaster.broadcastExcept(roomId, outbound, userId);

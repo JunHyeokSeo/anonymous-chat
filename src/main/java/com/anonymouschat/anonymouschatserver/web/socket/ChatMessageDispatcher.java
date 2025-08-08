@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.socket;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.handler.MessageHandler;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
@@ -27,6 +28,7 @@ public class ChatMessageDispatcher {
 		if (handler == null) {
 			throw new UnsupportedOperationException("Unsupported message type: " + inbound.type());
 		}
+		log.debug("{}type={} roomId={} sessionId={}", WsLogTag.sys(), inbound.type(), inbound.roomId(), session.getId());
 		handler.handle(session, inbound);
 	}
 

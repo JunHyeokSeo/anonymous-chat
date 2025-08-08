@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,6 +51,9 @@ public class ChatMessageHandler implements MessageHandler {
 			publisher.publishEvent(ChatMessageSentEvent.builder().roomId(roomId).build());
 			publisher.publishEvent(ChatMessageSaveEvent.builder()
 					                       .chatRoomId(roomId).senderId(senderId).content(content).build());
+
+			// 로깅
+			log.info("{}roomId={} senderId={} ts={}", WsLogTag.chat(), roomId, senderId, outbound.timestamp());
 
 			// 브로드캐스트
 			int delivered = broadcaster.broadcast(roomId, outbound);

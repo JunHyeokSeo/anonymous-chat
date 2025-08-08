@@ -53,7 +53,8 @@ public class ChatSessionManager {
 			forceDisconnect(principal.userId(), status);
 		} else {
 			try {
-				if (session.isOpen()) session.close(status);
+				if (session.isOpen())
+					session.close(status);
 			} catch (IOException e) {
 				log.warn("[WS] close failed (anonymous): {}", e.getMessage());
 			}

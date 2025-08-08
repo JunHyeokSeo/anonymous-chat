@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.socket.handler;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,6 @@ public class EnterMessageHandler implements MessageHandler {
 	public void handle(WebSocketSession session, ChatInboundMessage inbound) {
 		Long userId = extractUserId(session);
 		sessionManager.joinRoom(inbound.roomId(), userId);
-		log.info("[ENTER] userId={} roomId={}", userId, inbound.roomId());
+		log.info("{}userId={} roomId={}", WsLogTag.enter(), userId, inbound.roomId());
 	}
 }

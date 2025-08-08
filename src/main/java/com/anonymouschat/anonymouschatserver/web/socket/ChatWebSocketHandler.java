@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.web.socket;
 
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,27 +34,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		try {
 			CustomPrincipal principal = extractPrincipal(session);
 			Long userId = principal.userId();
-
-			// 중복 세션 교체 + lastActive 초기화까지 내부에서 처리
 			sessionManager.registerOrReplaceSession(userId, session);
-			log.info("[WS] Connected userId={} sessionId={}", userId, session.getId());
+			log.info("{}connected userId={} sessionId={}", WsLogTag.sys(), userId, session.getId());
 		} catch (Exception e) {
-			log.warn("[WS] connection rejected: {}", e.getMessage());
+			log.warn("{}connection rejected sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
 			sessionManager.forceDisconnect(session, CloseStatus.NOT_ACCEPTABLE);
 		}
 	}
-
 
 	@Override
 	protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage textMessage) {
 		try {
 			ChatInboundMessage inbound = objectMapper.readValue(textMessage.getPayload(), ChatInboundMessage.class);
+			log.debug("{}dispatch start sessionId={} type={} roomId={}", WsLogTag.sys(), session.getId(), inbound.type(), inbound.roomId());
 			dispatcher.dispatch(session, inbound);
 		} catch (UnsupportedOperationException | IllegalArgumentException bad) {
-			log.warn("[WS-BAD_DATA] sessionId={} reason={}", session.getId(), bad.getMessage());
+			log.warn("{}bad payload sessionId={} reason={}", WsLogTag.err(), session.getId(), bad.getMessage());
 			sessionManager.forceDisconnect(session, CloseStatus.BAD_DATA);
 		} catch (Exception e) {
-			log.error("[WS-ERROR] sessionId={} error={}", session.getId(), e.getMessage(), e);
+			log.error("{}handleText error sessionId={} error={}", WsLogTag.err(), session.getId(), e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
 	}
@@ -61,18 +60,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
 		try {
-			CustomPrincipal principal = extractPrincipal(session);
-			Long userId = principal.userId();
+			Long userId = extractPrincipal(session).userId();
+			log.info("{}disconnected userId={} sessionId={} status={}", WsLogTag.sys(), userId, session.getId(), status);
 			sessionManager.forceDisconnect(userId, status);
-			log.info("[Disconnected] userId={} status={}", userId, status);
 		} catch (Exception e) {
-			log.warn("연결 종료 처리 중 예외: {}", e.getMessage(), e);
+			log.warn("{}afterClose error sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
 		}
 	}
 
 	@Override
 	public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
-		log.error("WebSocket 전송 오류 발생: {}", exception.getMessage());
+		log.error("{}transport error sessionId={} error={}", WsLogTag.err(), session.getId(), exception.getMessage(), exception);
 		sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 	}
 
@@ -81,9 +79,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		try {
 			Long userId = extractPrincipal(session).userId();
 			sessionManager.updateLastActiveAt(userId);
-			log.debug("[WS] PONG userId={}", userId);
+			log.debug("{}userId={} sessionId={}", WsLogTag.pong(), userId, session.getId());
 		} catch (Exception e) {
-			log.warn("[WS] pong handle failed: {}", e.getMessage());
+			log.warn("{}pong handle failed sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
 		}
 	}
 

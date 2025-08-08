@@ -29,7 +29,7 @@ public class MessageBroadcaster {
 		try {
 			payload = objectMapper.writeValueAsString(message);
 		} catch (Exception e) {
-			log.error("[WS-BROADCAST] serialize failed: roomId={} error={}", roomId, e.getMessage(), e);
+			log.error("{}serialize failed roomId={} reason={}", WsLogTag.bc(), roomId, e.getMessage(), e);
 			return 0;
 		}
 
@@ -46,11 +46,11 @@ public class MessageBroadcaster {
 	private boolean sendToParticipant(Long participantId, String payload) {
 		WebSocketSession session = sessionManager.getSession(participantId);
 		if (session == null) {
-			log.debug("[WS-BROADCAST] skip: no session userId={}", participantId);
+			log.debug("{}skip(no session) userId={}", WsLogTag.bc(), participantId);
 			return false;
 		}
 		if (!session.isOpen()) {
-			log.debug("[WS-BROADCAST] skip: closed session userId={}", participantId);
+			log.debug("{}skip(closed) userId={}", WsLogTag.bc(), participantId);
 			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}
@@ -59,7 +59,7 @@ public class MessageBroadcaster {
 			session.sendMessage(new TextMessage(payload));
 			return true;
 		} catch (Exception e) {
-			log.warn("[WS-BROADCAST] send failed: userId={} sessionId={} reason={}", participantId, safeSessionId(session), e.getMessage());
+			log.warn("{}send failed userId={} sessionId={} reason={}", WsLogTag.bc(), participantId, safeSessionId(session), e.getMessage());
 			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}
