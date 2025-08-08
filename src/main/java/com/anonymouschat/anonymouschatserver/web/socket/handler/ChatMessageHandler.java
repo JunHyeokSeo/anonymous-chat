@@ -52,7 +52,11 @@ public class ChatMessageHandler implements MessageHandler {
 					                       .chatRoomId(roomId).senderId(senderId).content(content).build());
 
 			// 브로드캐스트
-			broadcaster.broadcast(roomId, outbound);
+			int delivered = broadcaster.broadcast(roomId, outbound);
+			if (delivered == 0) {
+				log.warn("[WS-DELIVERY] no receiver online: roomId={} senderId={}", roomId, senderId);
+				//todo: FCM 이벤트 발행
+			}
 		} catch (Exception e) {
 			log.error("메시지 처리 중 예외: {}", e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);

@@ -5,9 +5,10 @@ import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -16,25 +17,55 @@ public class MessageBroadcaster {
 	private final ChatSessionManager sessionManager;
 	private final ObjectMapper objectMapper;
 
-	public void broadcast(Long roomId, ChatOutboundMessage message) {
-		broadcastExcept(roomId, message, null);
+	/** 방 전체 브로드캐스트 */
+	public int broadcast(Long roomId, ChatOutboundMessage message) {
+		return broadcastExcept(roomId, message, null);
 	}
 
-	public void broadcastExcept(Long roomId, ChatOutboundMessage message, Long excludeUserId) {
+	/** 특정 유저(excludeUserId)만 제외하고 브로드캐스트 */
+	public int broadcastExcept(Long roomId, ChatOutboundMessage message, Long excludeUserId) {
+		int success = 0;
+		String payload;
 		try {
-			String payload = objectMapper.writeValueAsString(message);
-			for (Long participantId : sessionManager.getParticipants(roomId)) {
-				if (participantId.equals(excludeUserId))
-					continue;
-
-				WebSocketSession session = sessionManager.getSession(participantId);
-				if (session != null && session.isOpen()) {
-					session.sendMessage(new TextMessage(payload));
-				}
-			}
+			payload = objectMapper.writeValueAsString(message);
 		} catch (Exception e) {
-			log.error("브로드캐스트 실패: {}", e.getMessage(), e);
+			log.error("[WS-BROADCAST] serialize failed: roomId={} error={}", roomId, e.getMessage(), e);
+			return 0;
+		}
+
+		for (Long participantId : sessionManager.getParticipants(roomId)) {
+			if (excludeUserId != null && excludeUserId.equals(participantId)) continue;
+			if (sendToParticipant(participantId, payload)) {
+				success++;
+			}
+		}
+		return success;
+	}
+
+	/** 단일 대상 전송 + 실패 시 정리 */
+	private boolean sendToParticipant(Long participantId, String payload) {
+		WebSocketSession session = sessionManager.getSession(participantId);
+		if (session == null) {
+			log.debug("[WS-BROADCAST] skip: no session userId={}", participantId);
+			return false;
+		}
+		if (!session.isOpen()) {
+			log.debug("[WS-BROADCAST] skip: closed session userId={}", participantId);
+			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
+			return false;
+		}
+
+		try {
+			session.sendMessage(new TextMessage(payload));
+			return true;
+		} catch (Exception e) {
+			log.warn("[WS-BROADCAST] send failed: userId={} sessionId={} reason={}", participantId, safeSessionId(session), e.getMessage());
+			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
+			return false;
 		}
 	}
 
+	private String safeSessionId(WebSocketSession s) {
+		try { return s.getId(); } catch (Exception ignored) { return "unknown"; }
+	}
 }
