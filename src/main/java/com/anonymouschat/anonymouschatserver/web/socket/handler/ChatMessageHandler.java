@@ -49,8 +49,7 @@ public class ChatMessageHandler implements MessageHandler {
 
 			// 이벤트 발행
 			publisher.publishEvent(ChatMessageSentEvent.builder().roomId(roomId).build());
-			publisher.publishEvent(ChatMessageSaveEvent.builder()
-					                       .chatRoomId(roomId).senderId(senderId).content(content).build());
+			publisher.publishEvent(ChatMessageSaveEvent.builder().chatRoomId(roomId).senderId(senderId).content(content).build());
 
 			// 로깅
 			log.info("{}roomId={} senderId={} ts={}", WsLogTag.chat(), roomId, senderId, outbound.timestamp());
