@@ -1,8 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
-import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSaveEvent;
-import com.anonymouschat.anonymouschatserver.application.event.ChatMessageSentEvent;
-import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
@@ -38,8 +36,8 @@ public class ChatMessageHandler implements MessageHandler {
 	@Override
 	public void handle(WebSocketSession session, ChatInboundMessage inbound) {
 		try {
-			Long senderId = extractUserId(session);
 			Long roomId = inbound.roomId();
+			Long senderId = extractUserId(session);
 			String content = inbound.content();
 
 			if (!guard.ensureParticipant(session, roomId, senderId))
@@ -54,8 +52,7 @@ public class ChatMessageHandler implements MessageHandler {
 					                               .build();
 
 			// 이벤트 발행
-			publisher.publishEvent(ChatMessageSentEvent.builder().roomId(roomId).build());
-			publisher.publishEvent(ChatMessageSaveEvent.builder().chatRoomId(roomId).senderId(senderId).content(content).build());
+			publisher.publishEvent(ChatSave.builder().roomId(roomId).senderId(senderId).content(content).build());
 
 			// 로깅
 			log.info("{}roomId={} senderId={} ts={}", WsLogTag.chat(), roomId, senderId, outbound.timestamp());
