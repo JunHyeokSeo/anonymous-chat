@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.application.service;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
-import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
@@ -75,7 +74,7 @@ class ChatRoomServiceTest {
 		@DisplayName("기존 채팅방이 존재하면 반환하고 returnBy 호출")
 		void returnExistingChatRoom() {
 			ChatRoom existingRoom = new ChatRoom(user1, user2);
-			when(chatRoomRepository.findByParticipantsAndStatus(anyLong(), anyLong(), eq(ChatRoomStatus.ACTIVE)))
+			when(chatRoomRepository.findActiveByPair(anyLong(), anyLong()))
 					.thenReturn(Optional.of(existingRoom));
 
 			ChatRoom result = chatRoomService.createOrFind(user1, user2);
@@ -86,7 +85,7 @@ class ChatRoomServiceTest {
 		@Test
 		@DisplayName("기존 채팅방이 없으면 새로 생성하여 저장")
 		void createNewChatRoom() {
-			when(chatRoomRepository.findByParticipantsAndStatus(anyLong(), anyLong(), eq(ChatRoomStatus.ACTIVE)))
+			when(chatRoomRepository.findActiveByPair(anyLong(), anyLong()))
 					.thenReturn(Optional.empty());
 
 			ChatRoom newRoom = new ChatRoom(user1, user2);
@@ -119,7 +118,7 @@ class ChatRoomServiceTest {
 					)
 			);
 
-			when(chatRoomRepository.findActiveChatRoomsByUser(userId, ChatRoomStatus.ACTIVE))
+			when(chatRoomRepository.findActiveChatRoomsByUser(userId))
 					.thenReturn(mockResult);
 
 			// when
@@ -127,7 +126,7 @@ class ChatRoomServiceTest {
 
 			// then
 			assertThat(result).isEqualTo(mockResult);
-			verify(chatRoomRepository).findActiveChatRoomsByUser(userId, ChatRoomStatus.ACTIVE);
+			verify(chatRoomRepository).findActiveChatRoomsByUser(userId);
 		}
 	}
 

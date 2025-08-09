@@ -1,6 +1,5 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
-import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +12,9 @@ import java.time.LocalDateTime;
 @Table(
 		name = "chat_room",
 		indexes = {
-				@Index(name = "idx_chat_room_user1_status_updated", columnList = "user1_id, status, updated_at"),
-				@Index(name = "idx_chat_room_user2_status_updated", columnList = "user2_id, status, updated_at")
+				@Index(name = "idx_chat_room_user1_active_updated", columnList = "user1_id, is_active, updated_at"),
+				@Index(name = "idx_chat_room_user2_active_updated", columnList = "user2_id, is_active, updated_at"),
+				@Index(name = "ux_chat_room_pair_active", columnList = "pair_left_id, pair_right_id, is_active", unique = true)
 		}
 )
 public class ChatRoom {
@@ -36,9 +36,16 @@ public class ChatRoom {
 	private User user2;
 
 	@Getter
-	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false, length = 20)
-	private ChatRoomStatus status;
+	@Column(name = "pair_left_id", nullable = false)
+	private Long pairLeftId;
+
+	@Getter
+	@Column(name = "pair_right_id", nullable = false)
+	private Long pairRightId;
+
+	@Getter
+	@Column(name = "is_active", nullable = false)
+	private boolean isActive;
 
 	@Embedded
 	@Getter
@@ -50,23 +57,27 @@ public class ChatRoom {
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
 
-	public void touch() {
-		this.updatedAt = LocalDateTime.now();
+	@PrePersist
+	private void prePersist() {
+		long a = user1.getId();
+		long b = user2.getId();
+		this.pairLeftId = Math.min(a, b);
+		this.pairRightId = Math.max(a, b);
+		touch();
 	}
 
+	public void touch() { this.updatedAt = LocalDateTime.now(); }
+
+	//채팅 시작 시, 활성화
 	public void returnBy(Long userId) {
-		if (!isParticipant(userId)) {
-			throw new IllegalStateException("채팅방 참여자가 아닙니다.");
-		}
+		if (!isParticipant(userId)) throw new IllegalStateException("채팅방 참여자가 아닙니다.");
 		exit.returnByUser(userId, user1.getId(), user2.getId());
 	}
 
 	public void exitBy(Long userId) {
-		if (!isParticipant(userId)) {
-			throw new IllegalStateException("채팅방 참여자가 아닙니다.");
-		}
+		if (!isParticipant(userId)) throw new IllegalStateException("채팅방 참여자가 아닙니다.");
 		exit.exitByUser(userId, user1.getId(), user2.getId());
-		updateStatusIfBothExited();
+		updateActiveIfBothExited();
 	}
 
 	public LocalDateTime getLastExitedAt(Long userId) {
@@ -75,30 +86,26 @@ public class ChatRoom {
 
 	public void validateParticipant(Long userId) {
 		if (!isParticipant(userId))
-			throw new IllegalStateException("유저가 속한 채팅방이 아닙니다.");
+			throw new IllegalStateException("채팅방 참여자가 아닙니다.");
 	}
 
 	public boolean isParticipant(Long userId) {
 		return user1.getId().equals(userId) || user2.getId().equals(userId);
 	}
 
-	public void activate() {
-		if (this.status == ChatRoomStatus.INACTIVE) {
-			this.status = ChatRoomStatus.ACTIVE;
-		}
+	public void activate() { // 정책상 활성화 지점에서 호출
+		if (!this.isActive) this.isActive = true;
 	}
 
-	private void updateStatusIfBothExited() {
-		if (exit.bothExited()) {
-			this.status = ChatRoomStatus.INACTIVE;
-		}
+	private void updateActiveIfBothExited() {
+		if (exit.bothExited()) this.isActive = false;
 	}
 
 	@Builder
 	public ChatRoom(User user1, User user2) {
 		this.user1 = user1;
 		this.user2 = user2;
-		this.status = ChatRoomStatus.INACTIVE;
+		this.isActive = false; // 생성 직후 비활성(정책 유지)
 		this.exit = new ChatRoomExit();
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();

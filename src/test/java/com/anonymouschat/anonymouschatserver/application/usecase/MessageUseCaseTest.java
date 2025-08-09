@@ -5,7 +5,6 @@ import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService
 import com.anonymouschat.anonymouschatserver.application.service.MessageService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.type.ChatRoomStatus;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
@@ -58,7 +57,6 @@ class MessageUseCaseTest {
 				           .user2(user)
 				           .build();
 		ReflectionTestUtils.setField(chatRoom, "id", 1L);
-		ReflectionTestUtils.setField(chatRoom, "status", ChatRoomStatus.ACTIVE);
 
 		message = Message.builder()
 				          .chatRoom(chatRoom)
