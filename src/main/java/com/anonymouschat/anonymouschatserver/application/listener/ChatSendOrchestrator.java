@@ -25,17 +25,20 @@ public class ChatSendOrchestrator {
 	@EventListener
 	@Transactional
 	public void on(ChatSave event) {
-		// 1) returnBy (CHAT 시점 채팅방 복귀)
+		// 채팅방 isActive가 false 라면 true 로 변경
+		chatRoomService.markActiveIfInactive(event.roomId());
+
+		// returnBy (CHAT 시점 채팅방 복귀)
 		chatRoomService.returnBy(event.roomId(), event.senderId());
 
-		// 2) 메시지 저장
+		// 메시지 저장
 		Long messageId = messageUseCase.sendMessage(MessageUseCaseDto.SendMessage.builder()
 				                                    .roomId(event.roomId())
 				                                    .senderId(event.senderId())
 				                                    .content(event.content())
 				                                    .build());
 
-		// 3) 저장 완료 이벤트 발행 (동일 트랜잭션에서 발행됨)
+		// 저장 완료 이벤트 발행 (동일 트랜잭션에서 발행됨)
 		publisher.publishEvent(ChatPersisted.builder()
 				                       .roomId(event.roomId())
 				                       .senderId(event.senderId())

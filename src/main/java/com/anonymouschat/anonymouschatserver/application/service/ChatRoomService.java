@@ -72,12 +72,21 @@ public class ChatRoomService {
 	}
 
 	@Transactional(readOnly = true)
-	public boolean isActiveMember(Long roomId, Long userId) {
-		return chatRoomRepository.existsByIdAndParticipantIdAndActive(roomId, userId);
+	public boolean isMember(Long roomId, Long userId) {
+		return chatRoomRepository.existsByIdAndParticipantId(roomId, userId);
 	}
 
 	public void returnBy(Long roomId, Long userId) {
 		ChatRoom chatRoom = findChatRoomById(roomId);
+		chatRoom.validateParticipant(userId);
+
+		if (chatRoom.isArchived()) {
+			throw new IllegalStateException("종료된 대화방입니다. 새 대화방을 사용하세요.");
+		}
+
 		chatRoom.returnBy(userId);
+		if (!chatRoom.isActive()) {
+			chatRoom.activate();    // 새 대화 시작 시 활성화
+		}
 	}
 }

@@ -18,7 +18,7 @@ public class WebSocketAccessGuard {
 
 	/** ENTER 전용: DB 멤버십 검증. 실패 시 즉시 종료. */
 	public boolean ensureEnterAllowed(WebSocketSession session, Long roomId, Long userId) {
-		boolean member = chatRoomService.isActiveMember(roomId, userId);
+		boolean member = chatRoomService.isMember(roomId, userId);
 		if (!member) {
 			log.warn("[WS][POLICY] ENTER denied userId={} roomId={}", userId, roomId);
 			sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
