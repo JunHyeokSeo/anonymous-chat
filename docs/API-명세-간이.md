@@ -118,7 +118,7 @@
 {
   "code": "SUCCESS",
   "message": "채팅방 생성",
-  "data": { "chatRoomId": 100 }
+  "data": { "roomId": 100 }
 }
 ```
 
@@ -133,7 +133,7 @@
   "message": "채팅방 목록",
   "data": [
     {
-      "chatRoomId": 100,
+      "roomId": 100,
       "partner": { "id": 2, "nickname": "상대유저" },
       "lastMessage": "안녕하세요",
       "partnerExited": false
@@ -144,7 +144,7 @@
 
 ### 🔹 채팅방 나가기
 
-* **PATCH** `/api/v1/chatrooms/{chatRoomId}/exit`
+* **PATCH** `/api/v1/chatrooms/{roomId}/exit`
 * **응답** `200 OK`
 
 ```json
@@ -160,7 +160,7 @@
 
 ### 🔹 메시지 전송
 
-* **POST** `/api/v1/chatrooms/{chatRoomId}/messages`
+* **POST** `/api/v1/chatrooms/{roomId}/messages`
 * **요청 Body**
 
 ```json
@@ -181,7 +181,7 @@
 
 ### 🔹 메시지 조회
 
-* **GET** `/api/v1/chatrooms/{chatRoomId}/messages?page=0&size=20`
+* **GET** `/api/v1/chatrooms/{roomId}/messages?page=0&size=20`
 * **응답** `200 OK`
 
 ```json

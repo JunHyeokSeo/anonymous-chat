@@ -8,7 +8,7 @@ public class ChatRoomUseCaseDto {
 
 	@Builder
 	public record Summary(
-			Long chatRoomId,
+			Long roomId,
 			Long opponentId,
 			String opponentNickname,
 			int opponentAge,
@@ -18,7 +18,7 @@ public class ChatRoomUseCaseDto {
 	) {
 		public static Summary from(ChatRoomServiceDto.Summary result) {
 			return Summary.builder()
-					       .chatRoomId(result.chatRoomId())
+					       .roomId(result.roomId())
 					       .opponentId(result.opponentId())
 					       .opponentNickname(result.opponentNickname())
 					       .opponentAge(result.opponentAge())

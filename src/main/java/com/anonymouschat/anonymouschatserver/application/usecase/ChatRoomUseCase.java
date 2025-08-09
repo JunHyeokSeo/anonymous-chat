@@ -29,7 +29,7 @@ public class ChatRoomUseCase {
 				       .toList();
 	}
 
-	public void exitChatRoom(Long userId, Long chatRoomId){
-		chatRoomService.exit(userId, chatRoomId);
+	public void exitChatRoom(Long userId, Long roomId){
+		chatRoomService.exit(userId, roomId);
 	}
 }

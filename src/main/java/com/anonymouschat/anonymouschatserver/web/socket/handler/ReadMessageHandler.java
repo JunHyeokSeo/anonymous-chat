@@ -46,7 +46,7 @@ public class ReadMessageHandler implements MessageHandler{
 			Long lastReadMessageId = messageUseCase.markMessagesAsRead(
 					MarkMessagesAsRead.builder()
 							.userId(userId)
-							.chatRoomId(roomId)
+							.roomId(roomId)
 							.build()
 			);
 

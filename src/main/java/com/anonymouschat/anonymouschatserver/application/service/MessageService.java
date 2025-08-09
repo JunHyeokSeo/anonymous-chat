@@ -33,12 +33,12 @@ public class MessageService {
 	}
 
 	// TODO: 추후 대량 메시지 처리 성능 개선을 위해 ReadTracking 구조 도입 고려
-	public Long markMessagesAsRead(Long chatRoomId, Long userId) {
-		return messageRepository.updateMessagesAsRead(chatRoomId, userId);
+	public Long markMessagesAsRead(Long roomId, Long userId) {
+		return messageRepository.updateMessagesAsRead(roomId, userId);
 	}
 
-	public Long findLastReadMessageIdByReceiver(Long chatRoomId, Long senderId) {
-		return messageRepository.findMaxReadMessageId(chatRoomId, senderId);
+	public Long findLastReadMessageIdByReceiver(Long roomId, Long senderId) {
+		return messageRepository.findMaxReadMessageId(roomId, senderId);
 	}
 }
 

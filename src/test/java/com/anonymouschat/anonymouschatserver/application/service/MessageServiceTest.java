@@ -103,11 +103,11 @@ class MessageServiceTest {
 		@DisplayName("읽지 않은 메시지를 읽음 처리한다")
 		void markMessagesAsRead_success() {
 			// given
-			Long chatRoomId = chatRoom.getId();
+			Long roomId = chatRoom.getId();
 			Long userId = user1.getId();
 
 			// when
-			messageService.markMessagesAsRead(chatRoomId, userId);
+			messageService.markMessagesAsRead(roomId, userId);
 		}
 	}
 }

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class ChatRoomServiceDto {
 	public record Summary(
-			Long chatRoomId,
+			Long roomId,
 			Long opponentId,
 			String opponentNickname,
 			Integer opponentAge,

@@ -8,7 +8,7 @@ public class MessageUseCaseDto {
 	@Builder
 	public record MessageResult(
 			Long messageId,
-			Long chatRoomId,
+			Long roomId,
 			Long senderId,
 			String content,
 			LocalDateTime sentAt,
@@ -18,7 +18,7 @@ public class MessageUseCaseDto {
 			boolean isMine = message.isSentBy(userId);
 			return MessageResult.builder()
 					       .messageId(message.getId())
-					       .chatRoomId(message.getChatRoom().getId())
+					       .roomId(message.getChatRoom().getId())
 					       .senderId(message.getSender().getId())
 					       .content(message.getContent())
 					       .sentAt(message.getSentAt())
@@ -29,7 +29,7 @@ public class MessageUseCaseDto {
 
 	@Builder
 	public record GetMessages(
-			Long chatRoomId,
+			Long roomId,
 			Long userId,
 			Long lastMessageId, // null 이면 최신부터 시작
 			int limit
@@ -37,20 +37,20 @@ public class MessageUseCaseDto {
 
 	@Builder
 	public record SendMessage(
-			Long chatRoomId,
+			Long roomId,
 			Long senderId,
 			String content
 	) {}
 
 	@Builder
 	public record MarkMessagesAsRead(
-			Long chatRoomId,
+			Long roomId,
 			Long userId
 	) {}
 
 	@Builder
 	public record GetLastReadMessage(
-			Long chatRoomId,
+			Long roomId,
 			Long userId
 	) { }
 }

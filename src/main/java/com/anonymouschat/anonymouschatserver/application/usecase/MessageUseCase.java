@@ -21,15 +21,15 @@ public class MessageUseCase {
 	private final UserService userService;
 
 	// 메시지 전송
-	public void sendMessage(MessageUseCaseDto.SendMessage request) {
-		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.senderId(), request.chatRoomId());
+	public Long sendMessage(MessageUseCaseDto.SendMessage request) {
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.senderId(), request.roomId());
 		User sender = userService.findUser(request.senderId());
-		messageService.saveMessage(chatRoom, sender, request.content());
+		return messageService.saveMessage(chatRoom, sender, request.content()).getId();
 	}
 
 	// 메시지 목록 조회 (Cursor 방식)
 	public List<MessageUseCaseDto.MessageResult> getMessages(MessageUseCaseDto.GetMessages request) {
-		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
 		LocalDateTime lastExitedAt = chatRoom.getLastExitedAt(request.userId());
 
 		List<Message> messages = messageService.getMessages(
@@ -46,12 +46,12 @@ public class MessageUseCase {
 
 	// 메시지 읽음 처리
 	public Long markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
-		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
-		return messageService.markMessagesAsRead(request.chatRoomId(), request.userId());
+		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
+		return messageService.markMessagesAsRead(request.roomId(), request.userId());
 	}
 
 	public Long getLastReadMessageIdByOpponent(MessageUseCaseDto.GetLastReadMessage request) {
-		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.chatRoomId());
-		return messageService.findLastReadMessageIdByReceiver(request.chatRoomId(), request.userId());
+		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
+		return messageService.findLastReadMessageIdByReceiver(request.roomId(), request.userId());
 	}
 }

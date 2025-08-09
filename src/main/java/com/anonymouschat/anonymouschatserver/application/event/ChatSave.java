@@ -3,8 +3,8 @@ package com.anonymouschat.anonymouschatserver.application.event;
 import lombok.Builder;
 
 @Builder
-public record ChatMessageSaveEvent(
+public record ChatSave(
 		Long senderId,
-		Long chatRoomId,
+		Long roomId,
 		String content
 ) {}

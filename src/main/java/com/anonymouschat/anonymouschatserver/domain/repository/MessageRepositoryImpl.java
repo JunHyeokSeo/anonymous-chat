@@ -20,13 +20,13 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Message> findMessagesAfterExitTimeWithCursor(Long chatRoomId, LocalDateTime lastExitedAt, Long lastMessageId, int limit) {
+	public List<Message> findMessagesAfterExitTimeWithCursor(Long roomId, LocalDateTime lastExitedAt, Long lastMessageId, int limit) {
 		QMessage m = QMessage.message;
 
 		return queryFactory
 				       .selectFrom(m)
 				       .where(
-						       m.chatRoom.id.eq(chatRoomId),
+						       m.chatRoom.id.eq(roomId),
 						       lastExitedAt != null ? m.sentAt.goe(lastExitedAt) : null,
 						       lastMessageId != null ? m.id.lt(lastMessageId) : null
 				       )
@@ -36,7 +36,7 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 	}
 
 	@Override
-	public Long updateMessagesAsRead(Long chatRoomId, Long userId) {
+	public Long updateMessagesAsRead(Long roomId, Long userId) {
 		QMessage m = QMessage.message;
 
 		//읽을 메시지 ID 조회 (isRead = false, 내가 보낸 것 아님)
@@ -44,7 +44,7 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 				                              .select(m.id)
 				                              .from(m)
 				                              .where(
-						                              m.chatRoom.id.eq(chatRoomId),
+						                              m.chatRoom.id.eq(roomId),
 						                              m.sender.id.ne(userId),
 						                              m.isRead.isFalse()
 				                              )
@@ -68,14 +68,14 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 	}
 
 	@Override
-	public Long findMaxReadMessageId(Long chatRoomId, Long senderId) {
+	public Long findMaxReadMessageId(Long roomId, Long senderId) {
 		QMessage m = QMessage.message;
 
 		return queryFactory
 				       .select(m.id.max())
 				       .from(m)
 				       .where(
-						       m.chatRoom.id.eq(chatRoomId),
+						       m.chatRoom.id.eq(roomId),
 						       m.sender.id.eq(senderId),
 						       m.isRead.isTrue()
 				       )

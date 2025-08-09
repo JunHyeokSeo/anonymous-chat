@@ -43,8 +43,8 @@ public class ChatRoomService {
 
 	// 채팅방 상세 조회 (유저 포함 여부 확인 포함)
 	@Transactional
-	public ChatRoom getVerifiedChatRoomOrThrow(Long userId, Long chatRoomId) {
-		ChatRoom chatRoom = findChatRoomById(chatRoomId);
+	public ChatRoom getVerifiedChatRoomOrThrow(Long userId, Long roomId) {
+		ChatRoom chatRoom = findChatRoomById(roomId);
 		chatRoom.validateParticipant(userId);
 		return chatRoom;
 	}
@@ -54,25 +54,30 @@ public class ChatRoomService {
 		return chatRoomRepository.findActiveChatRoomsByUser(userId);
 	}
 
-	public void exit(Long userId, Long chatRoomId) {
-		ChatRoom chatRoom = findChatRoomById(chatRoomId);
+	public void exit(Long userId, Long roomId) {
+		ChatRoom chatRoom = findChatRoomById(roomId);
 		chatRoom.exitBy(userId); // 둘 다 나가면 isActive=false로 전환됨
 	}
 
-	private ChatRoom findChatRoomById(Long chatRoomId) {
-		return chatRoomRepository.findById(chatRoomId)
+	private ChatRoom findChatRoomById(Long roomId) {
+		return chatRoomRepository.findById(roomId)
 				       .orElseThrow(() -> new IllegalStateException("채팅방이 존재하지 않습니다."));
 	}
 
-	public void markActiveIfInactive(Long chatRoomId) {
-		ChatRoom chatRoom = findChatRoomById(chatRoomId);
+	public void markActiveIfInactive(Long roomId) {
+		ChatRoom chatRoom = findChatRoomById(roomId);
 		if (!chatRoom.isActive()) {
 			chatRoom.activate();
 		}
 	}
 
 	@Transactional(readOnly = true)
-	public boolean isActiveMember(Long chatRoomId, Long userId) {
-		return chatRoomRepository.existsByIdAndParticipantIdAndActive(chatRoomId, userId);
+	public boolean isActiveMember(Long roomId, Long userId) {
+		return chatRoomRepository.existsByIdAndParticipantIdAndActive(roomId, userId);
+	}
+
+	public void returnBy(Long roomId, Long userId) {
+		ChatRoom chatRoom = findChatRoomById(roomId);
+		chatRoom.returnBy(userId);
 	}
 }

@@ -18,10 +18,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
 	@Query("""
         select (count(cr) > 0)
         from ChatRoom cr
-        where cr.id = :chatRoomId
+        where cr.id = :roomId
           and cr.isActive = true
           and (cr.user1.id = :participantId or cr.user2.id = :participantId)
         """)
-	boolean existsByIdAndParticipantIdAndActive(@Param("chatRoomId") Long chatRoomId,
+	boolean existsByIdAndParticipantIdAndActive(@Param("roomId") Long roomId,
 	                                            @Param("participantId") Long participantId);
 }

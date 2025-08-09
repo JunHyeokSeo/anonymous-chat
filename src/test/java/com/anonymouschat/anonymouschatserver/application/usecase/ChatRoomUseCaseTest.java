@@ -127,7 +127,7 @@ class ChatRoomUseCaseTest {
 
 			// then
 			assertThat(result).hasSize(1);
-			assertThat(result.getFirst().chatRoomId()).isEqualTo(100L);
+			assertThat(result.getFirst().roomId()).isEqualTo(100L);
 			verify(chatRoomService).getMyActiveChatRooms(userId);
 		}
 	}
@@ -141,13 +141,13 @@ class ChatRoomUseCaseTest {
 		void exitRoom() {
 			// given
 			Long userId = 1L;
-			Long chatRoomId = 99L;
+			Long roomId = 99L;
 
 			// when
-			chatRoomUseCase.exitChatRoom(userId, chatRoomId);
+			chatRoomUseCase.exitChatRoom(userId, roomId);
 
 			// then
-			verify(chatRoomService).exit(userId, chatRoomId);
+			verify(chatRoomService).exit(userId, roomId);
 		}
 	}
 }
