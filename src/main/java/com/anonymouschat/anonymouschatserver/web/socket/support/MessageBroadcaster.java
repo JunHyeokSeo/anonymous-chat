@@ -47,6 +47,7 @@ public class MessageBroadcaster {
 		WebSocketSession session = sessionManager.getSession(participantId);
 		if (session == null) {
 			log.debug("{}skip(no session) userId={}", WsLogTag.bc(), participantId);
+			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}
 		if (!session.isOpen()) {

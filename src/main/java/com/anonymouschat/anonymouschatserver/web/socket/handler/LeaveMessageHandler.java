@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.web.socket.handler;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocket
 @RequiredArgsConstructor
 public class LeaveMessageHandler implements MessageHandler {
 	private final ChatSessionManager sessionManager;
-	private final WebSocketAccessGuard guard;
 
 	@Override
 	public MessageType type() { return MessageType.LEAVE; }

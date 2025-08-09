@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil.extractPrincipal;
+import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil.extractUserId;
 
 /**
  * 실시간 채팅 처리를 위한 WebSocket 핸들러.
@@ -47,9 +48,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage textMessage) {
 		try {
+			Long userId = extractUserId(session);
+			sessionManager.updateLastActiveAt(userId);
 			ChatInboundMessage inbound = objectMapper.readValue(textMessage.getPayload(), ChatInboundMessage.class);
 
-			Long userId = extractPrincipal(session).userId();
 			// 레이트 리밋 컷
 			if (!rateLimitGuard.allow(userId, inbound.type())) {
 				log.warn("[WS][ERR] rate limited userId={} type={} sessionId={}", userId, inbound.type(), session.getId());
@@ -71,7 +73,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
 		try {
-			Long userId = extractPrincipal(session).userId();
+			Long userId = extractUserId(session);
 			log.info("{}disconnected userId={} sessionId={} status={}", WsLogTag.sys(), userId, session.getId(), status);
 			rateLimitGuard.clear(userId);
 			sessionManager.forceDisconnect(userId, status);
@@ -89,7 +91,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void handlePongMessage(@NonNull WebSocketSession session, @NonNull PongMessage message) {
 		try {
-			Long userId = extractPrincipal(session).userId();
+			Long userId = extractUserId(session);
 			sessionManager.updateLastActiveAt(userId);
 			log.debug("{}userId={} sessionId={}", WsLogTag.pong(), userId, session.getId());
 		} catch (Exception e) {
@@ -108,6 +110,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		sessionManager.getAllSessions().forEach((userId, session) -> {
 			if (!session.isOpen()) {
 				log.debug("이미 닫힌 세션: userId={}", userId);
+				sessionManager.forceDisconnect(userId, CloseStatus.SESSION_NOT_RELIABLE);
 				return;
 			}
 

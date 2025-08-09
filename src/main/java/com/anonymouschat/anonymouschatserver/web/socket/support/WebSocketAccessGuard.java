@@ -31,8 +31,8 @@ public class WebSocketAccessGuard {
 	public boolean ensureParticipant(WebSocketSession session, Long roomId, Long userId) {
 		boolean ok = sessionManager.isParticipant(roomId, userId);
 		if (!ok) {
-			log.warn("{}Not a participant userId={} roomId={}", WsLogTag.policy(), userId, roomId);
-			sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
+			log.warn("{}Not a participant userId={} roomId={} -> closing BAD_DATA", WsLogTag.policy(), userId, roomId);
+			sessionManager.forceDisconnect(session, CloseStatus.BAD_DATA);
 			return false;
 		}
 		return true;

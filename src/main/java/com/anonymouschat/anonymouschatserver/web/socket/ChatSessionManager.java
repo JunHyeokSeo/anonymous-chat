@@ -1,6 +1,8 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil;
+import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -11,6 +13,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil.*;
 
 @Slf4j
 @Component
@@ -48,18 +52,42 @@ public class ChatSessionManager {
 	}
 
 	public void forceDisconnect(WebSocketSession session, CloseStatus status) {
-		Object attr = session.getAttributes().get("principal");
-		if (attr instanceof CustomPrincipal principal) {
-			forceDisconnect(principal.userId(), status);
-		} else {
-			try {
-				if (session.isOpen())
-					session.close(status);
-			} catch (IOException e) {
-				log.warn("[WS] close failed (anonymous): {}", e.getMessage());
+		Long userId = null;
+
+		// 정상 케이스: 세션에서 바로 userId 추출 (예외는 흡수)
+		try {
+			userId = extractUserId(session);
+		} catch (Exception e) {
+			// 인증 정보가 없거나 비정상 상태일 수 있음 → 폴백 진행
+			log.warn("{}failed to extract userId from sessionId={} reason={}", WsLogTag.err(), safeId(session), e.getMessage());
+		}
+
+		// 폴백: 역참조로 userId 찾기
+		if (userId == null) {
+			for (Map.Entry<Long, WebSocketSession> e : userSessions.entrySet()) {
+				if (e.getValue() == session) {
+					userId = e.getKey();
+					break;
+				}
 			}
 		}
+
+		// userId를 찾았으면 통합 경로로 정리
+		if (userId != null) {
+			forceDisconnect(userId, status);
+			return;
+		}
+
+		// session만 직접 종료 (매핑 정리는 없음)
+		try {
+			if (session.isOpen()) {
+				session.close(status);
+			}
+		} catch (IOException e) {
+			log.warn("{}close failed (anonymous) sessionId={} reason={}", WsLogTag.err(), safeId(session), e.getMessage());
+		}
 	}
+
 
 	/** 방 참여/이탈 */
 	public void joinRoom(Long roomId, Long userId) {
