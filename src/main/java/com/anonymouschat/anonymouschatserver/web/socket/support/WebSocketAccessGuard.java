@@ -20,7 +20,7 @@ public class WebSocketAccessGuard {
 	public boolean ensureEnterAllowed(WebSocketSession session, Long roomId, Long userId) {
 		boolean member = chatRoomService.isMember(roomId, userId);
 		if (!member) {
-			log.warn("[WS][POLICY] ENTER denied userId={} roomId={}", userId, roomId);
+			log.warn("{}ENTER denied userId={} roomId={}", WsLogTag.policy(), userId, roomId);
 			sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
 			return false;
 		}
@@ -31,7 +31,7 @@ public class WebSocketAccessGuard {
 	public boolean ensureParticipant(WebSocketSession session, Long roomId, Long userId) {
 		boolean ok = sessionManager.isParticipant(roomId, userId);
 		if (!ok) {
-			log.warn("[WS][POLICY] Not a participant userId={} roomId={}", userId, roomId);
+			log.warn("{}Not a participant userId={} roomId={}", WsLogTag.policy(), userId, roomId);
 			sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
 			return false;
 		}
