@@ -7,6 +7,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * WebSocket 메시지 전송에 대한 레이트 리밋(Rate Limit)을 관리하는 가드 클래스입니다.
+ * 사용자별, 메시지 타입별 토큰 버킷(Token Bucket) 알고리즘을 사용하여 메시지 전송 속도를 제어합니다.
+ */
 @Component
 public class WebSocketRateLimitGuard {
 
@@ -23,6 +27,14 @@ public class WebSocketRateLimitGuard {
 	private static final int ENTER_LEAVE_CAPACITY = 5;
 	private static final double ENTER_LEAVE_REFILL_PER_SEC = 2; // 초당 2개
 
+	/**
+	 * 특정 사용자가 특정 메시지 타입을 전송하는 것을 허용할지 여부를 확인합니다.
+	 * 토큰 버킷에서 토큰을 소비하며, 토큰이 없으면 false를 반환합니다.
+	 *
+	 * @param userId 사용자 ID
+	 * @param type 메시지 타입
+	 * @return 메시지 전송 허용 여부
+	 */
 	public boolean allow(long userId, MessageType type) {
 		EnumMap<MessageType, TokenBucket> userBuckets =
 				buckets.computeIfAbsent(userId, k -> new EnumMap<>(MessageType.class));
@@ -36,13 +48,20 @@ public class WebSocketRateLimitGuard {
 		return bucket.tryConsume();
 	}
 
-	/** 연결 종료 시 메모리 정리를 위해 호출 (선택) */
+	/**
+	 * 특정 사용자의 모든 토큰 버킷 정보를 초기화합니다.
+	 * 주로 WebSocket 연결 종료 시 메모리 정리를 위해 호출됩니다.
+	 *
+	 * @param userId 사용자 ID
+	 */
 	public void clear(long userId) {
 		buckets.remove(userId);
 	}
 
-	/** 토큰 버킷 (thread-safe) */
-	private static final class TokenBucket {
+	/**
+	 * 토큰 버킷 알고리즘을 구현한 내부 클래스입니다.
+	 * 스레드 안전하게 토큰을 소비하고 리필합니다.
+	 */	private static final class TokenBucket {
 		private final int capacity;
 		private final double refillPerSec;
 

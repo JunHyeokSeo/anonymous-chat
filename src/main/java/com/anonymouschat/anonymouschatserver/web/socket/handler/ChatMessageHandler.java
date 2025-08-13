@@ -19,6 +19,11 @@ import java.time.Instant;
 
 import static com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil.extractUserId;
 
+/**
+ * {@link MessageType#CHAT} 타입의 인바운드 메시지를 처리하는 핸들러입니다.
+ * 채팅 메시지의 유효성을 검사하고, 메시지를 저장하기 위한 이벤트를 발행하며,
+ * 채팅방 참여자들에게 메시지를 브로드캐스트하는 역할을 수행합니다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,12 +33,26 @@ public class ChatMessageHandler implements MessageHandler {
 	private final MessageBroadcaster broadcaster;
 	private final WebSocketAccessGuard guard;
 
-	@Override
+	/**
+	 * 이 핸들러가 처리할 메시지 타입을 반환합니다.
+	 *
+	 * @return {@link MessageType#CHAT}
+	 */	@Override
 	public MessageType type() {
 		return MessageType.CHAT;
 	}
 
-	@Override
+	/**
+	 * 수신된 채팅 메시지를 처리합니다.
+	 * 1. 사용자가 채팅방 참여자인지 확인합니다.
+	 * 2. 아웃바운드 메시지 객체를 생성합니다.
+	 * 3. 메시지 저장을 위한 {@link ChatSave} 이벤트를 발행합니다.
+	 * 4. 채팅방 참여자들에게 메시지를 브로드캐스트합니다.
+	 * 5. 처리 중 예외 발생 시 세션을 종료합니다.
+	 *
+	 * @param session 메시지를 보낸 WebSocket 세션
+	 * @param inbound 처리할 인바운드 메시지 객체
+	 */	@Override
 	public void handle(WebSocketSession session, ChatInboundMessage inbound) {
 		try {
 			Long roomId = inbound.roomId();
@@ -51,13 +70,13 @@ public class ChatMessageHandler implements MessageHandler {
 					                               .timestamp(Instant.now())
 					                               .build();
 
-			// 이벤트 발행
+			// 이벤트 발행: 메시지 저장 로직은 이벤트 리스너에서 비동기적으로 처리됩니다.
 			publisher.publishEvent(ChatSave.builder().roomId(roomId).senderId(senderId).content(content).build());
 
 			// 로깅
 			log.info("{}roomId={} senderId={} ts={}", WsLogTag.chat(), roomId, senderId, outbound.timestamp());
 
-			// 브로드캐스트
+			// 브로드캐스트: 채팅방 참여자들에게 메시지를 전송합니다.
 			int delivered = broadcaster.broadcast(roomId, outbound);
 			if (delivered == 0) {
 				log.warn("{}no receiver online: roomId={} senderId={}", WsLogTag.bc(), roomId, senderId);
