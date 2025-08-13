@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -123,6 +124,27 @@ class MessageBroadcasterTest {
 
         // then
         assertThat(deliveredCount).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("메시지 전송 중 IOException 발생 시 해당 세션을 종료하고 전송 실패로 처리한다")
+    void should_disconnect_and_fail_delivery_on_io_exception_during_send() throws Exception {
+        // given
+        long roomId = 100L;
+        WebSocketSession participantSession = mock(WebSocketSession.class);
+        when(participantSession.isOpen()).thenReturn(true);
+        var message = createDummyOutboundMessage(roomId);
+
+        when(sessionManager.getParticipants(roomId)).thenReturn(Set.of(1L));
+        when(sessionManager.getSession(1L)).thenReturn(participantSession);
+        doThrow(new IOException("Network error")).when(participantSession).sendMessage(any());
+
+        // when
+        int deliveredCount = messageBroadcaster.broadcast(roomId, message);
+
+        // then
+        assertThat(deliveredCount).isEqualTo(0);
+        verify(sessionManager).forceDisconnect(eq(1L), any());
     }
 
     private ChatOutboundMessage createDummyOutboundMessage(Long roomId) {

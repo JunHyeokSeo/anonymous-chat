@@ -94,4 +94,21 @@ class JwtHandshakeInterceptorTest {
         assertThat(result).isFalse();
         verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
     }
+
+    @Test
+    @DisplayName("토큰 유효성 검증 실패 시, 401 상태 코드를 설정하고 false를 반환한다")
+    void should_set_unauthorized_and_return_false_for_invalid_token_validation() throws Exception {
+        // given
+        String invalidToken = "invalid-token";
+        when(tokenResolver.resolve(request)).thenReturn(invalidToken);
+        doThrow(new RuntimeException("Invalid token")).when(jwtValidator).validate(invalidToken); // Simulate validation failure
+
+        // when
+        boolean result = interceptor.beforeHandshake(request, response, wsHandler, attributes);
+
+        // then
+        assertThat(result).isFalse();
+        assertThat(attributes).doesNotContainKey("principal");
+        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
+    }
 }

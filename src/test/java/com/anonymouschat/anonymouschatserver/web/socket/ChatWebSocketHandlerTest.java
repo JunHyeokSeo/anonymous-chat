@@ -134,5 +134,26 @@ class ChatWebSocketHandlerTest {
             // then
             verify(sessionManager).forceDisconnect(session, CloseStatus.SERVER_ERROR);
         }
+
+        @Test
+        @DisplayName("handleTextMessage: 레이트 리밋 초과 시 연결을 종료하고 메시지를 처리하지 않는다")
+        void should_disconnect_and_not_dispatch_when_rate_limit_exceeded() throws Exception {
+            // given
+            CustomPrincipal principal = (CustomPrincipal) PrincipalStub.authenticated(100L);
+            WebSocketSession session = WebSocketSessionStub.withPrincipal(principal);
+            ChatInboundMessage inboundMessage = new ChatInboundMessage(200L, MessageType.CHAT, "안녕하세요");
+            String payload = "some json payload";
+
+            when(objectMapper.readValue(payload, ChatInboundMessage.class)).thenReturn(inboundMessage);
+            when(rateLimitGuard.allow(anyLong(), any())).thenReturn(false); // Simulate rate limit exceeded
+
+            // when
+            handler.handleTextMessage(session, new TextMessage(payload));
+
+            // then
+            verify(sessionManager).updateLastActiveAt(100L); // Still updates last active time
+            verify(sessionManager).forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
+            verify(dispatcher, never()).dispatch(any(), any()); // Dispatcher should not be called
+        }
     }
 }
