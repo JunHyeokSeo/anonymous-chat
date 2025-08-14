@@ -61,7 +61,8 @@ public class WebSocketRateLimitGuard {
 	/**
 	 * 토큰 버킷 알고리즘을 구현한 내부 클래스입니다.
 	 * 스레드 안전하게 토큰을 소비하고 리필합니다.
-	 */	private static final class TokenBucket {
+	 */
+	private static final class TokenBucket {
 		private final int capacity;
 		private final double refillPerSec;
 
