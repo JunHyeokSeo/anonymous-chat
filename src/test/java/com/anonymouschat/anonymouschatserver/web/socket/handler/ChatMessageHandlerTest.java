@@ -112,7 +112,7 @@ class ChatMessageHandlerTest {
         var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
         var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
 
-        // Mock 설정: guard가 참여자임을 허용하고, broadcaster가 예외를 발생시키도록 설정.
+        // guard가 참여자임을 허용하고, broadcaster가 예외를 발생시키도록 설정.
         when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
         doThrow(new RuntimeException("Broadcast failed")).when(broadcaster).broadcast(anyLong(), any());
 
