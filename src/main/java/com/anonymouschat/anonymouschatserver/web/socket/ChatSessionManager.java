@@ -1,7 +1,5 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
-import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketUtil;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,9 +37,9 @@ public class ChatSessionManager {
 		if (old != null && old.isOpen()) {
 			try {
 				old.close(CloseStatus.NORMAL);
-				log.info("[WS] replaced session: userId={} oldSessionId={}", userId, safeId(old));
+				log.info("{}replaced session: userId={} oldSessionId={}", WsLogTag.sys(), userId, safeId(old));
 			} catch (IOException e) {
-				log.warn("[WS] old session close failed: userId={} reason={}", userId, e.getMessage());
+				log.warn("{}old session close failed: userId={} reason={}", WsLogTag.err(), userId, e.getMessage());
 			}
 		}
 		updateLastActiveAt(userId); // 최초 핑/퐁 이전에도 유휴 판정 안 나게 초기화
@@ -58,9 +56,9 @@ public class ChatSessionManager {
 		if (session != null && session.isOpen()) {
 			try {
 				session.close(status);
-				log.info("[WS] force disconnect: userId={} status={}", userId, status);
+				log.info("{}force disconnect: userId={} status={}", WsLogTag.sys(), userId, status);
 			} catch (IOException e) {
-				log.warn("[WS] close failed: userId={} reason={}", userId, e.getMessage());
+				log.warn("{}close failed: userId={} reason={}", WsLogTag.err(), userId, e.getMessage());
 			}
 		}
 		unregisterSession(userId);
@@ -191,7 +189,7 @@ public class ChatSessionManager {
 		userSessions.remove(userId);
 		lastActiveAtMap.remove(userId);
 		roomParticipants.values().forEach(ps -> ps.remove(userId));
-		log.debug("[WS] session/state cleared: userId={}", userId);
+		log.debug("{}session/state cleared: userId={}", WsLogTag.sys() ,userId);
 	}
 
 	/**

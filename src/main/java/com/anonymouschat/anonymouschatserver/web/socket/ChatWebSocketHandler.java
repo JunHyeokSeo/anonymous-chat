@@ -54,8 +54,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
 			// 레이트 리밋 컷
 			if (!rateLimitGuard.allow(userId, inbound.type())) {
-				log.warn("[WS][ERR] rate limited userId={} type={} sessionId={}", userId, inbound.type(), session.getId());
-				sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
+				log.warn("{}rate limited userId={} type={} sessionId={}", WsLogTag.err(), userId, inbound.type(), session.getId());
 				return;
 			}
 
