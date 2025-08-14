@@ -36,6 +36,14 @@ public class Block {
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 
+	public void deactivate() {
+		this.active = false;
+	}
+
+	public void reactivate() {
+		this.active = true;
+	}
+
 	@Builder
 	public Block(User blocker, User blocked) {
 		this.blocker = blocker;
@@ -43,22 +51,5 @@ public class Block {
 		this.active = true;
 		this.createdAt = LocalDateTime.now();
 	}
-
-	public void deactivate() {
-		this.active = false;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Block other)) return false;
-		return Objects.equals(blocker, other.blocker) && Objects.equals(blocked, other.blocked);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(blocker, blocked);
-	}
-
 }
 

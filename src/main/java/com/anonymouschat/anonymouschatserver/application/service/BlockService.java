@@ -3,37 +3,55 @@ package com.anonymouschat.anonymouschatserver.application.service;
 import com.anonymouschat.anonymouschatserver.domain.entity.Block;
 import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BlockService {
-	private final BlockRepository blockRepository;
+    private final BlockRepository blockRepository;
 
-	public void block(User blocker, User blocked) {
-		Block block = Block.builder()
-				              .blocker(blocker)
-				              .blocked(blocked)
-				              .build();
+    @Transactional
+    public void block(User blocker, User blocked) {
+        if (Objects.equals(blocker.getId(), blocked.getId())) {
+            throw new IllegalArgumentException("자기 자신을 차단할 수 없습니다.");
+        }
 
-		blockRepository.save(block);
-	}
+        Optional<Block> existingBlock = blockRepository.findByBlockerIdAndBlockedId(blocker.getId(), blocked.getId());
 
-	public void unblock(Long blockerId, Long blockedId) {
-		Block block = findBlockByBlockerIdAndBlockedId(blockerId, blockedId);
-		block.deactivate();
-	}
+        if (existingBlock.isPresent()) {
+            Block block = existingBlock.get();
+            if (!block.isActive()) {
+                block.reactivate();
+            }
+        } else {
+            Block block = Block.builder()
+                    .blocker(blocker)
+                    .blocked(blocked)
+                    .build();
+            blockRepository.save(block);
+        }
+    }
 
-	public List<Long> getBlockedUserIds(Long blockerId) {
-		return blockRepository.findAllBlockedUserIdsByBlockerId(blockerId);
-	}
+    @Transactional
+    public void unblock(Long blockerId, Long blockedId) {
+        Block block = findBlockByBlockerIdAndBlockedId(blockerId, blockedId);
+        block.deactivate();
+    }
 
-	private Block findBlockByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {
-		return blockRepository.findByBlockerIdAndBlockedId(blockerId, blockedId)
-				       .orElseThrow(() -> new IllegalStateException("차단 정보를 찾을 수 없습니다."));
-	}
+    public List<Long> getBlockedUserIds(Long blockerId) {
+        return blockRepository.findAllBlockedUserIdsByBlockerId(blockerId);
+    }
+
+    private Block findBlockByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {
+        return blockRepository.findByBlockerIdAndBlockedId(blockerId, blockedId)
+                .filter(Block::isActive)
+                .orElseThrow(() -> new IllegalStateException("차단 정보를 찾을 수 없습니다."));
+    }
 }
