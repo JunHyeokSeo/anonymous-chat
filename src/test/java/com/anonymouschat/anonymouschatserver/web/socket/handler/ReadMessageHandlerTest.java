@@ -23,8 +23,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link ReadMessageHandler}에 대한 단위 테스트 클래스입니다.
- * 메시지 읽음 처리(`MessageType.READ`) 로직 및 관련 브로드캐스트 기능을 검증합니다.
+ * {@link ReadMessageHandler} 단위 테스트.
+ * - 참여자의 읽음 메시지 처리 및 브로드캐스트
+ * - 읽음 메시지가 없을 경우 브로드캐스트 생략
+ * - 비참여자 요청 무시
+ * - 처리 중 예외 발생 시 세션 종료
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ReadMessageHandler 테스트")
