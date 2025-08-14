@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.common.util;
+package com.anonymouschat.testsupport.util;
 
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;

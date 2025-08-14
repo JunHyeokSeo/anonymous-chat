@@ -2,173 +2,319 @@ package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
-import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ChatRoomService 테스트")
 class ChatRoomServiceTest {
 
-	private ChatRoomRepository chatRoomRepository;
-	private ChatRoomService chatRoomService;
+    @InjectMocks
+    private ChatRoomService chatRoomService;
 
-	private User user1;
-	private User user2;
+    @Mock
+    private ChatRoomRepository chatRoomRepository;
 
-	@BeforeEach
-	void setUp() throws Exception {
-		chatRoomRepository = mock(ChatRoomRepository.class);
-		chatRoomService = new ChatRoomService(chatRoomRepository);
+    @Mock
+    private User initiator;
 
-		user1 = User.builder()
-				        .provider(OAuthProvider.GOOGLE)
-				        .providerId("user1")
-				        .nickname("User1")
-				        .gender(Gender.MALE)
-				        .age(25)
-				        .region(Region.SEOUL)
-				        .bio("Hi there")
-				        .build();
+    @Mock
+    private User recipient;
 
-		user2 = User.builder()
-				        .provider(OAuthProvider.GOOGLE)
-				        .providerId("user2")
-				        .nickname("User2")
-				        .gender(Gender.FEMALE)
-				        .age(24)
-				        .region(Region.BUSAN)
-				        .bio("Hello")
-				        .build();
+    @BeforeEach
+    void setUp() {
+        lenient().when(initiator.getId()).thenReturn(1L);
+        lenient().when(recipient.getId()).thenReturn(2L);
+    }
 
-		setId(user1, 1L);
-		setId(user2, 2L);
-	}
+    @Nested
+    @DisplayName("createOrFind 메소드는")
+    class Describe_createOrFind {
 
-	private void setId(User user, Long id) throws Exception {
-		Field idField = User.class.getDeclaredField("id");
-		idField.setAccessible(true);
-		idField.set(user, id);
-	}
+        private ChatRoom chatRoom;
 
-	@Nested
-	@DisplayName("createOrFind")
-	class CreateOrFind {
+        @BeforeEach
+        void setUp() {
+            chatRoom = spy(new ChatRoom(initiator, recipient));
+        }
 
-		@Test
-		@DisplayName("기존 채팅방이 존재하면 반환하고 returnBy 호출")
-		void returnExistingChatRoom() {
-			ChatRoom existingRoom = new ChatRoom(user1, user2);
-			when(chatRoomRepository.findActiveByPair(anyLong(), anyLong()))
-					.thenReturn(Optional.of(existingRoom));
+        @Test
+        @DisplayName("활성 채팅방이 존재하면 그 채팅방을 반환한다")
+        void it_returns_existing_active_chat_room() {
+            // given
+            when(chatRoomRepository.findActiveByPair(1L, 2L)).thenReturn(Optional.of(chatRoom));
 
-			ChatRoom result = chatRoomService.createOrFind(user1, user2);
+            // when
+            ChatRoom result = chatRoomService.createOrFind(initiator, recipient);
 
-			assertThat(result).isEqualTo(existingRoom);
-		}
+            // then
+            assertThat(result).isEqualTo(chatRoom);
+            verify(chatRoom).returnBy(initiator.getId());
+            verify(chatRoomRepository, never()).save(any());
+        }
 
-		@Test
-		@DisplayName("기존 채팅방이 없으면 새로 생성하여 저장")
-		void createNewChatRoom() {
-			when(chatRoomRepository.findActiveByPair(anyLong(), anyLong()))
-					.thenReturn(Optional.empty());
+        @Test
+        @DisplayName("활성 채팅방이 없으면 새로 생성하여 반환한다")
+        void it_creates_new_chat_room_if_not_exist() {
+            // given
+            when(chatRoomRepository.findActiveByPair(1L, 2L)).thenReturn(Optional.empty());
+            when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(chatRoom);
 
-			ChatRoom newRoom = new ChatRoom(user1, user2);
-			when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(newRoom);
+            // when
+            ChatRoom result = chatRoomService.createOrFind(initiator, recipient);
 
-			ChatRoom result = chatRoomService.createOrFind(user1, user2);
+            // then
+            assertThat(result).isEqualTo(chatRoom);
+            verify(chatRoomRepository).save(any(ChatRoom.class));
+        }
 
-			assertThat(result).isNotNull();
-		}
-	}
+        @Test
+        @DisplayName("동시성 문제로 저장 실패 시, 다시 조회하여 반환한다")
+        void it_handles_concurrency_issue() {
+            // given
+            when(chatRoomRepository.findActiveByPair(1L, 2L))
+                    .thenReturn(Optional.empty())
+                    .thenReturn(Optional.of(chatRoom));
+            when(chatRoomRepository.save(any(ChatRoom.class)))
+                    .thenThrow(DataIntegrityViolationException.class);
 
-	@Nested
-	@DisplayName("getMyActiveChatRooms")
-	class GetMyActiveChatRooms {
+            // when
+            ChatRoom result = chatRoomService.createOrFind(initiator, recipient);
 
-		@Test
-		@DisplayName("사용자가 참여 중인 활성 채팅방 목록을 정상적으로 조회한다")
-		void getMyActiveChatRooms_shouldReturnChatRoomSummaries() {
-			// given
-			Long userId = 1L;
-			List<ChatRoomServiceDto.Summary> mockResult = List.of(
-					new ChatRoomServiceDto.Summary(
-							10L,
-							2L,
-							"상대닉네임",
-							25,
-							"SEOUL",
-							"https://example.com/profile.jpg",
-							LocalDateTime.now()
-					)
-			);
+            // then
+            assertThat(result).isEqualTo(chatRoom);
+            verify(chatRoomRepository).save(any(ChatRoom.class));
+            verify(chatRoomRepository, times(2)).findActiveByPair(1L, 2L);
+        }
+    }
 
-			when(chatRoomRepository.findActiveChatRoomsByUser(userId))
-					.thenReturn(mockResult);
+    @Nested
+    @DisplayName("getVerifiedChatRoomOrThrow 메소드는")
+    class Describe_getVerifiedChatRoomOrThrow {
+        private ChatRoom chatRoom;
 
-			// when
-			List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(userId);
+        @BeforeEach
+        void setUp() {
+            chatRoom = spy(new ChatRoom(initiator, recipient));
+        }
 
-			// then
-			assertThat(result).isEqualTo(mockResult);
-			verify(chatRoomRepository).findActiveChatRoomsByUser(userId);
-		}
-	}
+        @Test
+        @DisplayName("채팅방이 존재하고 사용자가 참여자이면 채팅방을 반환한다")
+        void it_returns_chat_room_if_verified() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
 
-	@Nested
-	@DisplayName("getVerifiedChatRoomOrThrow")
-	class GetVerifiedChatRoomOrThrow {
+            // when
+            ChatRoom result = chatRoomService.getVerifiedChatRoomOrThrow(1L, 10L);
 
-		@Test
-		@DisplayName("유효한 채팅방이면 반환")
-		void returnChatRoomIfValid() {
-			ChatRoom room = new ChatRoom(user1, user2);
-			when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(room));
+            // then
+            assertThat(result).isEqualTo(chatRoom);
+            verify(chatRoom).validateParticipant(1L);
+        }
 
-			ChatRoom result = chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L);
+        @Test
+        @DisplayName("채팅방이 존재하지 않으면 예외를 던진다")
+        void it_throws_exception_if_chat_room_not_found() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.empty());
 
-			assertThat(result).isEqualTo(room);
-		}
+            // when & then
+            assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(1L, 10L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("채팅방이 존재하지 않습니다.");
+        }
 
-		@Test
-		@DisplayName("참여자가 아니면 예외")
-		void throwIfNotParticipant() {
-			ChatRoom room = new ChatRoom(user1, user2);
-			when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(room));
+        @Test
+        @DisplayName("사용자가 참여자가 아니면 예외를 던진다")
+        void it_throws_exception_if_user_is_not_participant() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+            doThrow(new IllegalStateException("채팅방 참여자가 아닙니다.")).when(chatRoom).validateParticipant(99L);
 
-			assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(99L, 1L))
-					.isInstanceOf(IllegalStateException.class);
-		}
-	}
+            // when & then
+            assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(99L, 10L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("채팅방 참여자가 아닙니다.");
+        }
+    }
 
-	@Nested
-	@DisplayName("exit")
-	class Exit {
+    @Nested
+    @DisplayName("getMyActiveChatRooms 메소드는")
+    class Describe_getMyActiveChatRooms {
+        @Test
+        @DisplayName("사용자의 활성 채팅방 목록을 반환한다")
+        void it_returns_active_chat_room_list() {
+            // given
+            List<ChatRoomServiceDto.Summary> summaries = List.of(new ChatRoomServiceDto.Summary(1L, 2L, "nickname", 20, "region", "url", LocalDateTime.now()));
+            when(chatRoomRepository.findActiveChatRoomsByUser(1L)).thenReturn(summaries);
 
-		@Test
-		@DisplayName("채팅방 나가기")
-		void exitChatRoom() {
-			ChatRoom room = Mockito.spy(new ChatRoom(user1, user2));
-			when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(room));
+            // when
+            List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(1L);
 
-			chatRoomService.exit(1L, 1L);
+            // then
+            assertThat(result).isEqualTo(summaries);
+        }
+    }
 
-			verify(room).exitBy(1L);
-		}
-	}
+    @Nested
+    @DisplayName("exit 메소드는")
+    class Describe_exit {
+        private ChatRoom chatRoom;
+
+        @BeforeEach
+        void setUp() {
+            chatRoom = spy(new ChatRoom(initiator, recipient));
+        }
+
+        @Test
+        @DisplayName("채팅방에서 나간다")
+        void it_exits_from_chat_room() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+
+            // when
+            chatRoomService.exit(1L, 10L);
+
+            // then
+            verify(chatRoom).exitBy(1L);
+        }
+
+        @Test
+        @DisplayName("채팅방이 없으면 예외를 던진다")
+        void it_throws_exception_if_chat_room_not_found() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> chatRoomService.exit(1L, 10L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("채팅방이 존재하지 않습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("markActiveIfInactive 메소드는")
+    class Describe_markActiveIfInactive {
+        private ChatRoom chatRoom;
+
+        @BeforeEach
+        void setUp() {
+            chatRoom = spy(new ChatRoom(initiator, recipient));
+        }
+
+        @Test
+        @DisplayName("채팅방이 비활성이면 활성으로 변경한다")
+        void it_activates_if_inactive() {
+            // given
+            when(chatRoom.isActive()).thenReturn(false);
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+
+            // when
+            chatRoomService.markActiveIfInactive(10L);
+
+            // then
+            verify(chatRoom).activate();
+        }
+
+        @Test
+        @DisplayName("채팅방이 활성이면 아무것도 하지 않는다")
+        void it_does_nothing_if_active() {
+            // given
+            when(chatRoom.isActive()).thenReturn(true);
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+
+            // when
+            chatRoomService.markActiveIfInactive(10L);
+
+            // then
+            verify(chatRoom, never()).activate();
+        }
+    }
+
+    @Nested
+    @DisplayName("isMember 메소드는")
+    class Describe_isMember {
+        @Test
+        @DisplayName("사용자가 멤버이면 true를 반환한다")
+        void it_returns_true_if_user_is_member() {
+            // given
+            when(chatRoomRepository.existsByIdAndParticipantId(10L, 1L)).thenReturn(true);
+
+            // when
+            boolean result = chatRoomService.isMember(10L, 1L);
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("사용자가 멤버가 아니면 false를 반환한다")
+        void it_returns_false_if_user_is_not_member() {
+            // given
+            when(chatRoomRepository.existsByIdAndParticipantId(10L, 1L)).thenReturn(false);
+
+            // when
+            boolean result = chatRoomService.isMember(10L, 1L);
+
+            // then
+            assertThat(result).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("returnBy 메소드는")
+    class Describe_returnBy {
+        private ChatRoom chatRoom;
+
+        @BeforeEach
+        void setUp() {
+            chatRoom = spy(new ChatRoom(initiator, recipient));
+        }
+
+        @Test
+        @DisplayName("사용자가 채팅방에 돌아오면 returnBy를 호출한다")
+        void it_calls_returnBy() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+            when(chatRoom.isArchived()).thenReturn(false);
+
+            // when
+            chatRoomService.returnBy(10L, 1L);
+
+            // then
+            verify(chatRoom).validateParticipant(1L);
+            verify(chatRoom).returnBy(1L);
+        }
+
+        @Test
+        @DisplayName("채팅방이 종료된 상태면 예외를 던진다")
+        void it_throws_exception_if_archived() {
+            // given
+            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
+            when(chatRoom.isArchived()).thenReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> chatRoomService.returnBy(10L, 1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("종료된 대화방입니다. 새 대화방을 사용하세요.");
+        }
+    }
 }
