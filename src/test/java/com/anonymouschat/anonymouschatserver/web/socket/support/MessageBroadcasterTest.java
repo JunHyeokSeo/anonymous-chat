@@ -88,7 +88,7 @@ class MessageBroadcasterTest {
 
 	@Test
 	@DisplayName("세션이 닫혀있거나 없으면 메시지를 보내지 않고 연결을 정리한다")
-	void should_not_send_to_closed_or_null_session_and_disconnect() throws IOException {
+	void should_not_send_to_closed_or_null_session_and_disconnect() {
 		// given
 		long roomId = 100L;
 		var open = WebSocketSessionStub.open();
