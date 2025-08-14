@@ -25,9 +25,11 @@ import static org.mockito.Mockito.*;
 
 /**
  * {@link MessageBroadcaster} 단위 테스트.
- * - 브로드캐스트/제외 브로드캐스트
- * - 세션 유효성 검사 및 정리
- * - 직렬화 실패/전송 실패 처리
+ * - 채팅방 전체 브로드캐스트
+ * - 특정 사용자 제외 브로드캐스트
+ * - 세션 유효성 검사 및 강제 종료
+ * - 직렬화 실패 처리
+ * - 전송 중 IOException 처리
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MessageBroadcaster 테스트")
