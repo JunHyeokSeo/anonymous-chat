@@ -14,10 +14,6 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-//todo: 채팅방 상태 관리 구체화 필요
-// "대화하기"로 채팅방 생성 뒤 메시지를 입력하지 않은 경우. - 어차피 생성 시 Status 'INACTIVE'
-// 한 명이 나간 뒤 나간 사용자가 다시 채팅을 시작할 때. - 채팅을 보낼 때, Status를 Active - > Inactive로 바꾸는데, 이미 Active 이고 내가 나가서 안보였던거라면? returnBy를 통해 채팅 보낸 사용자가 다시 돌아왔음을 알리도록 변경해야됨.
-// 한 명이 나간 뒤 나가지 않은 사용자가 다시 채팅을 시작할 때. - 이건 상관 없음. 기존 구조여도 문제 없음
 public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 
