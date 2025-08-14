@@ -4,7 +4,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.web.socket.*;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
@@ -15,6 +14,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * 테스트 목적으로 {@link WebSocketSession}을 시뮬레이션하는 스텁(Stub) 클래스입니다.
+ * 실제 WebSocket 연결 없이 세션의 동작을 모의하고, 전송된 메시지를 캡처하며,
+ * Principal 및 속성 관리를 지원합니다.
+ */
 public class WebSocketSessionStub implements WebSocketSession {
 
     private final String id;
@@ -22,7 +26,6 @@ public class WebSocketSessionStub implements WebSocketSession {
     private final AtomicBoolean open = new AtomicBoolean(true);
     private final AtomicReference<CloseStatus> closeStatus = new AtomicReference<>();
     private final List<TextMessage> sentMessages = new CopyOnWriteArrayList<>();
-    private boolean failOnSend = false;
 
     public WebSocketSessionStub(String id, Principal principal) {
         this.id = id;
@@ -31,18 +34,23 @@ public class WebSocketSessionStub implements WebSocketSession {
         }
     }
 
+	/**
+	 * 지정된 Principal을 가진 새로운 열린 WebSocketSessionStub 인스턴스를 생성합니다.
+	 *
+	 * @param principal 세션에 연결할 Principal 객체
+	 * @return 새로 생성된 WebSocketSessionStub 인스턴스
+	 */
     public static WebSocketSessionStub withPrincipal(Principal principal) {
         return new WebSocketSessionStub("session-" + System.nanoTime(), principal);
     }
 
+	/**
+	 * 새로운 열린 WebSocketSessionStub 인스턴스를 생성합니다.
+	 *
+	 * @return 새로 생성된 WebSocketSessionStub 인스턴스
+	 */
     public static WebSocketSessionStub open() {
         return new WebSocketSessionStub("session-" + System.nanoTime(), null);
-    }
-
-    public static WebSocketSessionStub willFailOnSend() {
-        WebSocketSessionStub stub = new WebSocketSessionStub("failing-session-" + System.nanoTime(), null);
-        stub.failOnSend = true;
-        return stub;
     }
 
     @NonNull @Override public String getId() { return id; }
@@ -60,10 +68,7 @@ public class WebSocketSessionStub implements WebSocketSession {
     @NonNull @Override public List<WebSocketExtension> getExtensions() { return List.of(); }
 
     @Override
-    public void sendMessage(@NonNull WebSocketMessage<?> message) throws IOException {
-        if (failOnSend) {
-            throw new IOException("Simulated send failure");
-        }
+    public void sendMessage(@NonNull WebSocketMessage<?> message) {
         if (message instanceof TextMessage) {
             sentMessages.add((TextMessage) message);
         }
@@ -72,7 +77,7 @@ public class WebSocketSessionStub implements WebSocketSession {
     @Override public boolean isOpen() { return open.get(); }
 
     @Override
-    public void close() throws IOException {
+    public void close(){
         close(CloseStatus.NORMAL);
     }
 
@@ -83,14 +88,22 @@ public class WebSocketSessionStub implements WebSocketSession {
         }
     }
 
-    public List<TextMessage> getSentMessages() {
-        return sentMessages;
-    }
-
+	/**
+	 * 이 세션을 통해 전송된 텍스트 메시지의 페이로드 목록을 반환합니다.
+	 * 테스트 검증에 사용됩니다.
+	 *
+	 * @return 전송된 텍스트 메시지 페이로드 목록
+	 */
     public List<String> getSentTextPayloads() {
         return sentMessages.stream().map(TextMessage::getPayload).toList();
     }
 
+	/**
+	 * 이 세션의 현재 종료 상태를 반환합니다.
+	 * 테스트 검증에 사용됩니다.
+	 *
+	 * @return 세션의 CloseStatus
+	 */
     public CloseStatus getCloseStatus() {
         return closeStatus.get();
     }
