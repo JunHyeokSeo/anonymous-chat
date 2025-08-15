@@ -28,7 +28,7 @@ public class TestUtils {
 
 	public static User guestUser(){
 		return User.builder()
-				            .provider(OAuthProvider.GOOGLE)
+				            .provider(OAuthProvider.KAKAO)
 				            .providerId("provider-id")
 				            .role(UserRole.ROLE_GUEST)
 				            .build();
