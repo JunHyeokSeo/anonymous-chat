@@ -10,6 +10,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -78,6 +79,16 @@ public class UserService {
 	@Transactional(readOnly = true)
 	public User findUser(Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	public User createGuestUser(OAuthProvider provider, String providerId) {
+		User guestUser = User.builder()
+				.provider(provider)
+				.providerId(providerId)
+				.role(UserRole.ROLE_GUEST)
+				.nickname("guest_" + System.currentTimeMillis())
+				.build();
+		return userRepository.save(guestUser);
 	}
 
 	private void validateNicknameDuplication(String nickname) {

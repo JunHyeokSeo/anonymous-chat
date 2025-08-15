@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.common.exception.BadRequestExceptio
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,6 +42,10 @@ public class User {
 	 */
 	@Column(name = "provider_id", nullable = false, length = 100)
 	private String providerId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role", nullable = false, length = 20)
+	private UserRole role;
 
 	// 사용자 정보
 	@Column(name = "nickname", nullable = false, length = 50, unique = true)
@@ -107,9 +112,10 @@ public class User {
 	}
 
 	@Builder
-	public User(OAuthProvider provider, String providerId, String nickname, Gender gender, int age, Region region, String bio) {
+	public User(OAuthProvider provider, String providerId, UserRole role, String nickname, Gender gender, int age, Region region, String bio) {
 		this.provider = Objects.requireNonNull(provider);
 		this.providerId = Objects.requireNonNull(providerId);
+		this.role = Objects.requireNonNull(role);
 		this.nickname = Objects.requireNonNull(nickname);
 		this.gender = Objects.requireNonNull(gender);
 		this.age = age;

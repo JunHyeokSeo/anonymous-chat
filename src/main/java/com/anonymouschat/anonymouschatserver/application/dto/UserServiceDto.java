@@ -43,6 +43,7 @@ public class UserServiceDto {
 					       .bio(bio)
 					       .provider(provider)
 					       .providerId(providerId)
+					       .role(com.anonymouschat.anonymouschatserver.domain.type.UserRole.ROLE_USER)
 					       .build();
 		}
 	}
