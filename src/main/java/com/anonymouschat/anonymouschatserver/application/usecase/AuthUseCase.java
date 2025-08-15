@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
+import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
 import com.anonymouschat.anonymouschatserver.application.dto.AuthTokens;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,9 +25,14 @@ public class AuthUseCase {
     private final UserService userService;
 
     @Transactional
-    public AuthTokens login(OAuthProvider provider, String providerId) {
-        User user = userService.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> userService.createGuestUser(provider, providerId));
+    public AuthResult login(OAuthProvider provider, String providerId) {
+	    AtomicBoolean isNewUser = new AtomicBoolean(false);
+
+	    User user = userService.findByProviderAndProviderId(provider, providerId)
+                .orElseGet(() -> {
+					isNewUser.set(true);
+	                return userService.createGuestUser(provider, providerId);
+				});
 
         String accessToken = authService.generateAccessToken(provider, providerId);
         String refreshToken = null;
@@ -34,7 +42,7 @@ public class AuthUseCase {
             authService.saveRefreshToken(user.getId().toString(), refreshToken);
         }
 
-        return new AuthTokens(accessToken, refreshToken);
+	    return new AuthResult(new AuthTokens(accessToken, refreshToken), isNewUser.get());
     }
 
 	@Transactional
