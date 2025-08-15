@@ -30,12 +30,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	) throws IOException {
 
 		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-		Object rawSub = oAuth2User.getAttribute("sub");
-		if (rawSub == null) {
-			throw new UnauthorizedException(ErrorCode.OAUTH_PROVIDER_ERROR);
-		}
-		String providerId = rawSub.toString();
-		OAuthProvider provider = oAuth2ProviderResolver.resolve(request, oAuth2User);
+
+		OAuthProvider provider = oAuth2ProviderResolver.resolve(oAuth2User);
+		String providerId = provider.extractProviderId(oAuth2User.getAttributes());
 
 		AuthTokens authTokens = authUseCase.login(provider, providerId);
 
