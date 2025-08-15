@@ -1,6 +1,7 @@
-package com.anonymouschat.anonymouschatserver.infra.web;
+package com.anonymouschat.anonymouschatserver.web;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.AbstractCustomException;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,14 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	@ExceptionHandler(AbstractCustomException.class)
+	public ResponseEntity<ApiResponse<Void>> handleCustomException(AbstractCustomException ex) {
+		ErrorCode errorCode = ex.getErrorCode();
+		return ResponseEntity.status(errorCode.getStatus())
+				       .body(ApiResponse.error(errorCode, errorCode.getMessage()));
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException ex) {
 		String errorMessage = ex.getBindingResult().getFieldErrors().stream()
@@ -39,5 +48,3 @@ public class GlobalExceptionHandler {
 				       .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR, "서버 에러가 발생했습니다."));
 	}
 }
-
-

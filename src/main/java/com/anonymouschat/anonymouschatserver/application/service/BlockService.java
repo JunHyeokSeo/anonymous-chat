@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.user.CannotBlockSelfException;
 import com.anonymouschat.anonymouschatserver.domain.entity.Block;
 import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
@@ -20,7 +23,7 @@ public class BlockService {
     @Transactional
     public void block(User blocker, User blocked) {
         if (Objects.equals(blocker.getId(), blocked.getId())) {
-            throw new IllegalArgumentException("자기 자신을 차단할 수 없습니다.");
+            throw new CannotBlockSelfException(ErrorCode.CANNOT_BLOCK_SELF);
         }
 
         Optional<Block> existingBlock = blockRepository.findByBlockerIdAndBlockedId(blocker.getId(), blocked.getId());
@@ -52,6 +55,6 @@ public class BlockService {
     private Block findBlockByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {
         return blockRepository.findByBlockerIdAndBlockedId(blockerId, blockedId)
                 .filter(Block::isActive)
-                .orElseThrow(() -> new IllegalStateException("차단 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BLOCK_NOT_FOUND));
     }
 }

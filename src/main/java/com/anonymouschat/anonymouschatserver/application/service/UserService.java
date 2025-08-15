@@ -1,6 +1,9 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
+import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
@@ -74,12 +77,12 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public User findUser(Long userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+		return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
 
 	private void validateNicknameDuplication(String nickname) {
 		if (userRepository.existsByNickname(nickname)) {
-			throw new IllegalStateException("동일한 닉네임이 존재합니다.");
+			throw new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME);
 		}
 	}
 

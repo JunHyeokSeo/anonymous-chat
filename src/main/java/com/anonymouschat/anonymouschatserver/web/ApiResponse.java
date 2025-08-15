@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.web;
+package com.anonymouschat.anonymouschatserver.web;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;

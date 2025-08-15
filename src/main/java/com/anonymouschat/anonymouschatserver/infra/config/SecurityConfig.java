@@ -6,7 +6,7 @@ import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticatio
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
-import com.anonymouschat.anonymouschatserver.infra.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

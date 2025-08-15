@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.infra.file;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
+import com.anonymouschat.anonymouschatserver.common.exception.file.FileUploadException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,12 +23,12 @@ public class LocalFileStorage implements FileStorage{
 	public String upload(MultipartFile file) throws IOException {
 		File dir = new File(uploadDir);
 		if (!dir.exists() && !dir.mkdirs()) {
-			throw new IllegalStateException("업로드 디렉토리 생성 실패: " + uploadDir);
+			throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
 		}
 
 		String originalFilename = file.getOriginalFilename();
 		if (originalFilename == null || !originalFilename.contains(".")) {
-			throw new IllegalArgumentException("잘못된 파일 이름입니다.");
+			throw new BadRequestException(ErrorCode.INVALID_FILE_NAME);
 		}
 
 		String ext = originalFilename.substring(originalFilename.lastIndexOf("."));

@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.UnauthorizedException;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -24,11 +26,11 @@ public class WebSocketUtil {
 		Object attr = session.getAttributes().get(ATTR_PRINCIPAL);
 		if (attr instanceof CustomPrincipal principal) {
 			if (!principal.isAuthenticatedUser()) {
-				throw new IllegalStateException("인증되지 않은 사용자는 메시지를 보낼 수 없습니다.");
+				throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
 			}
 			return principal;
 		}
-		throw new IllegalStateException("WebSocket 세션에 인증 정보가 없습니다.");
+		throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
 	}
 
 	/**

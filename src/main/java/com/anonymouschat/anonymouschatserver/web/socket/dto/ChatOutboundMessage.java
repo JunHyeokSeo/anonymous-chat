@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.dto;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.socket.MessageValidationException;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -25,10 +27,10 @@ public record ChatOutboundMessage(
         Long lastReadMessageId // nullable: READ 타입일 때만 사용.
 ) {
 	public ChatOutboundMessage {
-		if (roomId == null) throw new IllegalArgumentException("roomId is required");
-		if (type == null) throw new IllegalArgumentException("type is required");
-		if (senderId == null) throw new IllegalArgumentException("senderId is required");
-		if (timestamp == null) throw new IllegalArgumentException("timestamp is required");
-		if (type == MessageType.CHAT && (content == null || content.isBlank())) throw new IllegalArgumentException("content is required for CHAT");
+		if (roomId == null) throw new MessageValidationException(ErrorCode.ROOM_ID_REQUIRED);
+		if (type == null) throw new MessageValidationException(ErrorCode.MESSAGE_TYPE_REQUIRED);
+		if (senderId == null) throw new MessageValidationException(ErrorCode.SENDER_ID_REQUIRED);
+		if (timestamp == null) throw new MessageValidationException(ErrorCode.TIMESTAMP_REQUIRED);
+		if (type == MessageType.CHAT && (content == null || content.isBlank())) throw new MessageValidationException(ErrorCode.CONTENT_REQUIRED_FOR_CHAT);
 	}
 }

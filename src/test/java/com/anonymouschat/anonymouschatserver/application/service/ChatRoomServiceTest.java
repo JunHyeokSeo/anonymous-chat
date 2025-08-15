@@ -1,6 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
+import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
@@ -138,8 +142,8 @@ class ChatRoomServiceTest {
 
             // when & then
             assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(1L, 10L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("채팅방이 존재하지 않습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
 
         @Test
@@ -147,12 +151,12 @@ class ChatRoomServiceTest {
         void it_throws_exception_if_user_is_not_participant() {
             // given
             when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
-            doThrow(new IllegalStateException("채팅방 참여자가 아닙니다.")).when(chatRoom).validateParticipant(99L);
+            doThrow(new NotChatRoomMemberException(ErrorCode.NOT_CHAT_ROOM_MEMBER)).when(chatRoom).validateParticipant(99L);
 
             // when & then
             assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(99L, 10L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("채팅방 참여자가 아닙니다.");
+                    .isInstanceOf(NotChatRoomMemberException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_CHAT_ROOM_MEMBER);
         }
     }
 
@@ -205,8 +209,8 @@ class ChatRoomServiceTest {
 
             // when & then
             assertThatThrownBy(() -> chatRoomService.exit(1L, 10L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("채팅방이 존재하지 않습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
     }
 
@@ -313,8 +317,8 @@ class ChatRoomServiceTest {
 
             // when & then
             assertThatThrownBy(() -> chatRoomService.returnBy(10L, 1L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("종료된 대화방입니다. 새 대화방을 사용하세요.");
+                    .isInstanceOf(ConflictException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_CLOSED);
         }
     }
 }

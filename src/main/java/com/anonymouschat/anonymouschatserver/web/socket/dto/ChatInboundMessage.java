@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.dto;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.socket.MessageValidationException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -17,21 +19,21 @@ public record ChatInboundMessage(
 		String content
 ) {
 	public ChatInboundMessage {
-		if (roomId == null) throw new IllegalArgumentException("roomId is required");
-		if (type == null) throw new IllegalArgumentException("type is required");
+		if (roomId == null) throw new MessageValidationException(ErrorCode.ROOM_ID_REQUIRED);
+		if (type == null) throw new MessageValidationException(ErrorCode.MESSAGE_TYPE_REQUIRED);
 
 		// 타입별 제약
 		switch (type) {
 			case CHAT -> {
 				if (content == null || content.isBlank())
-					throw new IllegalArgumentException("content is required for CHAT");
+					throw new MessageValidationException(ErrorCode.CONTENT_REQUIRED_FOR_CHAT);
 				if (content.length() > 2000)
-					throw new IllegalArgumentException("content length exceeds limit");
+					throw new MessageValidationException(ErrorCode.CONTENT_LENGTH_EXCEEDED);
 			}
 			case READ, ENTER, LEAVE -> {
 				// READ/ENTER/LEAVE는 content 금지
 				if (content != null && !content.isBlank())
-					throw new IllegalArgumentException("content must be empty for " + type);
+					throw new MessageValidationException(ErrorCode.CONTENT_SHOULD_BE_EMPTY);
 			}
 		}
 	}

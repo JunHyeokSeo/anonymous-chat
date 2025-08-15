@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.socket.UnsupportedMessageTypeException;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.handler.MessageHandler;
@@ -72,7 +74,7 @@ class ChatMessageDispatcherTest {
         // leaveMessage를 디스패치할 때 UnsupportedOperationException이 발생하고,
         // 해당 예외 메시지에 "Unsupported message type: LEAVE"가 포함되어 있는지 검증.
         assertThatThrownBy(() -> dispatcher.dispatch(session, leaveMessage))
-                .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessageContaining("Unsupported message type: LEAVE");
+                .isInstanceOf(UnsupportedMessageTypeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_MESSAGE_TYPE);
     }
 }

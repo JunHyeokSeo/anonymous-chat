@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.common.util;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.file.EmptyFileException;
+import com.anonymouschat.anonymouschatserver.common.exception.file.UnsupportedImageFormatException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,8 +38,8 @@ class ImageValidatorTest {
 			);
 
 			assertThatThrownBy(() -> imageValidator.validate(file))
-					.isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("파일이 비어 있습니다.");
+					.isInstanceOf(EmptyFileException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FILE_IS_EMPTY);
 		}
 
 		@Test
@@ -47,8 +50,8 @@ class ImageValidatorTest {
 			);
 
 			assertThatThrownBy(() -> imageValidator.validate(file))
-					.isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("지원하지 않는 이미지 형식입니다.");
+					.isInstanceOf(UnsupportedImageFormatException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
 
 		@Test
@@ -59,8 +62,8 @@ class ImageValidatorTest {
 			);
 
 			assertThatThrownBy(() -> imageValidator.validate(file))
-					.isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("지원하지 않는 이미지 형식입니다.");
+					.isInstanceOf(UnsupportedImageFormatException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
 	}
 }

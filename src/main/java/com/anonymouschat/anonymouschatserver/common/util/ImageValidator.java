@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.common.util;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.file.EmptyFileException;
+import com.anonymouschat.anonymouschatserver.common.exception.file.UnsupportedImageFormatException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,12 +47,12 @@ TODO [Refactor-ImageValidation] Bean Validation 기반으로 이미지 검증 �
 
 4) 서비스 계층 정리
    - UserService 등에서 이 유틸(현재 클래스) 직접 호출 제거.
-   - 입력 검증 실패는 컨트롤러 진입 전에 400으로 반환되도록 GlobalExceptionHandler에서 처리 일원화.
+   - 입력 검증 실패는 컨트롤러 진입 전에 400으로 반환되도록 GlobalExceptionHandler 에서 처리 일원화.
    - 본 클래스(common.util.ImageValidator)는 리팩토링 완료 후 삭제 대상.
 
 5) 예외/응답 정책
-   - 검증 실패 메시지는 @ImageFile.message() 또는 Validator에서 구성.
-   - 공통 응답 형식(ApiResponse 등)은 GlobalExceptionHandler에서 BindException/MethodArgumentNotValidException 매핑.
+   - 검증 실패 메시지는 @ImageFile.message() 또는 Validator 에서 구성.
+   - 공통 응답 형식(ApiResponse 등)은 GlobalExceptionHandler 에서 BindException/MethodArgumentNotValidException 매핑.
 
 6) 테스트
    - 단위 테스트: ImageFileValidator에 대한 isValid() 케이스(정상/확장자 오류/MIME 오류/빈 파일/allowEmpty=true) 검증.
@@ -95,11 +98,11 @@ public class ImageValidator {
 
 	public void validate(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
-			throw new IllegalArgumentException("파일이 비어 있습니다.");
+			throw new EmptyFileException(ErrorCode.FILE_IS_EMPTY);
 		}
 
 		if (!hasValidExtension(file) || !hasValidMimeType(file)) {
-			throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
+			throw new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
 	}
 

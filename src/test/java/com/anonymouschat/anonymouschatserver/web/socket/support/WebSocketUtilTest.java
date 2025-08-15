@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.UnauthorizedException;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.testsupport.security.PrincipalStub;
 import com.anonymouschat.testsupport.socket.WebSocketSessionStub;
@@ -69,8 +71,8 @@ class WebSocketUtilTest {
         // when & then
         // Principal 추출 시 IllegalStateException이 발생하고, 메시지에 "인증 정보가 없습니다"가 포함되어 있는지 검증.
         assertThatThrownBy(() -> WebSocketUtil.extractPrincipal(session))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("인증 정보가 없습니다");
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED);
     }
 
     /**
@@ -87,7 +89,7 @@ class WebSocketUtilTest {
         // when & then
         // Principal 추출 시 IllegalStateException이 발생하고, 메시지에 "인증되지 않은 사용자"가 포함되어 있는지 검증합니다.
         assertThatThrownBy(() -> WebSocketUtil.extractPrincipal(session))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("인증되지 않은 사용자");
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED);
     }
 }

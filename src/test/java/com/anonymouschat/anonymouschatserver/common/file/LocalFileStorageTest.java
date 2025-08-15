@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.file;
 
+import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.infra.file.LocalFileStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,6 +77,6 @@ class LocalFileStorageTest {
 		MockMultipartFile file = new MockMultipartFile("file", "invalidfile", "text/plain", "data".getBytes());
 
 		// when/then
-		org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> fileStorage.upload(file));
+		org.junit.jupiter.api.Assertions.assertThrows(BadRequestException.class, () -> fileStorage.upload(file));
 	}
 }

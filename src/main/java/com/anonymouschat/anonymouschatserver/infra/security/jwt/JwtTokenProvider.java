@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
@@ -77,14 +79,10 @@ public class JwtTokenProvider {
 		try {
 			Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
 			return true;
-		} catch (SecurityException | MalformedJwtException e) {
-			throw new JwtException("잘못된 JWT 서명입니다.", e);
+		} catch (SecurityException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+			throw new InvalidTokenException(ErrorCode.INVALID_TOKEN, e);
 		} catch (ExpiredJwtException e) {
-			throw new JwtException("만료된 JWT 입니다.", e);
-		} catch (UnsupportedJwtException e) {
-			throw new JwtException("지원하지 않는 JWT 입니다.", e);
-		} catch (IllegalArgumentException e) {
-			throw new JwtException("JWT claims 문자열이 비어있습니다.", e);
+			throw new InvalidTokenException(ErrorCode.EXPIRED_TOKEN, e);
 		}
 	}
 
@@ -110,7 +108,7 @@ public class JwtTokenProvider {
 					       .role(role)
 					       .build();
 		}
-		throw new JwtException("유효한 클레임이 JWT에 존재하지 않습니다.");
+		throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
 	}
 
 	private Claims parse(String token) {

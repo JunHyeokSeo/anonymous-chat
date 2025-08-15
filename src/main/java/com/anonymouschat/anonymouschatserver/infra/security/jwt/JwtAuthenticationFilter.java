@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.infra.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

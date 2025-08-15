@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.InternalServerException;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import lombok.Builder;
 
@@ -21,7 +23,7 @@ public record CustomPrincipal(
 		//userId가 없으면 provider + providerId는 있어야 한다
 		if (userId == null) {
 			if (provider == null || providerId == null || providerId.isBlank()) {
-				throw new IllegalArgumentException("userId 또는 provider + providerId 조합 중 하나는 반드시 존재해야 합니다.");
+				throw new InternalServerException(ErrorCode.INVALID_PRINCIPAL_STATE);
 			}
 		}
 	}
@@ -34,7 +36,7 @@ public record CustomPrincipal(
 		if (provider != null && providerId != null) {
 			return provider.name() + ":" + providerId;
 		}
-		throw new IllegalStateException("CustomPrincipal은 userId 또는 provider + providerId 조합 중 하나를 반드시 포함해야 합니다.");
+		throw new InternalServerException(ErrorCode.INVALID_PRINCIPAL_STATE);
 	}
 
 	public boolean isAuthenticatedUser() {

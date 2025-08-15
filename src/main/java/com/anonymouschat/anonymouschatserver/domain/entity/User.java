@@ -1,6 +1,8 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
@@ -81,7 +83,7 @@ public class User {
 
 	public void addProfileImage(UserProfileImage image) {
 		if (profileImages.size() >= 3) {
-			throw new IllegalStateException("프로필 이미지는 최대 3장까지만 등록할 수 있습니다.");
+			throw new BadRequestException(ErrorCode.PROFILE_IMAGE_LIMIT_EXCEEDED);
 		}
 
 		profileImages.add(image);

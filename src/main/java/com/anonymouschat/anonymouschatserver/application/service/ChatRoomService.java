@@ -1,6 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
+import com.anonymouschat.anonymouschatserver.common.exception.InternalServerException;
+import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
@@ -33,7 +37,7 @@ public class ChatRoomService {
 			return chatRoomRepository.save(new ChatRoom(initiator, recipient));
 		} catch (org.springframework.dao.DataIntegrityViolationException e) {
 			return chatRoomRepository.findActiveByPair(left, right)
-					       .orElseThrow(() -> new IllegalStateException("동시성 충돌 후 활성 방 조회 실패"));
+					       .orElseThrow(() -> new InternalServerException(ErrorCode.CHAT_ROOM_CONCURRENCY_ERROR));
 		}
 	}
 
@@ -57,7 +61,7 @@ public class ChatRoomService {
 
 	private ChatRoom findChatRoomById(Long roomId) {
 		return chatRoomRepository.findById(roomId)
-				       .orElseThrow(() -> new IllegalStateException("채팅방이 존재하지 않습니다."));
+				       .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 	}
 
 	public void markActiveIfInactive(Long roomId) {
@@ -76,7 +80,7 @@ public class ChatRoomService {
 		ChatRoom chatRoom = findChatRoomById(roomId);
 
 		if (chatRoom.isArchived()) {
-			throw new IllegalStateException("종료된 대화방입니다. 새 대화방을 사용하세요.");
+			throw new ConflictException(ErrorCode.CHAT_ROOM_CLOSED);
 		}
 
 		chatRoom.returnBy(userId);

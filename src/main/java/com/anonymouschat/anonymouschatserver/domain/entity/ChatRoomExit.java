@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.NoArgsConstructor;
@@ -43,7 +45,7 @@ public class ChatRoomExit {
 	public LocalDateTime getExitTime(Long userId, Long user1Id, Long user2Id) {
 		if (userId.equals(user1Id)) return user1ExitedAt;
 		else if (userId.equals(user2Id)) return user2ExitedAt;
-		else throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
+		else throw new NotChatRoomMemberException(ErrorCode.NOT_CHAT_ROOM_MEMBER);
 	}
 
 	public boolean bothExited() {

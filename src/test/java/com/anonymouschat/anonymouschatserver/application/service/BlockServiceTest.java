@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.user.CannotBlockSelfException;
 import com.anonymouschat.anonymouschatserver.domain.entity.Block;
 import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
@@ -58,8 +61,8 @@ class BlockServiceTest {
 
             // when & then
             assertThatThrownBy(() -> blockService.block(user, user))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("자기 자신을 차단할 수 없습니다.");
+                    .isInstanceOf(CannotBlockSelfException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CANNOT_BLOCK_SELF);
         }
 
         @Test
@@ -132,8 +135,8 @@ class BlockServiceTest {
 
             // when & then
             assertThatThrownBy(() -> blockService.unblock(blockerId, blockedId))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("차단 정보를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.BLOCK_NOT_FOUND);
         }
 
         @Test
@@ -149,8 +152,8 @@ class BlockServiceTest {
 
             // when & then
             assertThatThrownBy(() -> blockService.unblock(blockerId, blockedId))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("차단 정보를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.BLOCK_NOT_FOUND);
         }
     }
 

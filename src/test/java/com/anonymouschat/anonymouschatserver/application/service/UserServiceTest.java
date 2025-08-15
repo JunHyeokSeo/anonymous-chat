@@ -1,6 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.file.UnsupportedImageFormatException;
+import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
+import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
@@ -95,12 +99,13 @@ class UserServiceTest {
 		@DisplayName("이미지 유효성 검사 실패로 회원가입 실패")
 		void registerUser_imageValidationFails() {
 			MultipartFile image = mock(MultipartFile.class);
-			doThrow(new IllegalArgumentException("잘못된 이미지")).when(imageValidator).validate(image);
+			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT)).when(imageValidator).validate(image);
 
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of(image)))
-					.isInstanceOf(IllegalArgumentException.class);
+					.isInstanceOf(UnsupportedImageFormatException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
 
 		@Test
@@ -142,8 +147,8 @@ class UserServiceTest {
 			when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userService.getMyProfile(999L))
-					.isInstanceOf(IllegalStateException.class)
-					.hasMessageContaining("사용자를 찾을 수 없습니다");
+					.isInstanceOf(UserNotFoundException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
 	}
 
@@ -178,7 +183,8 @@ class UserServiceTest {
 
 			assertThatThrownBy(() -> userService.update(
 					new UserServiceDto.UpdateCommand(99L, "n", Gender.MALE, 20, Region.SEOUL, "bio"), List.of()
-			)).isInstanceOf(IllegalStateException.class);
+			)).isInstanceOf(UserNotFoundException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
 
 		@Test
@@ -190,12 +196,13 @@ class UserServiceTest {
 
 			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
-			doThrow(new IllegalArgumentException("invalid")).when(imageValidator).validate(image);
+			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT)).when(imageValidator).validate(image);
 
 			assertThatThrownBy(() -> userService.update(
 					new UserServiceDto.UpdateCommand(1L, "n", Gender.MALE, 20, Region.SEOUL, "bio"),
 					List.of(image)
-			)).isInstanceOf(IllegalArgumentException.class);
+			)).isInstanceOf(UnsupportedImageFormatException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
 	}
 
@@ -220,8 +227,8 @@ class UserServiceTest {
 			when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userService.withdraw(123L))
-					.isInstanceOf(IllegalStateException.class)
-					.hasMessageContaining("사용자를 찾을 수 없습니다");
+					.isInstanceOf(UserNotFoundException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
 	}
 
@@ -232,8 +239,8 @@ class UserServiceTest {
 
 		assertThatThrownBy(() -> ReflectionTestUtils.invokeMethod(
 				userService, "validateNicknameDuplication", "duplicate"))
-				.isInstanceOf(IllegalStateException.class)
-				.hasMessageContaining("동일한 닉네임이 존재합니다.");
+				.isInstanceOf(DuplicateNicknameException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_NICKNAME);
 	}
 
 	private User createUser() {

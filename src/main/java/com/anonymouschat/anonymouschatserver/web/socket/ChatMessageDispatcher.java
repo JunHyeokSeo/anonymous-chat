@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.socket.MessageValidationException;
+import com.anonymouschat.anonymouschatserver.common.exception.socket.UnsupportedMessageTypeException;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.handler.MessageHandler;
@@ -43,7 +46,7 @@ public class ChatMessageDispatcher {
 		validateInbound(inbound);
 		MessageHandler handler = handlerMap.get(inbound.type());
 		if (handler == null) {
-			throw new UnsupportedOperationException("Unsupported message type: " + inbound.type());
+			throw new UnsupportedMessageTypeException(ErrorCode.UNSUPPORTED_MESSAGE_TYPE);
 		}
 		log.debug("{}type={} roomId={} sessionId={}", WsLogTag.sys(), inbound.type(), inbound.roomId(), session.getId());
 		handler.handle(session, inbound);
@@ -57,16 +60,16 @@ public class ChatMessageDispatcher {
 	 * @throws IllegalArgumentException 필수 필드가 누락되었거나 내용이 유효하지 않을 경우
 	 */	private void validateInbound(ChatInboundMessage inbound) {
 		if (inbound == null) {
-			throw new IllegalArgumentException("Inbound payload is required.");
+			throw new MessageValidationException(ErrorCode.PAYLOAD_REQUIRED);
 		}
 		if (inbound.type() == null) {
-			throw new IllegalArgumentException("Inbound.type is required.");
+			throw new MessageValidationException(ErrorCode.MESSAGE_TYPE_REQUIRED);
 		}
 		if (inbound.roomId() == null) {
-			throw new IllegalArgumentException("Inbound.roomId is required.");
+			throw new MessageValidationException(ErrorCode.ROOM_ID_REQUIRED);
 		}
 		if (inbound.type() == MessageType.CHAT && (inbound.content() == null || inbound.content().isBlank())) {
-		     throw new IllegalArgumentException("Inbound.content is required for CHAT.");
+		     throw new MessageValidationException(ErrorCode.CONTENT_REQUIRED_FOR_CHAT);
 		}
 	}
 }

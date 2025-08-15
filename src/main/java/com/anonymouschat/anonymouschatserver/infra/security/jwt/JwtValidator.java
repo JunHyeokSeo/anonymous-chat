@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
-import io.jsonwebtoken.JwtException;
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +11,9 @@ public class JwtValidator {
 
 	private final JwtTokenProvider jwtTokenProvider;
 
-	public void validate(String token) throws JwtException {
+	public void validate(String token) {
 		if (!jwtTokenProvider.validateToken(token)) {
-			throw new JwtException("유효하지 않은 JWT 입니다.");
+			throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
 		}
 	}
 }
-

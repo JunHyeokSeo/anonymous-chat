@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
+import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,7 +72,7 @@ public class ChatRoom {
 
 	public void validateParticipant(Long userId) {
 		if (!isParticipant(userId)) {
-			throw new IllegalStateException("채팅방 참여자가 아닙니다.");
+			throw new NotChatRoomMemberException(ErrorCode.NOT_CHAT_ROOM_MEMBER);
 		}
 	}
 
