@@ -29,16 +29,8 @@ public record ApiResponse<T>(
 		return new ApiResponse<>(code.getCode(), code.getMessage(), data);
 	}
 
-	public static <T> ApiResponse<T> error(String code, String message) {
-		return new ApiResponse<>(code, message, null);
-	}
-
 	public static <T> ApiResponse<T> error(ErrorCode errorCode, String message) {
 		return new ApiResponse<>(errorCode.name(), message, null);
-	}
-
-	public static <T> ApiResponse<T> error(ErrorCode errorCode) {
-		return new ApiResponse<>(errorCode.name(), errorCode.name(), null);
 	}
 
 	/**
