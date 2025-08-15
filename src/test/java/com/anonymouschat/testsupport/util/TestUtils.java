@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 
 import java.lang.reflect.Field;
 
@@ -15,6 +16,7 @@ public class TestUtils {
             .provider(OAuthProvider.GOOGLE)
             .providerId("provider-id-" + id)
             .nickname("User" + id)
+		    .role(UserRole.ROLE_USER)
             .gender(Gender.MALE)
             .age(25)
             .region(Region.SEOUL)
@@ -23,6 +25,14 @@ public class TestUtils {
         setId(user, id);
         return user;
     }
+
+	public static User guestUser(){
+		return User.builder()
+				            .provider(OAuthProvider.GOOGLE)
+				            .providerId("provider-id")
+				            .role(UserRole.ROLE_GUEST)
+				            .build();
+	}
 
     public static ChatRoom createChatRoom(Long id, User user1, User user2) throws Exception {
         ChatRoom chatRoom = ChatRoom.builder()

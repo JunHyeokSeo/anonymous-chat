@@ -124,10 +124,10 @@ public class User {
 		this.provider = Objects.requireNonNull(provider);
 		this.providerId = Objects.requireNonNull(providerId);
 		this.role = Objects.requireNonNull(role);
-		this.nickname = Objects.requireNonNull(nickname);
-		this.gender = Objects.requireNonNull(gender);
+		this.nickname = nickname;
+		this.gender = gender;
 		this.age = age;
-		this.region = Objects.requireNonNull(region);
+		this.region = region;
 		this.bio = bio == null ? "" : bio;
 	}
 }

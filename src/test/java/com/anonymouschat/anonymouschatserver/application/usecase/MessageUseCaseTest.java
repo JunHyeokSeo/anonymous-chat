@@ -10,6 +10,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.testsupport.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,61 +39,42 @@ class MessageUseCaseTest {
 	private Message message;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		user = User.builder()
-				       .provider(OAuthProvider.GOOGLE)
-				       .providerId("pid")
-				       .nickname("tester")
-				       .gender(Gender.MALE)
-				       .age(25)
-				       .region(Region.SEOUL)
-				       .bio("hello")
-				       .build();
-		ReflectionTestUtils.setField(user, "id", 1L);
-
-		chatRoom = ChatRoom.builder()
-				           .user1(user)
-				           .user2(user)
-				           .build();
-		ReflectionTestUtils.setField(chatRoom, "id", 1L);
-
-		message = Message.builder()
-				          .chatRoom(chatRoom)
-				          .sender(user)
-				          .content("hi")
-				          .build();
-		ReflectionTestUtils.setField(message, "id", 10L);
-		ReflectionTestUtils.setField(message, "sentAt", LocalDateTime.now());
+		user = TestUtils.createUser(1L);
+		chatRoom = TestUtils.createChatRoom(1L, user, user);
+		message = TestUtils.createMessage(10L, chatRoom, user, "hi");
 	}
 
-//	@Nested
-//	@DisplayName("sendMessage 메서드는")
-//	class SendMessage {
-//
-//		@Test
-//		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
-//		void sendMessage() {
-//			// given
-//			var request = MessageUseCaseDto.SendMessage.builder()
-//					              .roomId(1L)
-//					              .senderId(1L)
-//					              .content("hello")
-//					              .build();
-//
-//			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
-//			when(userService.findUser(1L)).thenReturn(user);
-//
-//			// when
-//			messageUseCase.sendMessage(request);
-//
-//			// then
-//			verify(chatRoomService).getVerifiedChatRoomOrThrow(1L, 1L);
-//			verify(userService).findUser(1L);
-//			verify(messageService).saveMessage(chatRoom, user, "hello");
-//		}
-//	}
+	@Nested
+	@DisplayName("sendMessage 메서드는")
+	class SendMessage {
+
+		@Test
+		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
+		void sendMessage() {
+			// given
+			var request = MessageUseCaseDto.SendMessage.builder()
+					              .roomId(1L)
+					              .senderId(1L)
+					              .content("hello")
+					              .build();
+
+			when(chatRoomService.getVerifiedChatRoomOrThrow(1L, 1L)).thenReturn(chatRoom);
+			when(userService.findUser(1L)).thenReturn(user);
+			when(messageService.saveMessage(any(ChatRoom.class), any(User.class), anyString())).thenReturn(message);
+
+			// when
+			Long messageId = messageUseCase.sendMessage(request);
+
+			// then
+			verify(chatRoomService).getVerifiedChatRoomOrThrow(1L, 1L);
+			verify(userService).findUser(1L);
+			verify(messageService).saveMessage(chatRoom, user, "hello");
+			assertThat(messageId).isEqualTo(message.getId());
+		}
+	}
 
 	@Nested
 	@DisplayName("getMessages 메서드는")
