@@ -14,10 +14,15 @@ public class JwtValidator {
 
 	public void validate(String token) {
 		try {
-			Jwts.parserBuilder()
-					.setSigningKey(jwtTokenProvider.getSecretKey())
-					.build()
-					.parseClaimsJws(token);
+			Jws<Claims> parsedToken = Jwts.parserBuilder()
+					                        .setSigningKey(jwtTokenProvider.getSecretKey())
+					                        .build()
+					                        .parseClaimsJws(token);
+
+			JwsHeader<?> header = parsedToken.getHeader();
+			if (!SignatureAlgorithm.HS256.getValue().equals(header.getAlgorithm())) {
+				throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
+			}
 		} catch (SecurityException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
 			throw new InvalidTokenException(ErrorCode.INVALID_TOKEN, e);
 		} catch (ExpiredJwtException e) {
