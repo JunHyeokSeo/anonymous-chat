@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,15 +38,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				// 항상 request에 주입
 				request.setAttribute(ATTR_PRINCIPAL, principal);
 
+				// 기존 컨텍스트 제거
+				SecurityContextHolder.clearContext();
+
 				// 인증된 사용자만 SecurityContext에 주입
 				var authentication = authFactory.createAuthentication(principal);
 				if (authentication != null) {
-					SecurityContextHolder.getContext().setAuthentication(authentication);
+					// 새로운 인증 정보 설정
+					SecurityContext context = SecurityContextHolder.createEmptyContext();
+					context.setAuthentication(authentication);
+					SecurityContextHolder.setContext(context);
 				}
 			}
 
 			filterChain.doFilter(request, response);
-
 		} catch (Exception e) {
 			SecurityContextHolder.clearContext();
 			ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED, e.getMessage());
