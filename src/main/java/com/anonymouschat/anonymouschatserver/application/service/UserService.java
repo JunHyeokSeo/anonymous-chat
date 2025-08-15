@@ -2,6 +2,8 @@ package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.application.dto.*;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
+import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
@@ -34,12 +36,24 @@ public class UserService {
 	private final ImageValidator imageValidator;
 
 	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
+		User user = userRepository.findByProviderAndProviderIdAndActiveTrue(command.provider(), command.providerId())
+				            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND));
+
+		if (!user.isGuest()) {
+			throw new BadRequestException(ErrorCode.ALREADY_REGISTERED_USER);
+		}
+
 		validateNicknameDuplication(command.nickname());
-		User user = command.toEntity();
+
+		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
+		user.updateRole(UserRole.ROLE_USER);
+
 		List<UserProfileImage> profileImages = convertToProfileImages(images);
 		profileImages.forEach(user::addProfileImage);
-		return userRepository.save(user).getId();
+
+		return user.getId();
 	}
+
 
 	@Transactional(readOnly = true)
 	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
@@ -54,15 +68,10 @@ public class UserService {
 	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
 		User user = findUser(command.userId());
 
-		//닉네임 중복 검사
 		validateNicknameDuplication(command.nickname());
+		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 
-		user.update(command);
-
-		//기존 프로필 이미지 삭제
 		deletePreviousImages(user.getId());
-
-		//새 프로필 이미지 등록
 		List<UserProfileImage> newImages = convertToProfileImages(images);
 		newImages.forEach(user::addProfileImage);
 	}

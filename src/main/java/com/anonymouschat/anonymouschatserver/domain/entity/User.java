@@ -95,11 +95,7 @@ public class User {
 		image.setUser(this);
 	}
 
-	public void update(UserServiceDto.UpdateCommand command) {
-		updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
-	}
-
-	private void updateProfile(String nickname, Gender gender, int age, Region region, String bio) {
+	public void updateProfile(String nickname, Gender gender, int age, Region region, String bio) {
 		this.nickname = Objects.requireNonNull(nickname);
 		this.gender = Objects.requireNonNull(gender);
 		this.age = age;
@@ -109,6 +105,18 @@ public class User {
 
 	public void markWithDraw() {
 		this.active = false;
+	}
+
+	public boolean isGuest() {
+		return UserRole.ROLE_GUEST.equals(this.role);
+	}
+
+	public void updateRole(UserRole newRole) {
+		if (newRole == null) {
+			throw new IllegalArgumentException("역할은 null이 될 수 없습니다.");
+		}
+
+		this.role = newRole;
 	}
 
 	@Builder

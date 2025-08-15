@@ -24,8 +24,9 @@ public enum ErrorCode {
 
     // 유저 관련
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."),
+	USER_GUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "임시 OAuth 유저를 찾을 수 없습니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
-    ALREADY_REGISTERED(HttpStatus.CONFLICT, "이미 등록된 사용자입니다."),
+    ALREADY_REGISTERED_USER(HttpStatus.CONFLICT, "이미 등록된 사용자입니다."),
     CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 차단할 수 없습니다."),
     PROFILE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "프로필 이미지는 최대 3장까지만 등록할 수 있습니다."),
     BLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "차단 정보를 찾을 수 없습니다."),
