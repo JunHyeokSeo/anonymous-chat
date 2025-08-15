@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.InternalServerException;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import jakarta.annotation.Nullable;
 import lombok.Builder;
 
 import java.security.Principal;
@@ -15,9 +16,9 @@ import java.security.Principal;
  */
 @Builder
 public record CustomPrincipal(
-		Long userId,
-		OAuthProvider provider,
-		String providerId,
+		@Nullable Long userId,
+		@Nullable OAuthProvider provider,
+		@Nullable String providerId,
 		String role) implements Principal {
 	public CustomPrincipal {
 		//userId가 없으면 provider + providerId는 있어야 한다

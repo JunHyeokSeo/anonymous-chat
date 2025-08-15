@@ -103,8 +103,8 @@ public class JwtTokenProvider {
 
 	public long getExpirationMillis(String token) {
 		Claims claims = parse(token);
-		Date expiration = claims.getExpiration();
-		return expiration.getTime() - System.currentTimeMillis();
+		long diff = claims.getExpiration().getTime() - System.currentTimeMillis();
+		return Math.max(diff, 0);
 	}
 
 	public Claims parse(String token) {

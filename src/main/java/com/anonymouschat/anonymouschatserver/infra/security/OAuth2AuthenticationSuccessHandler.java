@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
-import com.anonymouschat.anonymouschatserver.application.service.UserService;
+import com.anonymouschat.anonymouschatserver.application.dto.AuthTokens;
+import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.UnauthorizedException;
-import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,8 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-	private final JwtTokenProvider jwtTokenProvider;
-	private final UserService userService;
+	private final AuthUseCase authUseCase;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
 
 	@Override
@@ -38,15 +37,14 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		String providerId = rawSub.toString();
 		OAuthProvider provider = oAuth2ProviderResolver.resolve(request, oAuth2User);
 
-		boolean isNewUser = userService.findByProviderAndProviderId(provider, providerId).isEmpty();
-		String accessToken = jwtTokenProvider.createAccessTokenForOAuthLogin(provider, providerId);
+		AuthTokens authTokens = authUseCase.login(provider, providerId);
 
 		String json = String.format("""
 		{
 			"accessToken": "%s",
-			"isNewUser": %s
+			"refreshToken": "%s"
 		}
-		""", accessToken, isNewUser);
+		""", authTokens.accessToken(), authTokens.refreshToken());
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

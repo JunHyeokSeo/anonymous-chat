@@ -20,7 +20,7 @@ public enum ErrorCode {
     INVALID_PRINCIPAL_STATE(HttpStatus.INTERNAL_SERVER_ERROR, "서버 인증 객체 생성에 실패했습니다."),
     INVALID_OAUTH_TOKEN_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "잘못된 OAuth 토큰 타입입니다."),
     UNSUPPORTED_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, "지원하지 않는 OAuth Provider 입니다."),
-
+    TOKEN_THEFT_DETECTED(HttpStatus.UNAUTHORIZED, "토큰 탈취 시도가 감지되었습니다. 다시 로그인해주세요."),
 
     // 유저 관련
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."),
