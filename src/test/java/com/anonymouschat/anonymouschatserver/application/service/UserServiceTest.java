@@ -100,7 +100,7 @@ class UserServiceTest {
 			verify(imageValidator).validate(image);
 			verify(fileStorage).upload(image);
 			assertThat(guestUser.getProfileImages()).hasSize(1);
-			assertThat(guestUser.getProfileImages().get(0).getImageUrl()).isEqualTo("https://image.com");
+			assertThat(guestUser.getProfileImages().getFirst().getImageUrl()).isEqualTo("https://image.com");
 		}
 
 		@Test

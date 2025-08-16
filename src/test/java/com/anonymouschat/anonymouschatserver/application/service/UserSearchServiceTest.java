@@ -70,17 +70,17 @@ class UserSearchServiceTest {
 			Slice<UserServiceDto.SearchResult> mockSlice =
 					new SliceImpl<>(results, pageable, false);
 
-			when(userRepository.searchUsers(command, pageable))
+			when(userRepository.findUsersByCondition(command, pageable))
 					.thenReturn(mockSlice);
 
 			// when
-			Slice<UserServiceDto.SearchResult> slice = userSearchService.search(command, pageable);
+			Slice<UserServiceDto.SearchResult> slice = userSearchService.getUsersByCondition(command, pageable);
 
 			// then
 			assertThat(slice).isNotNull();
 			assertThat(slice.getContent()).hasSize(1);
 			assertThat(slice.getContent().get(0).nickname()).isEqualTo("nickname");
-			verify(userRepository).searchUsers(command, pageable);
+			verify(userRepository).findUsersByCondition(command, pageable);
 		}
 
 		@Test
@@ -90,15 +90,15 @@ class UserSearchServiceTest {
 			Slice<UserServiceDto.SearchResult> emptySlice =
 					new SliceImpl<>(List.of(), pageable, false);
 
-			when(userRepository.searchUsers(any(), any()))
+			when(userRepository.findUsersByCondition(any(), any()))
 					.thenReturn(emptySlice);
 
 			// when
-			Slice<UserServiceDto.SearchResult> slice = userSearchService.search(command, pageable);
+			Slice<UserServiceDto.SearchResult> slice = userSearchService.getUsersByCondition(command, pageable);
 
 			// then
 			assertThat(slice.getContent()).isEmpty();
-			verify(userRepository).searchUsers(command, pageable);
+			verify(userRepository).findUsersByCondition(command, pageable);
 		}
 	}
 }

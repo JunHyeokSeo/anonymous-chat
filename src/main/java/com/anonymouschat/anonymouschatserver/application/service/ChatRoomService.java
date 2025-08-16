@@ -32,7 +32,7 @@ public class ChatRoomService {
 		Optional<ChatRoom> existing = chatRoomRepository.findActiveByPair(left, right);
 		if (existing.isPresent()) {
             ChatRoom chatRoom = existing.get();
-            log.info("{}Active chat room exists. roomId={}", LogTag.CHAT, chatRoom.getId());
+            log.info("{}활성 채팅방 존재 - roomId={}", LogTag.CHAT, chatRoom.getId());
 			chatRoom.returnBy(initiator.getId());
 			return chatRoom;
 		}
@@ -41,7 +41,7 @@ public class ChatRoomService {
 		try {
 			return chatRoomRepository.save(new ChatRoom(initiator, recipient));
 		} catch (org.springframework.dao.DataIntegrityViolationException e) {
-            log.warn("{}Concurrency issue on creating chat room. initiatorId={}, recipientId={}", LogTag.CHAT, initiator.getId(), recipient.getId());
+            log.warn("{}채팅방 생성 중 동시성 문제 발생 - initiatorId={}, recipientId={}", LogTag.CHAT, initiator.getId(), recipient.getId());
 			return chatRoomRepository.findActiveByPair(left, right)
 					       .orElseThrow(() -> new InternalServerException(ErrorCode.CHAT_ROOM_CONCURRENCY_ERROR));
 		}
@@ -61,7 +61,7 @@ public class ChatRoomService {
 	}
 
 	public void exit(Long userId, Long roomId) {
-        log.info("{}userId={}, roomId={}", LogTag.CHAT, userId, roomId);
+        log.info("{}채팅방 나가기 요청 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
 		chatRoom.exitBy(userId); // 둘 다 나가면 isActive=false로 전환됨
 	}
@@ -84,7 +84,7 @@ public class ChatRoomService {
 	}
 
 	public void returnBy(Long roomId, Long userId) {
-        log.info("{}userId={}, roomId={}", LogTag.CHAT, userId, roomId);
+        log.info("{}채팅방 복귀 요청 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
 
 		if (chatRoom.isArchived()) {

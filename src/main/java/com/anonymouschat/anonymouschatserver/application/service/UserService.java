@@ -39,7 +39,7 @@ public class UserService {
 	private final ImageValidator imageValidator;
 
 	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
-        log.info("{}provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
+        log.info("{}회원 등록 요청 - provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
 		User user = userRepository.findByProviderAndProviderIdAndActiveTrue(command.provider(), command.providerId())
 				            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND));
 
@@ -70,7 +70,7 @@ public class UserService {
 	}
 
 	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
-        log.info("{}userId={}", LogTag.USER, command.userId());
+        log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, command.userId());
 		User user = findUser(command.userId());
 
 		validateNicknameDuplication(command.nickname());
@@ -82,7 +82,7 @@ public class UserService {
 	}
 
 	public void withdraw(Long userId) {
-        log.info("{}userId={}", LogTag.USER, userId);
+        log.info("{}회원 탈퇴 요청 - userId={}", LogTag.USER, userId);
 		findUser(userId).markWithDraw();
 	}
 
@@ -97,7 +97,7 @@ public class UserService {
 	}
 
 	public User createGuestUser(OAuthProvider provider, String providerId) {
-        log.info("{}provider={}, providerId={}", LogTag.USER, provider, providerId);
+        log.info("{}게스트 유저 생성 요청 - provider={}, providerId={}", LogTag.USER, provider, providerId);
 		User guestUser = User.builder()
 				.provider(provider)
 				.providerId(providerId)
@@ -136,7 +136,7 @@ public class UserService {
                                    .isRepresentative(i == 0)
                                    .build());
             } catch (IOException e) {
-                log.error("{}Failed to upload profile image.", LogTag.IMAGE, e);
+	            log.error("{}프로필 이미지 업로드 실패 - index={}, 파일명={}, 에러={}", LogTag.IMAGE, i, image.getOriginalFilename(), e.getMessage(), e);
                 throw e;
             }
 		}

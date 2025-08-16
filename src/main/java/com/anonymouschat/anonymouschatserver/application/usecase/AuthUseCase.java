@@ -27,7 +27,7 @@ public class AuthUseCase {
 
     @Transactional
     public AuthResult login(OAuthProvider provider, String providerId) {
-        log.info("{}Login attempt. provider={}, providerId={}", LogTag.AUTH, provider, providerId);
+        log.info("{}소셜 로그인 요청 - provider={}, providerId={}", LogTag.AUTH, provider, providerId);
 	    AtomicBoolean isNewUser = new AtomicBoolean(false);
 
 	    User user = userService.findByProviderAndProviderId(provider, providerId)
@@ -55,7 +55,7 @@ public class AuthUseCase {
 		String storedRefreshToken = authService.findRefreshTokenOrThrow(userId.toString());
 
 		if (!storedRefreshToken.equals(oldRefreshToken)) {
-			log.warn("{}RefreshToken theft detected. userId = {}, token = {}", LogTag.SECURITY, userId, oldRefreshToken);
+			log.warn("{}다른 기기에서의 RefreshToken 사용 감지 - userId = {}, token = {}", LogTag.SECURITY, userId, oldRefreshToken);
 			authService.revokeRefreshToken(userId.toString());
 			throw new InvalidTokenException(ErrorCode.TOKEN_THEFT_DETECTED);
 		}
@@ -73,7 +73,7 @@ public class AuthUseCase {
 
 	@Transactional
     public void logout(String userId) {
-        log.info("{}User logging out. userId={}", LogTag.AUTH, userId);
+        log.info("{}로그아웃 요청 - userId={}", LogTag.AUTH, userId);
         authService.revokeRefreshToken(userId);
     }
 }

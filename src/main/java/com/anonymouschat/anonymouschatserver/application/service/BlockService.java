@@ -25,7 +25,7 @@ public class BlockService {
 
     @Transactional
     public void block(User blocker, User blocked) {
-        log.info("{}blockerId={}, blockedId={}", LogTag.BLOCK, blocker.getId(), blocked.getId());
+        log.info("{}유저 차단 - blockerId={}, blockedId={}", LogTag.BLOCK, blocker.getId(), blocked.getId());
         if (Objects.equals(blocker.getId(), blocked.getId())) {
             throw new CannotBlockSelfException(ErrorCode.CANNOT_BLOCK_SELF);
         }
@@ -48,7 +48,7 @@ public class BlockService {
 
     @Transactional
     public void unblock(Long blockerId, Long blockedId) {
-        log.info("{}blockerId={}, blockedId={}", LogTag.BLOCK, blockerId, blockedId);
+        log.info("{}유저 차단 해제 - blockerId={}, blockedId={}", LogTag.BLOCK, blockerId, blockedId);
         Block block = findBlockByBlockerIdAndBlockedId(blockerId, blockedId);
         block.deactivate();
     }

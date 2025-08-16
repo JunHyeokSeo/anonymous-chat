@@ -1,6 +1,5 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
-import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;

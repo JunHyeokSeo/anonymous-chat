@@ -26,7 +26,7 @@ public class ChatSendOrchestrator {
 	@EventListener
 	@Transactional
 	public void on(ChatSave event) {
-        log.info("{}Received ChatSave event. roomId={}, senderId={}", LogTag.ORCHESTRATOR, event.roomId(), event.senderId());
+        log.info("{}ChatSave 이벤트 수신: roomId={}, senderId={}", LogTag.ORCHESTRATOR, event.roomId(), event.senderId());
 		// 채팅방 isActive가 false 라면 true 로 변경
 		chatRoomService.markActiveIfInactive(event.roomId());
 

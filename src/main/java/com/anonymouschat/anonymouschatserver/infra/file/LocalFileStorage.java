@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.infra.file;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.common.exception.file.FileUploadException;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class LocalFileStorage implements FileStorage{
 		String filename = Paths.get(fileUrl).getFileName().toString();
 		File file = new File(uploadDir, filename);
 		if (file.exists() && !file.delete()) {
-			log.warn("파일 삭제 실패: {}", file.getAbsolutePath());
+			log.warn("{}File deletion failed: path={}", LogTag.IMAGE, file.getAbsolutePath());
 		}
 	}
 }

@@ -7,18 +7,12 @@ import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
-import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.testsupport.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;

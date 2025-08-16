@@ -39,9 +39,9 @@ class UserUseCaseTest {
 	@DisplayName("유저 검색 테스트")
 	class Search {
 
-		@DisplayName("유저 검색에 성공한다")
+		@DisplayName("조건 기반 유저 목록 조회에 성공한다")
 		@Test
-		void search_success() {
+		void get_users_by_condition_success() {
 			// given
 			Long userId = 1L;
 			UserUseCaseDto.SearchCondition searchCondition = UserUseCaseDto.SearchCondition.builder()
@@ -58,17 +58,17 @@ class UserUseCaseTest {
 			Slice<UserServiceDto.SearchResult> serviceResultSlice = new SliceImpl<>(List.of(serviceResult));
 
 			when(blockService.getBlockedUserIds(userId)).thenReturn(blockedUserIds);
-			when(userSearchService.search(serviceCommand, Pageable.unpaged())).thenReturn(serviceResultSlice);
+			when(userSearchService.getUsersByCondition(serviceCommand, Pageable.unpaged())).thenReturn(serviceResultSlice);
 
 			// when
-			Slice<UserUseCaseDto.SearchResult> result = userUseCase.search(searchCondition, Pageable.unpaged());
+			Slice<UserUseCaseDto.SearchResult> result = userUseCase.getUserList(searchCondition, Pageable.unpaged());
 
 			// then
 			assertThat(result).hasSize(1);
 			assertThat(result.getContent().getFirst().userId()).isEqualTo(2L);
 
 			verify(blockService).getBlockedUserIds(userId);
-			verify(userSearchService).search(serviceCommand, Pageable.unpaged());
+			verify(userSearchService).getUsersByCondition(serviceCommand, Pageable.unpaged());
 		}
 	}
 }

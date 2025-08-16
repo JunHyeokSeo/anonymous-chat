@@ -22,7 +22,7 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 
 	public Message saveMessage(ChatRoom chatRoom, User sender, String content) {
-        log.info("{}roomId={}, senderId={}", LogTag.MESSAGE, chatRoom.getId(), sender.getId());
+        log.info("{}메시지 저장 요청 - roomId={}, senderId={}", LogTag.MESSAGE, chatRoom.getId(), sender.getId());
 		Message message = Message.builder()
 				                .chatRoom(chatRoom)
 				                .sender(sender)
@@ -38,7 +38,7 @@ public class MessageService {
 
 	// TODO: 추후 대량 메시지 처리 성능 개선을 위해 ReadTracking 구조 도입 고려
 	public Long markMessagesAsRead(Long roomId, Long userId) {
-        log.info("{}roomId={}, userId={}", LogTag.MESSAGE, roomId, userId);
+        log.info("메시지 읽음 처리 요청 - {}roomId={}, userId={}", LogTag.MESSAGE, roomId, userId);
 		return messageRepository.updateMessagesAsRead(roomId, userId);
 	}
 
