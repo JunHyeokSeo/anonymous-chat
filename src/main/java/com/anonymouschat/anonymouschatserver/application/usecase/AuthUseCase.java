@@ -43,7 +43,11 @@ public class AuthUseCase {
             authService.saveRefreshToken(user.getId().toString(), refreshToken);
         }
 
-	    return new AuthResult(new AuthTokens(accessToken, refreshToken), isNewUser.get());
+	    return AuthResult.builder()
+			           .accessToken(accessToken)
+			           .refreshToken(refreshToken)
+			           .isNewUser(isNewUser.get())
+			           .build();
     }
 
 	@Transactional

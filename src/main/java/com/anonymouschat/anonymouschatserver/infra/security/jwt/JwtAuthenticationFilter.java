@@ -35,28 +35,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String token = tokenResolver.resolve(request);
 
 			if (token != null) {
+				log.debug("{}JWT 토큰 감지됨 - token={}", LogTag.SECURITY_JWT, token);
+
 				jwtValidator.validate(token);
+				log.debug("{}JWT 유효성 검사 통과", LogTag.SECURITY_JWT);
+
 				CustomPrincipal principal = authFactory.createPrincipal(token);
+				log.debug("{}Principal 생성 완료 - userId={}, role={}", LogTag.SECURITY_AUTHENTICATION,
+						principal.userId(), principal.role());
 
 				// 항상 request에 주입
 				request.setAttribute(ATTR_PRINCIPAL, principal);
+				log.trace("{}Request에 Principal 주입 완료", LogTag.SECURITY_FILTER);
 
 				// 기존 컨텍스트 제거
 				SecurityContextHolder.clearContext();
 
-				// 인증된 사용자만 SecurityContext에 주입
 				var authentication = authFactory.createAuthentication(principal);
 				if (authentication != null) {
-					// 새로운 인증 정보 설정
 					SecurityContext context = SecurityContextHolder.createEmptyContext();
 					context.setAuthentication(authentication);
 					SecurityContextHolder.setContext(context);
+					log.debug("{}SecurityContext에 Authentication 설정 완료", LogTag.SECURITY_AUTHENTICATION);
 				}
+			} else {
+				log.trace("{}요청에 JWT 토큰 없음 - URI={}", LogTag.SECURITY_FILTER, request.getRequestURI());
 			}
 
 			filterChain.doFilter(request, response);
+
 		} catch (Exception e) {
-            log.error("{}JWT Filter failed: {}", LogTag.SECURITY, e.getMessage(), e);
+			log.error("{}JWT 필터 처리 실패 - URI={}, message={}", LogTag.SECURITY_FILTER, request.getRequestURI(), e.getMessage(), e);
 			SecurityContextHolder.clearContext();
 			ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED, e.getMessage());
 		}

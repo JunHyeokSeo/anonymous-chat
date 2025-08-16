@@ -13,8 +13,8 @@ public record AuthResponseDto(
 ) {
 	public static AuthResponseDto from(AuthResult result) {
 		return builder()
-				       .accessToken(result.tokens().accessToken())
-				       .refreshToken(result.tokens().refreshToken())
+				       .accessToken(result.accessToken())
+				       .refreshToken(result.refreshToken())
 				       .isNewUser(result.isNewUser())
 				       .build();
 	}

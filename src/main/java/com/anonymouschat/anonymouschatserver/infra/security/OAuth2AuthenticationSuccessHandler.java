@@ -34,21 +34,26 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	) throws IOException {
 
 		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+		log.debug("{}OAuth2User 속성 추출 - attributes={}", LogTag.SECURITY_AUTHENTICATION, oAuth2User.getAttributes());
 
 		OAuthProvider provider = oAuth2ProviderResolver.resolve(oAuth2User);
 		String providerId = provider.extractProviderId(oAuth2User.getAttributes());
 
+		log.info("{}OAuth2 로그인 성공 - provider={}, providerId={}", LogTag.SECURITY_AUTHENTICATION, provider, providerId);
+
 		AuthResult authResult = authUseCase.login(provider, providerId);
+		log.info("{}인증 처리 완료 - accessToken=****{}, refreshToken=****{}, 신규가입여부={}",
+				LogTag.SECURITY_AUTHENTICATION,
+				authResult.accessToken().substring(0, 5),
+				authResult.refreshToken().substring(0, 5),
+				authResult.isNewUser()
+		);
 
 		AuthResponseDto dto = AuthResponseDto.from(authResult);
-
-		        log.info("{}provider={}, providerId={}", LogTag.SECURITY, provider, providerId);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		objectMapper.writeValue(response.getWriter(), dto);
-
-		// TODO: 로그인 성공 후 사용자 역할이 GUEST인 경우 프로필 입력 페이지로, USER인 경우 홈 화면으로 리디렉션 처리
 	}
 }

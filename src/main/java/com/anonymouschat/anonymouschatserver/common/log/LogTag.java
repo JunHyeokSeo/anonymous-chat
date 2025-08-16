@@ -23,4 +23,11 @@ public final class LogTag {
     public static final String WS_PONG = "[WS][PONG] ";
     public static final String WS_BROADCAST = "[WS][BROADCAST] ";
     public static final String WS_POLICY = "[WS][POLICY] ";
+
+	// --- Security Specific Tags ---
+	public static final String SECURITY_AUTHENTICATION = "[SECURITY][AUTHENTICATION] ";
+	public static final String SECURITY_AUTHORIZATION = "[SECURITY][AUTHORIZATION] ";
+	public static final String SECURITY_ENTRYPOINT = "[SECURITY][ENTRYPOINT] ";
+	public static final String SECURITY_FILTER = "[SECURITY][FILTER] ";
+	public static final String SECURITY_JWT = "[SECURITY][JWT] ";
 }

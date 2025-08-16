@@ -1,7 +1,9 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,19 +13,40 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFactory {
 
 	private final JwtTokenProvider jwtTokenProvider;
 
 	public CustomPrincipal createPrincipal(String token) {
-		return jwtTokenProvider.getPrincipalFromToken(token);
+		CustomPrincipal principal = jwtTokenProvider.getPrincipalFromToken(token);
+		log.debug("{}Principal 생성 완료 - userId={}, provider={}, role={}, authenticated={}",
+				LogTag.SECURITY_JWT,
+				principal.userId(),
+				principal.provider(),
+				principal.role(),
+				principal.isAuthenticatedUser()
+		);
+		return principal;
 	}
 
 	public Authentication createAuthentication(CustomPrincipal principal) {
-		if (!principal.isAuthenticatedUser()) return null;
+		if (!principal.isAuthenticatedUser()) {
+			log.debug("{}비인증 사용자 - SecurityContext 미적용 - userId={}, provider={}",
+					LogTag.SECURITY_JWT,
+					principal.userId(),
+					principal.provider()
+			);
+			return null;
+		}
 
 		var authority = new SimpleGrantedAuthority(principal.role());
+		log.debug("{}Authentication 객체 생성 완료 - userId={}, role={}",
+				LogTag.SECURITY_JWT,
+				principal.userId(),
+				principal.role()
+		);
+
 		return new UsernamePasswordAuthenticationToken(principal, null, List.of(authority));
 	}
 }
-

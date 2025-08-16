@@ -1,3 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
-public record AuthResult(AuthTokens tokens, boolean isNewUser) {}
+import lombok.Builder;
+
+@Builder
+public record AuthResult(
+		String accessToken,
+		String refreshToken,
+		boolean isNewUser
+) {}

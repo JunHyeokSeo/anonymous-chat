@@ -1,6 +1,8 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -12,39 +14,33 @@ import org.springframework.stereotype.Component;
  * 오버로드된 `resolve` 메서드를 제공합니다.
  */
 @Component
+@Slf4j
 public class JwtTokenResolver {
 
 	private static final String BEARER_PREFIX = "Bearer ";
 
-	/**
-	 * HttpServletRequest 로부터 JWT 토큰을 추출합니다.
-	 *
-	 * @param request HttpServletRequest 객체
-	 * @return Bearer 토큰 문자열 (접두사 제외), 존재하지 않으면 null 반환
-	 */
 	public String resolve(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
-		return extractBearerToken(authHeader);
+		String token = extractBearerToken(authHeader);
+		if (token != null) {
+			log.debug("{}HTTP 요청에서 JWT 추출 완료 - token={}", LogTag.SECURITY_JWT, token);
+		} else {
+			log.trace("{}HTTP 요청에서 JWT 없음 - URI={}", LogTag.SECURITY_JWT, request.getRequestURI());
+		}
+		return token;
 	}
 
-	/**
-	 * ServerHttpRequest(WebSocket Handshake 요청 등)로부터 JWT 토큰을 추출합니다.
-	 *
-	 * @param request ServerHttpRequest 객체
-	 * @return Bearer 토큰 문자열 (접두사 제외), 존재하지 않으면 null 반환
-	 */
 	public String resolve(ServerHttpRequest request) {
-		HttpHeaders headers = request.getHeaders();
-		String authHeader = headers.getFirst("Authorization");
-		return extractBearerToken(authHeader);
+		String authHeader = request.getHeaders().getFirst("Authorization");
+		String token = extractBearerToken(authHeader);
+		if (token != null) {
+			log.debug("{}WebSocket 요청에서 JWT 추출 완료 - token={}", LogTag.SECURITY_JWT, token);
+		} else {
+			log.trace("{}WebSocket 요청에서 JWT 없음 - URI={}", LogTag.SECURITY_JWT, request.getURI());
+		}
+		return token;
 	}
 
-	/**
-	 * Authorization 헤더 값에서 "Bearer " 접두사를 제거하고 토큰만 추출합니다.
-	 *
-	 * @param authHeader Authorization 헤더 문자열
-	 * @return Bearer 토큰 문자열, 없으면 null
-	 */
 	private String extractBearerToken(String authHeader) {
 		if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
 			return authHeader.substring(BEARER_PREFIX.length());
