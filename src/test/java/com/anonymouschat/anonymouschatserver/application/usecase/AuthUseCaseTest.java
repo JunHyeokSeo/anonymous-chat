@@ -54,8 +54,8 @@ class AuthUseCaseTest {
 
 			AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
 
-			assertThat(result.tokens().accessToken()).isEqualTo("access-token");
-			assertThat(result.tokens().refreshToken()).isEqualTo("refresh-token");
+			assertThat(result.accessToken()).isEqualTo("access-token");
+			assertThat(result.refreshToken()).isEqualTo("refresh-token");
 			assertThat(result.isNewUser()).isFalse();
 
 			verify(authService).saveRefreshToken("1", "refresh-token");
@@ -75,8 +75,8 @@ class AuthUseCaseTest {
 
 			AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
 
-			assertThat(result.tokens().accessToken()).isEqualTo("access-token");
-			assertThat(result.tokens().refreshToken()).isNull();
+			assertThat(result.accessToken()).isEqualTo("access-token");
+			assertThat(result.refreshToken()).isNull();
 			assertThat(result.isNewUser()).isTrue();
 
 			verify(authService, never()).generateRefreshToken(any(), any());
