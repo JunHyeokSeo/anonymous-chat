@@ -79,7 +79,7 @@ class UserSearchServiceTest {
 			// then
 			assertThat(slice).isNotNull();
 			assertThat(slice.getContent()).hasSize(1);
-			assertThat(slice.getContent().get(0).nickname()).isEqualTo("nickname");
+			assertThat(slice.getContent().getFirst().nickname()).isEqualTo("nickname");
 			verify(userRepository).findUsersByCondition(command, pageable);
 		}
 
