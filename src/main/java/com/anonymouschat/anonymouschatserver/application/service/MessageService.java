@@ -1,10 +1,12 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import com.anonymouschat.anonymouschatserver.domain.repository.MessageRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +16,13 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class MessageService {
 
 	private final MessageRepository messageRepository;
 
 	public Message saveMessage(ChatRoom chatRoom, User sender, String content) {
+        log.info("{}roomId={}, senderId={}", LogTag.MESSAGE, chatRoom.getId(), sender.getId());
 		Message message = Message.builder()
 				                .chatRoom(chatRoom)
 				                .sender(sender)
@@ -34,6 +38,7 @@ public class MessageService {
 
 	// TODO: 추후 대량 메시지 처리 성능 개선을 위해 ReadTracking 구조 도입 고려
 	public Long markMessagesAsRead(Long roomId, Long userId) {
+        log.info("{}roomId={}, userId={}", LogTag.MESSAGE, roomId, userId);
 		return messageRepository.updateMessagesAsRead(roomId, userId);
 	}
 

@@ -1,13 +1,13 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
 import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -74,16 +74,16 @@ public class ChatMessageHandler implements MessageHandler {
 			publisher.publishEvent(ChatSave.builder().roomId(roomId).senderId(senderId).content(content).build());
 
 			// 로깅
-			log.info("{}roomId={} senderId={} ts={}", WsLogTag.chat(), roomId, senderId, outbound.timestamp());
+			log.info("{}roomId={} senderId={} ts={}", LogTag.WS_CHAT, roomId, senderId, outbound.timestamp());
 
 			// 브로드캐스트: 채팅방 참여자들에게 메시지를 전송합니다.
 			int delivered = broadcaster.broadcast(roomId, outbound);
 			if (delivered == 0) {
-				log.warn("{}no receiver online: roomId={} senderId={}", WsLogTag.bc(), roomId, senderId);
+				log.warn("{}no receiver online: roomId={} senderId={}", LogTag.WS_BROADCAST, roomId, senderId);
 				//todo: FCM 이벤트 발행
 			}
 		} catch (Exception e) {
-			log.error("메시지 처리 중 예외: {}", e.getMessage(), e);
+			log.error("{}message handling error: {}", LogTag.WS_ERR, e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
 	}

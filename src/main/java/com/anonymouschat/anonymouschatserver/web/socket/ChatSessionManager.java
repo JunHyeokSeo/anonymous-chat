@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -37,9 +37,9 @@ public class ChatSessionManager {
 		if (old != null && old.isOpen()) {
 			try {
 				old.close(CloseStatus.NORMAL);
-				log.info("{}replaced session: userId={} oldSessionId={}", WsLogTag.sys(), userId, safeId(old));
+				log.info("{}replaced session: userId={} oldSessionId={}", LogTag.WS_SYS, userId, safeId(old));
 			} catch (IOException e) {
-				log.warn("{}old session close failed: userId={} reason={}", WsLogTag.err(), userId, e.getMessage());
+				log.warn("{}old session close failed: userId={} reason={}", LogTag.WS_ERR, userId, e.getMessage(), e);
 			}
 		}
 		updateLastActiveAt(userId); // 최초 핑/퐁 이전에도 유휴 판정 안 나게 초기화
@@ -56,9 +56,9 @@ public class ChatSessionManager {
 		if (session != null && session.isOpen()) {
 			try {
 				session.close(status);
-				log.info("{}force disconnect: userId={} status={}", WsLogTag.sys(), userId, status);
+				log.info("{}force disconnect: userId={} status={}", LogTag.WS_SYS, userId, status);
 			} catch (IOException e) {
-				log.warn("{}close failed: userId={} reason={}", WsLogTag.err(), userId, e.getMessage());
+				log.warn("{}close failed: userId={} reason={}", LogTag.WS_ERR, userId, e.getMessage(), e);
 			}
 		}
 		unregisterSession(userId);
@@ -79,7 +79,7 @@ public class ChatSessionManager {
 			userId = extractUserId(session);
 		} catch (Exception e) {
 			// 인증 정보가 없거나 비정상 상태일 수 있음 → 폴백 진행
-			log.warn("{}failed to extract userId from sessionId={} reason={}", WsLogTag.err(), safeId(session), e.getMessage());
+			log.warn("{}failed to extract userId from sessionId={} reason={}", LogTag.WS_ERR, safeId(session), e.getMessage(), e);
 		}
 
 		// 폴백: 역참조로 userId 찾기
@@ -104,7 +104,7 @@ public class ChatSessionManager {
 				session.close(status);
 			}
 		} catch (IOException e) {
-			log.warn("{}close failed (anonymous) sessionId={} reason={}", WsLogTag.err(), safeId(session), e.getMessage());
+			log.warn("{}close failed (anonymous) sessionId={} reason={}", LogTag.WS_ERR, safeId(session), e.getMessage(), e);
 		}
 	}
 
@@ -189,7 +189,7 @@ public class ChatSessionManager {
 		userSessions.remove(userId);
 		lastActiveAtMap.remove(userId);
 		roomParticipants.values().forEach(ps -> ps.remove(userId));
-		log.debug("{}session/state cleared: userId={}", WsLogTag.sys() ,userId);
+		log.debug("{}session/state cleared: userId={}", LogTag.WS_SYS ,userId);
 	}
 
 	/**

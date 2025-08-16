@@ -1,6 +1,8 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 사용자별, 메시지 타입별 토큰 버킷(Token Bucket) 알고리즘을 사용하여 메시지 전송 속도를 제어합니다.
  */
 @Component
+@Slf4j
 public class WebSocketRateLimitGuard {
 
 	// 1유저당 타입별 버킷
@@ -45,7 +48,11 @@ public class WebSocketRateLimitGuard {
 			case ENTER, LEAVE -> new TokenBucket(ENTER_LEAVE_CAPACITY, ENTER_LEAVE_REFILL_PER_SEC);
 		});
 
-		return bucket.tryConsume();
+		boolean allowed = bucket.tryConsume();
+		if (!allowed) {
+			log.warn("{}Rate limit exceeded. userId={}, type={}", LogTag.WS_POLICY, userId, type);
+		}
+		return allowed;
 	}
 
 	/**

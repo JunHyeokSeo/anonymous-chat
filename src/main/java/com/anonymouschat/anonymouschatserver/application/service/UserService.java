@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.common.exception.BadRequestExceptio
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
@@ -15,6 +16,7 @@ import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
 	private final UserRepository userRepository;
@@ -36,6 +39,7 @@ public class UserService {
 	private final ImageValidator imageValidator;
 
 	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
+        log.info("{}provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
 		User user = userRepository.findByProviderAndProviderIdAndActiveTrue(command.provider(), command.providerId())
 				            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND));
 
@@ -66,6 +70,7 @@ public class UserService {
 	}
 
 	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
+        log.info("{}userId={}", LogTag.USER, command.userId());
 		User user = findUser(command.userId());
 
 		validateNicknameDuplication(command.nickname());
@@ -77,6 +82,7 @@ public class UserService {
 	}
 
 	public void withdraw(Long userId) {
+        log.info("{}userId={}", LogTag.USER, userId);
 		findUser(userId).markWithDraw();
 	}
 
@@ -91,6 +97,7 @@ public class UserService {
 	}
 
 	public User createGuestUser(OAuthProvider provider, String providerId) {
+        log.info("{}provider={}, providerId={}", LogTag.USER, provider, providerId);
 		User guestUser = User.builder()
 				.provider(provider)
 				.providerId(providerId)
@@ -115,15 +122,23 @@ public class UserService {
 	}
 
 	private List<UserProfileImage> convertToProfileImages(List<MultipartFile> images) throws IOException {
+        if (images == null || images.isEmpty()) {
+            return new ArrayList<>();
+        }
 		List<UserProfileImage> result = new ArrayList<>();
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile image = images.get(i);
 			imageValidator.validate(image);
-			String url = fileStorage.upload(image);
-			result.add(UserProfileImage.builder()
-					           .imageUrl(url)
-					           .isRepresentative(i == 0)
-					           .build());
+            try {
+                String url = fileStorage.upload(image);
+                result.add(UserProfileImage.builder()
+                                   .imageUrl(url)
+                                   .isRepresentative(i == 0)
+                                   .build());
+            } catch (IOException e) {
+                log.error("{}Failed to upload profile image.", LogTag.IMAGE, e);
+                throw e;
+            }
 		}
 		return result;
 	}

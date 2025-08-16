@@ -1,12 +1,14 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String ATTR_PRINCIPAL = "AuthenticatedPrincipal";
@@ -53,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			filterChain.doFilter(request, response);
 		} catch (Exception e) {
+            log.error("{}JWT Filter failed: {}", LogTag.SECURITY, e.getMessage(), e);
 			SecurityContextHolder.clearContext();
 			ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED, e.getMessage());
 		}

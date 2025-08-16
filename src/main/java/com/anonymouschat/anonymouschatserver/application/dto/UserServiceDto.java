@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;

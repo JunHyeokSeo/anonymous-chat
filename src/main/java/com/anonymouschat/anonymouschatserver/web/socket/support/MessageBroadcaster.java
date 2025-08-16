@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +49,7 @@ public class MessageBroadcaster {
 		try {
 			payload = objectMapper.writeValueAsString(message);
 		} catch (Exception e) {
-			log.error("{}serialize failed roomId={} reason={}", WsLogTag.bc(), roomId, e.getMessage(), e);
+			log.error("{}serialize failed roomId={} reason={}", LogTag.WS_BROADCAST, roomId, e.getMessage(), e);
 			return 0;
 		}
 
@@ -72,12 +73,12 @@ public class MessageBroadcaster {
 	private boolean sendToParticipant(Long participantId, String payload) {
 		WebSocketSession session = sessionManager.getSession(participantId);
 		if (session == null) {
-			log.debug("{}skip(no session) userId={}", WsLogTag.bc(), participantId);
+			log.debug("{}skip(no session) userId={}", LogTag.WS_BROADCAST, participantId);
 			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}
 		if (!session.isOpen()) {
-			log.debug("{}skip(closed) userId={}", WsLogTag.bc(), participantId);
+			log.debug("{}skip(closed) userId={}", LogTag.WS_BROADCAST, participantId);
 			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}
@@ -86,7 +87,7 @@ public class MessageBroadcaster {
 			session.sendMessage(new TextMessage(payload));
 			return true;
 		} catch (Exception e) {
-			log.warn("{}send failed userId={} sessionId={} reason={}", WsLogTag.bc(), participantId, safeSessionId(session), e.getMessage());
+			log.warn("{}send failed userId={} sessionId={} reason={}", LogTag.WS_BROADCAST, participantId, safeSessionId(session), e.getMessage());
 			sessionManager.forceDisconnect(participantId, CloseStatus.SESSION_NOT_RELIABLE);
 			return false;
 		}

@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class WebSocketAccessGuard {
 	public boolean ensureEnterAllowed(WebSocketSession session, Long roomId, Long userId) {
 		boolean member = chatRoomService.isMember(roomId, userId);
 		if (!member) {
-			log.warn("{}ENTER denied userId={} roomId={}", WsLogTag.policy(), userId, roomId);
+			log.warn("{}ENTER denied userId={} roomId={}", LogTag.WS_POLICY, userId, roomId);
 			sessionManager.forceDisconnect(session, CloseStatus.POLICY_VIOLATION);
 			return false;
 		}
@@ -51,7 +52,7 @@ public class WebSocketAccessGuard {
 	public boolean ensureParticipant(WebSocketSession session, Long roomId, Long userId) {
 		boolean ok = sessionManager.isParticipant(roomId, userId);
 		if (!ok) {
-			log.warn("{}Not a participant userId={} roomId={} -> closing BAD_DATA", WsLogTag.policy(), userId, roomId);
+			log.warn("{}Not a participant userId={} roomId={} -> closing BAD_DATA", LogTag.WS_POLICY, userId, roomId);
 			sessionManager.forceDisconnect(session, CloseStatus.BAD_DATA);
 			return false;
 		}

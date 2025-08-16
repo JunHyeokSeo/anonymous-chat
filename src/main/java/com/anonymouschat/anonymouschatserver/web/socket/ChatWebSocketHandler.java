@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketRateLimitGuard;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -38,9 +39,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 			CustomPrincipal principal = extractPrincipal(session);
 			Long userId = principal.userId();
 			sessionManager.registerOrReplaceSession(userId, session);
-			log.info("{}connected userId={} sessionId={}", WsLogTag.sys(), userId, session.getId());
+			log.info("{}connected userId={} sessionId={}", LogTag.WS_SYS, userId, session.getId());
 		} catch (Exception e) {
-			log.warn("{}connection rejected sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
+			log.warn("{}connection rejected sessionId={} reason={}", LogTag.WS_ERR, session.getId(), e.getMessage());
 			sessionManager.forceDisconnect(session, CloseStatus.NOT_ACCEPTABLE);
 		}
 	}
@@ -54,17 +55,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
 			// 레이트 리밋 컷
 			if (!rateLimitGuard.allow(userId, inbound.type())) {
-				log.warn("{}rate limited userId={} type={} sessionId={}", WsLogTag.err(), userId, inbound.type(), session.getId());
+				log.warn("{}rate limited userId={} type={} sessionId={}", LogTag.WS_ERR, userId, inbound.type(), session.getId());
 				return;
 			}
 
-			log.debug("{}dispatch start sessionId={} type={} roomId={}", WsLogTag.sys(), session.getId(), inbound.type(), inbound.roomId());
+			log.debug("{}dispatch start sessionId={} type={} roomId={}", LogTag.WS_SYS, session.getId(), inbound.type(), inbound.roomId());
 			dispatcher.dispatch(session, inbound);
 		} catch (UnsupportedOperationException | IllegalArgumentException bad) {
-			log.warn("{}bad payload sessionId={} reason={}", WsLogTag.err(), session.getId(), bad.getMessage());
+			log.warn("{}bad payload sessionId={} reason={}", LogTag.WS_ERR, session.getId(), bad.getMessage(), bad);
 			sessionManager.forceDisconnect(session, CloseStatus.BAD_DATA);
 		} catch (Exception e) {
-			log.error("{}handleText error sessionId={} error={}", WsLogTag.err(), session.getId(), e.getMessage(), e);
+			log.error("{}handleText error sessionId={} error={}", LogTag.WS_ERR, session.getId(), e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
 	}
@@ -73,17 +74,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
 		try {
 			Long userId = extractUserId(session);
-			log.info("{}disconnected userId={} sessionId={} status={}", WsLogTag.sys(), userId, session.getId(), status);
+			log.info("{}disconnected userId={} sessionId={} status={}", LogTag.WS_SYS, userId, session.getId(), status);
 			rateLimitGuard.clear(userId);
 			sessionManager.forceDisconnect(userId, status);
 		} catch (Exception e) {
-			log.warn("{}afterClose error sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
+			log.warn("{}afterClose error sessionId={} reason={}", LogTag.WS_ERR, session.getId(), e.getMessage());
 		}
 	}
 
 	@Override
 	public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) {
-		log.error("{}transport error sessionId={} error={}", WsLogTag.err(), session.getId(), exception.getMessage(), exception);
+		log.error("{}transport error sessionId={} error={}", LogTag.WS_ERR, session.getId(), exception.getMessage(), exception);
 		sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 	}
 
@@ -92,9 +93,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 		try {
 			Long userId = extractUserId(session);
 			sessionManager.updateLastActiveAt(userId);
-			log.debug("{}userId={} sessionId={}", WsLogTag.pong(), userId, session.getId());
+			log.debug("{}userId={} sessionId={}", LogTag.WS_PONG, userId, session.getId());
 		} catch (Exception e) {
-			log.warn("{}pong handle failed sessionId={} reason={}", WsLogTag.err(), session.getId(), e.getMessage());
+			log.warn("{}pong handle failed sessionId={} reason={}", LogTag.WS_ERR, session.getId(), e.getMessage());
 		}
 	}
 
@@ -108,7 +109,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
 		sessionManager.getAllSessions().forEach((userId, session) -> {
 			if (!session.isOpen()) {
-				log.debug("이미 닫힌 세션: userId={}", userId);
+				log.debug("{}Session already closed. Clearing up. userId={}", LogTag.WS_SYS, userId);
 				sessionManager.forceDisconnect(userId, CloseStatus.SESSION_NOT_RELIABLE);
 				return;
 			}
@@ -123,7 +124,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 			// 유휴 시간 체크 (무응답 클라이언트 정리)
 			Instant lastActiveAt = sessionManager.getLastActiveAt(userId);
 			if (lastActiveAt.plusSeconds(60).isBefore(now)) {
-				log.warn("세션 유휴 상태 감지: userId={} lastActiveAt={}", userId, lastActiveAt);
+				log.warn("{}Idle session detected. userId={} lastActiveAt={}", LogTag.WS_SYS, userId, lastActiveAt);
 				sessionManager.forceDisconnect(userId, CloseStatus.SESSION_NOT_RELIABLE);
 			}
 		});
@@ -137,10 +138,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 			long timestamp = Instant.now().toEpochMilli();
 			byte[] payload = Long.toString(timestamp).getBytes(StandardCharsets.UTF_8);
 			session.sendMessage(new PingMessage(ByteBuffer.wrap(payload)));
-			log.debug("Ping 전송 완료: userId={}", userId);
+			log.debug("{}Ping sent successfully. userId={}", LogTag.WS_SYS, userId);
 			return true;
 		} catch (IOException e) {
-			log.warn("Ping 전송 실패: userId={} reason={}", userId, e.getMessage());
+			log.warn("{}Ping send failed. userId={} reason={}", LogTag.WS_ERR, userId, e.getMessage());
 			return false;
 		}
 	}

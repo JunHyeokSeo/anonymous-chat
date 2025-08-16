@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.web.api.auth.dto.AuthResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +42,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 		AuthResponseDto dto = AuthResponseDto.from(authResult);
 
-		log.info("[OAuth 로그인 성공] provider={}, providerId={}", provider, providerId);
+		        log.info("{}provider={}, providerId={}", LogTag.SECURITY, provider, providerId);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

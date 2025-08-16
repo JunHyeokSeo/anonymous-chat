@@ -1,10 +1,12 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -21,6 +23,7 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
 	private final JwtTokenResolver tokenResolver;
@@ -49,6 +52,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
 			//인증된 사용자만 연결 허용
 			if (!principal.isAuthenticatedUser()) {
+                log.warn("{}Unauthorized guest user attempt.", LogTag.SECURITY);
 				response.setStatusCode(HttpStatus.UNAUTHORIZED);
 				return false;
 			}
@@ -57,6 +61,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 			return true;
 
 		} catch (Exception e) {
+            log.warn("{}WebSocket handshake failed. reason={}", LogTag.SECURITY, e.getMessage(), e);
 			// 연결 거부: 클라이언트에게 401로 응답 (WebSocket은 HTTP 기반 handshake)
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return false;

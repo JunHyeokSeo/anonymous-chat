@@ -5,10 +5,12 @@ import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
 import com.anonymouschat.anonymouschatserver.common.exception.InternalServerException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 
@@ -28,14 +31,17 @@ public class ChatRoomService {
 		// 1) 활성 방 조회
 		Optional<ChatRoom> existing = chatRoomRepository.findActiveByPair(left, right);
 		if (existing.isPresent()) {
-			existing.get().returnBy(initiator.getId());
-			return existing.get();
+            ChatRoom chatRoom = existing.get();
+            log.info("{}Active chat room exists. roomId={}", LogTag.CHAT, chatRoom.getId());
+			chatRoom.returnBy(initiator.getId());
+			return chatRoom;
 		}
 
 		// 2) 없으면 생성 (경합 시 유니크 충돌 → 재조회)
 		try {
 			return chatRoomRepository.save(new ChatRoom(initiator, recipient));
 		} catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.warn("{}Concurrency issue on creating chat room. initiatorId={}, recipientId={}", LogTag.CHAT, initiator.getId(), recipient.getId());
 			return chatRoomRepository.findActiveByPair(left, right)
 					       .orElseThrow(() -> new InternalServerException(ErrorCode.CHAT_ROOM_CONCURRENCY_ERROR));
 		}
@@ -55,6 +61,7 @@ public class ChatRoomService {
 	}
 
 	public void exit(Long userId, Long roomId) {
+        log.info("{}userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
 		chatRoom.exitBy(userId); // 둘 다 나가면 isActive=false로 전환됨
 	}
@@ -77,6 +84,7 @@ public class ChatRoomService {
 	}
 
 	public void returnBy(Long roomId, Long userId) {
+        log.info("{}userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
 
 		if (chatRoom.isArchived()) {

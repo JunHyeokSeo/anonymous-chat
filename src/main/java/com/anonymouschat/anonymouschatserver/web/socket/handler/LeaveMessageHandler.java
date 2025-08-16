@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,8 +42,8 @@ public class LeaveMessageHandler implements MessageHandler {
 		// 방 참여자 목록에서 제거
 		boolean removed = sessionManager.leaveRoom(roomId, userId);
 		if (removed)
-			log.info("{}userId={} roomId={}", WsLogTag.leave(), userId, roomId);
+			log.info("{}userId={} roomId={}", LogTag.WS_LEAVE, userId, roomId);
 		else
-			log.debug("{}no-op (not a participant) userId={} roomId={}", WsLogTag.leave(), userId, roomId);
+			log.debug("{}no-op (not a participant) userId={} roomId={}", LogTag.WS_LEAVE, userId, roomId);
 	}
 }

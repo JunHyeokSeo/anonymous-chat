@@ -2,13 +2,13 @@ package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
 import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto.MarkMessagesAsRead;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -60,13 +60,13 @@ public class ReadMessageHandler implements MessageHandler{
 						                               .build();
 
 				//로깅
-				log.info("{}roomId={} userId={} lastReadMessageId={}", WsLogTag.read(), roomId, userId, lastReadMessageId);
+				log.info("{}roomId={} userId={} lastReadMessageId={}", LogTag.WS_READ, roomId, userId, lastReadMessageId);
 
 				// 브로드 캐스트
 				broadcaster.broadcastExcept(roomId, outbound, userId);
 			}
 		} catch (Exception e) {
-			log.error("메시지 읽음 처리 중 오류 발생: userId={}, roomId={}, error={}", userId, roomId, e.getMessage(), e);
+			log.error("{}message read error: userId={}, roomId={}, error={}", LogTag.WS_ERR, userId, roomId, e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
 		}
 	}

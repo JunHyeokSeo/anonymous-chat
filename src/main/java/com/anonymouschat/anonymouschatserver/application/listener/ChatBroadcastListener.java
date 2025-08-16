@@ -1,10 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.listener;
 
 import com.anonymouschat.anonymouschatserver.application.event.ChatPersisted;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class ChatBroadcastListener {
 
 		int delivered = broadcaster.broadcast(event.roomId(), outbound);
 		if (delivered == 0) {
-			log.warn("{}no receiver online roomId={} senderId={}", WsLogTag.chat(), event.roomId(), event.senderId());
+			log.warn("{}no receiver online roomId={} senderId={}", LogTag.WS_CHAT, event.roomId(), event.senderId());
 			// TODO: FCM 이벤트 발행(별도 리스너로 분리 권장)
 		}
 	}

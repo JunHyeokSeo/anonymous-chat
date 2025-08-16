@@ -5,6 +5,7 @@ import com.anonymouschat.anonymouschatserver.application.event.ChatPersisted;
 import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,6 +26,7 @@ public class ChatSendOrchestrator {
 	@EventListener
 	@Transactional
 	public void on(ChatSave event) {
+        log.info("{}Received ChatSave event. roomId={}, senderId={}", LogTag.ORCHESTRATOR, event.roomId(), event.senderId());
 		// 채팅방 isActive가 false 라면 true 로 변경
 		chatRoomService.markActiveIfInactive(event.roomId());
 

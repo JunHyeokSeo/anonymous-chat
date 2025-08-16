@@ -1,10 +1,10 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.support.WebSocketAccessGuard;
-import com.anonymouschat.anonymouschatserver.web.socket.support.WsLogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,6 +47,6 @@ public class EnterMessageHandler implements MessageHandler {
 		if (!guard.ensureEnterAllowed(session, roomId, userId)) return;
 
 		sessionManager.joinRoom(roomId, userId);
-		log.info("{}userId={} roomId={}", WsLogTag.enter(), userId, roomId);
+		log.info("{}userId={} roomId={}", LogTag.WS_ENTER, userId, roomId);
 	}
 }

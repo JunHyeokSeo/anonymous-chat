@@ -3,10 +3,12 @@ package com.anonymouschat.anonymouschatserver.application.service;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.CannotBlockSelfException;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.Block;
 import com.anonymouschat.anonymouschatserver.domain.repository.BlockRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +19,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class BlockService {
     private final BlockRepository blockRepository;
 
     @Transactional
     public void block(User blocker, User blocked) {
+        log.info("{}blockerId={}, blockedId={}", LogTag.BLOCK, blocker.getId(), blocked.getId());
         if (Objects.equals(blocker.getId(), blocked.getId())) {
             throw new CannotBlockSelfException(ErrorCode.CANNOT_BLOCK_SELF);
         }
@@ -44,6 +48,7 @@ public class BlockService {
 
     @Transactional
     public void unblock(Long blockerId, Long blockedId) {
+        log.info("{}blockerId={}, blockedId={}", LogTag.BLOCK, blockerId, blockedId);
         Block block = findBlockByBlockerIdAndBlockedId(blockerId, blockedId);
         block.deactivate();
     }
