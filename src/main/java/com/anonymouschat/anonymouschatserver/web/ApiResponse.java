@@ -29,17 +29,17 @@ public record ApiResponse<T>(
 		return new ApiResponse<>(code.getCode(), code.getMessage(), data);
 	}
 
-	public static <T> ApiResponse<T> error(ErrorCode errorCode, String message) {
-		return new ApiResponse<>(errorCode.name(), message, null);
+	public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+		return new ApiResponse<>(errorCode.name(), errorCode.getMessage(), null);
 	}
 
 	/**
 	 * HttpServletResponse에 JSON 형태로 ApiResponse를 작성
 	 */
-	public static void writeErrorResponse(HttpServletResponse response, ErrorCode errorCode, String message) throws IOException {
+	public static void writeErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json;charset=UTF-8");
-		ApiResponse<?> body = ApiResponse.error(errorCode, message);
+		ApiResponse<?> body = ApiResponse.error(errorCode);
 		new ObjectMapper().writeValue(response.getWriter(), body);
 	}
 }

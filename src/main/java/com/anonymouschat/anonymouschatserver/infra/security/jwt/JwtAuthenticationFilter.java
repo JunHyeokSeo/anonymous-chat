@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			log.error("{}JWT 필터 처리 실패 - URI={}, message={}", LogTag.SECURITY_FILTER, request.getRequestURI(), e.getMessage(), e);
 			SecurityContextHolder.clearContext();
-			ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED, e.getMessage());
+			ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED);
 		}
 	}
 

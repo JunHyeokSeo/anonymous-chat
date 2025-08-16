@@ -42,7 +42,7 @@ public class SecurityConfig {
 				//인증 실패 시 JSON 응답
 				.exceptionHandling(exception -> exception
 						                                .authenticationEntryPoint((request, response, authException) ->
-								                                                          ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED,"인증이 필요합니다."))
+								                                                          ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED))
 				)
 
 				//접근 허용 경로 설정
