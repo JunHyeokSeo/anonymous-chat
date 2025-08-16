@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Slice<UserServiceDto.SearchResult> searchUsers(UserServiceDto.SearchCommand cond, Pageable pageable) {
+	public Slice<UserServiceDto.SearchResult> findUsersByCondition(UserServiceDto.SearchCommand cond, Pageable pageable) {
 		QUser user = QUser.user;
 		QUserProfileImage image = QUserProfileImage.userProfileImage;
 

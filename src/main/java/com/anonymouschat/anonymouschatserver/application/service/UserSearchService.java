@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 public class UserSearchService {
 	private final UserRepository userRepository;
 
-	public Slice<UserServiceDto.SearchResult> search(UserServiceDto.SearchCommand command, Pageable pageable) {
-        log.info("{}searcherId={}, searchCondition={}", LogTag.USER, command.id(), command);
-		return userRepository.searchUsers(command, pageable);
+	public Slice<UserServiceDto.SearchResult> getUsersByCondition(UserServiceDto.SearchCommand command, Pageable pageable) {
+		log.info("{}유저 목록 조회 - searcherId={}, gender={}, ageRange={}~{}, region={}", LogTag.USER, command.id(), command.gender(), command.minAge(), command.maxAge(), command.region());
+		return userRepository.findUsersByCondition(command, pageable);
 	}
 }

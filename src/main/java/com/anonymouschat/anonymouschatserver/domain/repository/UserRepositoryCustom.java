@@ -5,5 +5,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface UserRepositoryCustom {
-	Slice<UserServiceDto.SearchResult> searchUsers(UserServiceDto.SearchCommand command, Pageable pageable);
+	Slice<UserServiceDto.SearchResult> findUsersByCondition(UserServiceDto.SearchCommand command, Pageable pageable);
 }

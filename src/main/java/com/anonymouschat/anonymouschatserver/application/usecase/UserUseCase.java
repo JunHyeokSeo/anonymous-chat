@@ -37,9 +37,9 @@ public class UserUseCase {
 		userService.withdraw(userId);
 	}
 
-	public Slice<UserUseCaseDto.SearchResult> search(UserUseCaseDto.SearchCondition search, Pageable pageable) {
+	public Slice<UserUseCaseDto.SearchResult> getUserList(UserUseCaseDto.SearchCondition search, Pageable pageable) {
 		List<Long> blockedUserIds = blockService.getBlockedUserIds(search.id());
 		UserServiceDto.SearchCommand command = UserServiceDto.SearchCommand.from(search, blockedUserIds);
-		return userSearchService.search(command, pageable).map(UserUseCaseDto.SearchResult::from);
+		return userSearchService.getUsersByCondition(command, pageable).map(UserUseCaseDto.SearchResult::from);
 	}
 }
