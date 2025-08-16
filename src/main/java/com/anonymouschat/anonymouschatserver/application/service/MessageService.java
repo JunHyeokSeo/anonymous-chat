@@ -22,13 +22,14 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 
 	public Message saveMessage(ChatRoom chatRoom, User sender, String content) {
-        log.info("{}메시지 저장 요청 - roomId={}, senderId={}", LogTag.MESSAGE, chatRoom.getId(), sender.getId());
 		Message message = Message.builder()
-				                .chatRoom(chatRoom)
-				                .sender(sender)
-				                .content(content)
-				                .build();
-		return messageRepository.save(message);
+				                  .chatRoom(chatRoom)
+				                  .sender(sender)
+				                  .content(content)
+				                  .build();
+		Message saved = messageRepository.save(message);
+		log.info("{}메시지 저장 완료 - messageId={}, roomId={}, senderId={}", LogTag.MESSAGE, saved.getId(), chatRoom.getId(), sender.getId());
+		return saved;
 	}
 
 	@Transactional(readOnly = true)
@@ -38,12 +39,14 @@ public class MessageService {
 
 	// TODO: 추후 대량 메시지 처리 성능 개선을 위해 ReadTracking 구조 도입 고려
 	public Long markMessagesAsRead(Long roomId, Long userId) {
-        log.info("메시지 읽음 처리 요청 - {}roomId={}, userId={}", LogTag.MESSAGE, roomId, userId);
-		return messageRepository.updateMessagesAsRead(roomId, userId);
+		Long count = messageRepository.updateMessagesAsRead(roomId, userId);
+		log.info("{}메시지 읽음 처리 완료 - roomId={}, userId={}, updatedCount={}", LogTag.MESSAGE, roomId, userId, count);
+		return count;
 	}
 
 	public Long findLastReadMessageIdByReceiver(Long roomId, Long senderId) {
 		return messageRepository.findMaxReadMessageId(roomId, senderId);
 	}
 }
+
 

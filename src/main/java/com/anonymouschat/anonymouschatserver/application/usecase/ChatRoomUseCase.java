@@ -25,16 +25,13 @@ public class ChatRoomUseCase {
 	public Long createOrFind(Long initiatorId, Long recipientId) {
 		User initiator = userService.findUser(initiatorId);
 		User recipient = userService.findUser(recipientId);
-		Long roomId = chatRoomService.createOrFind(initiator, recipient).getId();
-		log.info("{}채팅방 생성 또는 조회 완료 - initiatorId={}, recipientId={}, roomId={}", LogTag.CHAT, initiatorId, recipientId, roomId);
-		return roomId;
+		return chatRoomService.createOrFind(initiator, recipient).getId();
 	}
 
 	/**
 	 * 본인이 참여 중인 활성 채팅방 목록을 조회합니다.
 	 */
 	public List<ChatRoomUseCaseDto.Summary> getMyActiveChatRooms(Long userId) {
-		log.info("{}유저의 활성 채팅방 목록 조회 요청 - userId={}", LogTag.CHAT, userId);
 		List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(userId);
 		return result.stream()
 				       .map(ChatRoomUseCaseDto.Summary::from)
@@ -46,6 +43,5 @@ public class ChatRoomUseCase {
 	 */
 	public void exitChatRoom(Long userId, Long roomId){
 		chatRoomService.exit(userId, roomId);
-		log.info("{}채팅방 나가기 완료 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 	}
 }

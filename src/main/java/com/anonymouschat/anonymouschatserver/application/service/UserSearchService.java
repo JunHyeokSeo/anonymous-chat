@@ -16,7 +16,7 @@ public class UserSearchService {
 	private final UserRepository userRepository;
 
 	public Slice<UserServiceDto.SearchResult> getUsersByCondition(UserServiceDto.SearchCommand command, Pageable pageable) {
-		log.info("{}유저 목록 조건 검색 실행 - 요청자 ID={}, 성별={}, 나이={}~{}, 지역={}",
+		log.info("{}유저 조건 검색 - 요청자 ID={}, 성별={}, 나이범위={}~{}, 지역={}",
 				LogTag.USER,
 				command.id(),
 				command.gender(),
@@ -24,6 +24,7 @@ public class UserSearchService {
 				command.maxAge(),
 				command.region()
 		);
+
 		return userRepository.findUsersByCondition(command, pageable);
 	}
 }

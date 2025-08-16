@@ -27,7 +27,6 @@ public class AuthUseCase {
 
     @Transactional
     public AuthResult login(OAuthProvider provider, String providerId) {
-        log.info("{}소셜 로그인 요청 - provider={}, providerId={}", LogTag.AUTH, provider, providerId);
 	    AtomicBoolean isNewUser = new AtomicBoolean(false);
 
 	    User user = userService.findByProviderAndProviderId(provider, providerId)

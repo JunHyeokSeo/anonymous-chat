@@ -39,11 +39,13 @@ public class UserService {
 	private final ImageValidator imageValidator;
 
 	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
-        log.info("{}회원 등록 요청 - provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
+		log.info("{}회원 등록 시작 - provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
+
 		User user = userRepository.findByProviderAndProviderIdAndActiveTrue(command.provider(), command.providerId())
 				            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND));
 
 		if (!user.isGuest()) {
+			log.warn("{}이미 등록된 유저 접근 차단 - providerId={}", LogTag.USER, command.providerId());
 			throw new BadRequestException(ErrorCode.ALREADY_REGISTERED_USER);
 		}
 
@@ -55,9 +57,9 @@ public class UserService {
 		List<UserProfileImage> profileImages = convertToProfileImages(images);
 		profileImages.forEach(user::addProfileImage);
 
+		log.info("{}회원 등록 완료 - userId={}", LogTag.USER, user.getId());
 		return user.getId();
 	}
-
 
 	@Transactional(readOnly = true)
 	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
@@ -70,7 +72,8 @@ public class UserService {
 	}
 
 	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
-        log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, command.userId());
+		log.info("{}회원 정보 수정 시작 - userId={}", LogTag.USER, command.userId());
+
 		User user = findUser(command.userId());
 
 		validateNicknameDuplication(command.nickname());
@@ -79,11 +82,14 @@ public class UserService {
 		deletePreviousImages(user.getId());
 		List<UserProfileImage> newImages = convertToProfileImages(images);
 		newImages.forEach(user::addProfileImage);
+
+		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, command.userId());
 	}
 
 	public void withdraw(Long userId) {
-        log.info("{}회원 탈퇴 요청 - userId={}", LogTag.USER, userId);
+		log.info("{}회원 탈퇴 처리 시작 - userId={}", LogTag.USER, userId);
 		findUser(userId).markWithDraw();
+		log.info("{}회원 탈퇴 처리 완료 - userId={}", LogTag.USER, userId);
 	}
 
 	@Transactional(readOnly = true)
@@ -97,15 +103,20 @@ public class UserService {
 	}
 
 	public User createGuestUser(OAuthProvider provider, String providerId) {
-        log.info("{}게스트 유저 생성 요청 - provider={}, providerId={}", LogTag.USER, provider, providerId);
+		log.info("{}게스트 유저 생성 요청 - provider={}, providerId={}", LogTag.USER, provider, providerId);
+
 		User guestUser = User.builder()
-				.provider(provider)
-				.providerId(providerId)
-				.role(UserRole.ROLE_GUEST)
-				.nickname("guest_" + System.currentTimeMillis())
-				.build();
-		return userRepository.save(guestUser);
+				                 .provider(provider)
+				                 .providerId(providerId)
+				                 .role(UserRole.ROLE_GUEST)
+				                 .nickname("guest_" + System.currentTimeMillis())
+				                 .build();
+
+		User saved = userRepository.save(guestUser);
+		log.info("{}게스트 유저 생성 완료 - userId={}", LogTag.USER, saved.getId());
+		return saved;
 	}
+
 
 	private void validateNicknameDuplication(String nickname) {
 		if (userRepository.existsByNickname(nickname)) {
@@ -122,23 +133,22 @@ public class UserService {
 	}
 
 	private List<UserProfileImage> convertToProfileImages(List<MultipartFile> images) throws IOException {
-        if (images == null || images.isEmpty()) {
-            return new ArrayList<>();
-        }
+		if (images == null || images.isEmpty()) return new ArrayList<>();
+
 		List<UserProfileImage> result = new ArrayList<>();
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile image = images.get(i);
 			imageValidator.validate(image);
-            try {
-                String url = fileStorage.upload(image);
-                result.add(UserProfileImage.builder()
-                                   .imageUrl(url)
-                                   .isRepresentative(i == 0)
-                                   .build());
-            } catch (IOException e) {
-	            log.error("{}프로필 이미지 업로드 실패 - index={}, 파일명={}, 에러={}", LogTag.IMAGE, i, image.getOriginalFilename(), e.getMessage(), e);
-                throw e;
-            }
+			try {
+				String url = fileStorage.upload(image);
+				result.add(UserProfileImage.builder()
+						           .imageUrl(url)
+						           .isRepresentative(i == 0)
+						           .build());
+			} catch (IOException e) {
+				log.error("{}프로필 이미지 업로드 실패 - index={}, 파일명={}, 에러={}", LogTag.IMAGE, i, image.getOriginalFilename(), e.getMessage(), e);
+				throw e;
+			}
 		}
 		return result;
 	}

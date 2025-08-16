@@ -11,6 +11,7 @@ import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepositor
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,26 +29,25 @@ public class ChatRoomService {
 		long a = initiator.getId(), b = recipient.getId();
 		long left = Math.min(a, b), right = Math.max(a, b);
 
-		// 1) 활성 방 조회
 		Optional<ChatRoom> existing = chatRoomRepository.findActiveByPair(left, right);
 		if (existing.isPresent()) {
-            ChatRoom chatRoom = existing.get();
-            log.info("{}활성 채팅방 존재 - roomId={}", LogTag.CHAT, chatRoom.getId());
+			ChatRoom chatRoom = existing.get();
+			log.info("{}기존 활성 채팅방 반환 - roomId={}, initiatorId={}, recipientId={}", LogTag.CHAT, chatRoom.getId(), initiator.getId(), recipient.getId());
 			chatRoom.returnBy(initiator.getId());
 			return chatRoom;
 		}
 
-		// 2) 없으면 생성 (경합 시 유니크 충돌 → 재조회)
 		try {
-			return chatRoomRepository.save(new ChatRoom(initiator, recipient));
-		} catch (org.springframework.dao.DataIntegrityViolationException e) {
-            log.warn("{}채팅방 생성 중 동시성 문제 발생 - initiatorId={}, recipientId={}", LogTag.CHAT, initiator.getId(), recipient.getId());
+			ChatRoom newRoom = chatRoomRepository.save(new ChatRoom(initiator, recipient));
+			log.info("{}신규 채팅방 생성 - roomId={}, initiatorId={}, recipientId={}", LogTag.CHAT, newRoom.getId(), initiator.getId(), recipient.getId());
+			return newRoom;
+		} catch (DataIntegrityViolationException e) {
+			log.warn("{}채팅방 생성 중 동시성 충돌 - initiatorId={}, recipientId={}", LogTag.CHAT, initiator.getId(), recipient.getId());
 			return chatRoomRepository.findActiveByPair(left, right)
 					       .orElseThrow(() -> new InternalServerException(ErrorCode.CHAT_ROOM_CONCURRENCY_ERROR));
 		}
 	}
 
-	// 채팅방 상세 조회 (유저 포함 여부 확인 포함)
 	@Transactional
 	public ChatRoom getVerifiedChatRoomOrThrow(Long userId, Long roomId) {
 		ChatRoom chatRoom = findChatRoomById(roomId);
@@ -61,9 +61,9 @@ public class ChatRoomService {
 	}
 
 	public void exit(Long userId, Long roomId) {
-        log.info("{}채팅방 나가기 요청 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
-		chatRoom.exitBy(userId); // 둘 다 나가면 isActive=false로 전환됨
+		chatRoom.exitBy(userId); // 둘 다 나가면 isActive = false로 전환됨
+		log.info("{}채팅방 나가기 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 	}
 
 	private ChatRoom findChatRoomById(Long roomId) {
@@ -75,6 +75,7 @@ public class ChatRoomService {
 		ChatRoom chatRoom = findChatRoomById(roomId);
 		if (!chatRoom.isActive()) {
 			chatRoom.activate();
+			log.info("{}비활성 채팅방 복원 처리 - roomId={}", LogTag.CHAT, roomId);
 		}
 	}
 
@@ -84,13 +85,14 @@ public class ChatRoomService {
 	}
 
 	public void returnBy(Long roomId, Long userId) {
-        log.info("{}채팅방 복귀 요청 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 		ChatRoom chatRoom = findChatRoomById(roomId);
 
 		if (chatRoom.isArchived()) {
+			log.warn("{}채팅방 복귀 불가 - 이미 종료된 채팅방 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 			throw new ConflictException(ErrorCode.CHAT_ROOM_CLOSED);
 		}
 
 		chatRoom.returnBy(userId);
+		log.info("{}채팅방 복귀 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
 	}
 }

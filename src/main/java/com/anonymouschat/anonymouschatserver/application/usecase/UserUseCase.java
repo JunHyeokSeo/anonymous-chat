@@ -38,7 +38,6 @@ public class UserUseCase {
 	 * 내 프로필을 조회합니다.
 	 */
 	public UserUseCaseDto.Profile getMyProfile(Long userId) {
-		log.info("{}내 프로필 조회 요청 - userId={}", LogTag.USER, userId);
 		return UserUseCaseDto.Profile.from(userService.getMyProfile(userId));
 	}
 

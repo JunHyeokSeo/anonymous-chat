@@ -39,9 +39,6 @@ public class MessageUseCase {
 	 * 메시지 목록을 조회합니다. (커서 기반 페이징)
 	 */
 	public List<MessageUseCaseDto.MessageResult> getMessages(MessageUseCaseDto.GetMessages request) {
-		log.info("{}메시지 목록 조회 요청 - userId={}, roomId={}, lastMessageId={}, limit={}",
-				LogTag.MESSAGE, request.userId(), request.roomId(), request.lastMessageId(), request.limit());
-
 		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
 		LocalDateTime lastExitedAt = chatRoom.getLastExitedAt(request.userId());
 
@@ -52,7 +49,6 @@ public class MessageUseCase {
 				request.limit()
 		);
 
-		log.info("{}메시지 목록 조회 완료 - 조회된 메시지 수={}", LogTag.MESSAGE, messages.size());
 		return messages.stream()
 				       .map(m -> MessageUseCaseDto.MessageResult.from(m, request.userId()))
 				       .toList();
@@ -62,21 +58,15 @@ public class MessageUseCase {
 	 * 메시지를 읽음 처리합니다.
 	 */
 	public Long markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
-		log.info("{}메시지 읽음 처리 요청 - userId={}, roomId={}", LogTag.MESSAGE, request.userId(), request.roomId());
 		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
-		Long lastReadId = messageService.markMessagesAsRead(request.roomId(), request.userId());
-		log.info("{}읽음 처리 완료 - 마지막 읽은 메시지 ID={}", LogTag.MESSAGE, lastReadId);
-		return lastReadId;
+		return messageService.markMessagesAsRead(request.roomId(), request.userId());
 	}
 
 	/**
 	 * 상대방이 마지막으로 읽은 메시지 ID를 조회합니다.
 	 */
 	public Long getLastReadMessageIdByOpponent(MessageUseCaseDto.GetLastReadMessage request) {
-		log.info("{}상대방의 마지막 읽은 메시지 ID 조회 - userId={}, roomId={}", LogTag.MESSAGE, request.userId(), request.roomId());
 		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
-		Long lastReadId = messageService.findLastReadMessageIdByReceiver(request.roomId(), request.userId());
-		log.info("{}상대방이 마지막으로 읽은 메시지 ID={}", LogTag.MESSAGE, lastReadId);
-		return lastReadId;
+		return messageService.findLastReadMessageIdByReceiver(request.roomId(), request.userId());
 	}
 }

@@ -22,7 +22,6 @@ public class BlockUseCase {
 		User blocker = userService.findUser(blockerId);
 		User blocked = userService.findUser(blockedId);
 		blockService.block(blocker, blocked);
-		log.info("{}유저 차단 완료 - 차단자 ID={}, 피차단자 ID={}", LogTag.BLOCK, blockerId, blockedId);
 	}
 
 	/**
@@ -30,6 +29,5 @@ public class BlockUseCase {
 	 */
 	public void unblockUser(Long blockerId, Long blockedId) {
 		blockService.unblock(blockerId, blockedId);
-		log.info("{}유저 차단 해제 완료 - 차단자 ID={}, 피차단자 ID={}", LogTag.BLOCK, blockerId, blockedId);
 	}
 }
