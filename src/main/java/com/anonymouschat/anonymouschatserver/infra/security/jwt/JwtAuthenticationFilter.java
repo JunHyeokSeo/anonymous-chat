@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtTokenResolver tokenResolver;
 	private final JwtValidator jwtValidator;
 	private final JwtAuthenticationFactory authFactory;
+	private final AuthenticationEntryPoint entryPoint;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -67,12 +69,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			// 인증 실패는 그대로 던져 ETF가 EntryPoint 호출하게 함
 			log.warn("인증 실패: {}", e.getMessage());
 			SecurityContextHolder.clearContext();
-			throw e;
+			entryPoint.commence(request, response, e);
+			return;
 		} catch (Exception e) {
 			// 서버 사이드 예기치 못한 오류 → EntryPoint로 유도 (401 처리)
 			log.error("{}JWT 필터 처리 실패 - URI={}, message={}", LogTag.SECURITY_FILTER, request.getRequestURI(), e.getMessage(), e);
 			SecurityContextHolder.clearContext();
-			throw new AuthenticationServiceException(UNEXPECTED_AUTH_ERROR.getMessage(), e);
+			AuthenticationException ae = new org.springframework.security.authentication.AuthenticationServiceException(
+					com.anonymouschat.anonymouschatserver.common.code.ErrorCode.UNEXPECTED_AUTH_ERROR.getMessage(), e);
+			entryPoint.commence(request, response, ae);
+			return;
 		}
 
 		filterChain.doFilter(request, response);

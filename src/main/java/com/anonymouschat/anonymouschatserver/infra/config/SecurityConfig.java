@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -68,8 +69,8 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 
 				// JWT 필터 등록 ExceptionTranslationFilter
-				.addFilterAfter(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory),
-						ExceptionTranslationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, customAuthenticationEntryPoint()),
+						UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
@@ -78,9 +79,10 @@ public class SecurityConfig {
 	public JwtAuthenticationFilter jwtAuthenticationFilter(
 			JwtTokenResolver tokenResolver,
 			JwtValidator jwtValidator,
-			JwtAuthenticationFactory authFactory
+			JwtAuthenticationFactory authFactory,
+			CustomAuthenticationEntryPoint entryPoint
 	) {
-		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory);
+		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, entryPoint);
 	}
 
 	@Bean
