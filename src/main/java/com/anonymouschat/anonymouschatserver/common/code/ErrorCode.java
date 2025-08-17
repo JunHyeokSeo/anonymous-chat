@@ -27,6 +27,11 @@ public enum ErrorCode {
 	INVALID_OAUTH_TOKEN_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "잘못된 OAuth 토큰 타입입니다."),
 	UNSUPPORTED_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, "지원하지 않는 OAuth Provider 입니다."),
 	TOKEN_THEFT_DETECTED(HttpStatus.UNAUTHORIZED, "토큰 탈취 시도가 감지되었습니다. 다시 로그인해주세요."),
+	UNSUPPORTED_ALGORITHM(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 알고리즘입니다."),
+	UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 형식입니다."),
+	MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "JWT 형식이 올바르지 않습니다."),
+	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT 서명이 유효하지 않습니다."),
+	UNEXPECTED_AUTH_ERROR(HttpStatus.UNAUTHORIZED, "인증 처리 중 서버 오류가 발생했습니다."),
 
 	// 유저 관련
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."),

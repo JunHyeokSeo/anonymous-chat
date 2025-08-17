@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.common.file;
+package com.anonymouschat.anonymouschatserver.infra.file;
 
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.infra.file.LocalFileStorage;

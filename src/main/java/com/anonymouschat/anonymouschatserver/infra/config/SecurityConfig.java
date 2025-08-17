@@ -1,27 +1,31 @@
 package com.anonymouschat.anonymouschatserver.infra.config;
 
-import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.infra.security.CustomAccessDeniedHandler;
+import com.anonymouschat.anonymouschatserver.infra.security.CustomAuthenticationEntryPoint;
 import com.anonymouschat.anonymouschatserver.infra.security.OAuth2AuthenticationSuccessHandler;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity()
 @RequiredArgsConstructor
 public class SecurityConfig {
+
 	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 	private final JwtTokenResolver tokenResolver;
 	private final JwtValidator jwtValidator;
@@ -29,27 +33,25 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
 		http
-				//CORS + CSRF 비활성화
+				// CORS/CSRF
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(Customizer.withDefaults())
 
-				//세션 정책: STATELESS
-				.sessionManagement(session -> session
-						                              .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				// 세션: STATELESS
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-				//인증 실패 시 JSON 응답
-				.exceptionHandling(exception -> exception
-						                                .authenticationEntryPoint((request, response, authException) ->
-								                                                          ApiResponse.writeErrorResponse(response, ErrorCode.UNAUTHORIZED))
+				// 401/403 JSON 통일
+				.exceptionHandling(ex -> ex
+						                         .authenticationEntryPoint(customAuthenticationEntryPoint())
+						                         .accessDeniedHandler(customAccessDeniedHandler())
 				)
 
-				//접근 허용 경로 설정
+				// 인가 규칙
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers(
-								                               "/api/v1/auth/**",           // 로그인, 회원가입
-								                               "/oauth2/**",                // OAuth2 로그인
+								                               "/api/v1/auth/**",
+								                               "/oauth2/**",
 								                               "/swagger-ui.html",
 								                               "/swagger-ui/**",
 								                               "/v3/api-docs/**",
@@ -58,16 +60,17 @@ public class SecurityConfig {
 						                               .anyRequest().authenticated()
 				)
 
-				//OAuth2 로그인 성공 시 토큰 발급 핸들러 연결
+				// OAuth2 로그인
 				.oauth2Login(oauth2 -> oauth2
 						                       .successHandler(oAuth2AuthenticationSuccessHandler)
 				)
 
-				//불필요한 form 로그인 제거
+				// 폼 로그인 제거
 				.formLogin(AbstractHttpConfigurer::disable)
 
-				//JWT 인증 필터 추가
-				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory), UsernamePasswordAuthenticationFilter.class);
+				// JWT 필터 등록 ExceptionTranslationFilter
+				.addFilterAfter(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory),
+						ExceptionTranslationFilter.class);
 
 		return http.build();
 	}
@@ -79,5 +82,15 @@ public class SecurityConfig {
 			JwtAuthenticationFactory authFactory
 	) {
 		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory);
+	}
+
+	@Bean
+	public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+		return new CustomAuthenticationEntryPoint();
+	}
+
+	@Bean
+	public CustomAccessDeniedHandler customAccessDeniedHandler() {
+		return new CustomAccessDeniedHandler();
 	}
 }
