@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
-import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;

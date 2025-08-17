@@ -8,7 +8,6 @@ import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
