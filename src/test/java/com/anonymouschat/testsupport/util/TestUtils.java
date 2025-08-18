@@ -9,6 +9,7 @@ import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 
 public class TestUtils {
     public static User createUser(Long id) throws Exception {
@@ -50,6 +51,7 @@ public class TestUtils {
             .content(content)
             .build();
         setId(message, id);
+		setSentAt(message);
         return message;
     }
 
@@ -58,4 +60,10 @@ public class TestUtils {
         idField.setAccessible(true);
         idField.set(target, id);
     }
+
+	public static void setSentAt(Object target) throws Exception {
+		Field sentAt = target.getClass().getDeclaredField("sentAt");
+		sentAt.setAccessible(true);
+		sentAt.set(target, LocalDateTime.now());
+	}
 }

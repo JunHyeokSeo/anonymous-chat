@@ -143,7 +143,7 @@ class ChatRoomServiceTest {
             // when & then
             assertThatThrownBy(() -> chatRoomService.getVerifiedChatRoomOrThrow(1L, 10L))
                     .isInstanceOf(NotFoundException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_NOT_FOUND);
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHATROOM_NOT_FOUND);
         }
 
         @Test

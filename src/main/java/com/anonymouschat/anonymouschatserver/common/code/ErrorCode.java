@@ -43,7 +43,7 @@ public enum ErrorCode {
 	BLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "차단 정보를 찾을 수 없습니다."),
 
 	// 채팅 관련
-	CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
+	CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
 	CHAT_ROOM_CLOSED(HttpStatus.CONFLICT, "종료된 대화방입니다. 새 대화방을 사용하세요."),
 	NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "채팅방 참여자가 아닙니다."),
 	CHAT_ROOM_CONCURRENCY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "동시성 충돌 후 활성 방 조회 실패"),
