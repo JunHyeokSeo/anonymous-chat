@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.common.exception.auth.UnsupportedAlgorithmAuthenticationException;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.config.SecurityConfig;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
@@ -65,7 +66,7 @@ class SecurityExceptionHandlingWebTest {
 		stubResolveToken(token);
 		doNothing().when(jwtValidator).validate(token);
 		when(authFactory.createPrincipal(token))
-				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, "USER"));
+				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, Role.USER));
 		when(authFactory.createAuthentication(any())).thenReturn(authentication);
 	}
 
@@ -195,7 +196,7 @@ class SecurityExceptionHandlingWebTest {
 		stubResolveToken(token);
 		doNothing().when(jwtValidator).validate(token);
 		when(authFactory.createPrincipal(token))
-				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, "USER"));
+				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, Role.USER));
 		when(authFactory.createAuthentication(any())).thenReturn(null); // 핵심
 
 		mockMvc.perform(get("/secure/user"))

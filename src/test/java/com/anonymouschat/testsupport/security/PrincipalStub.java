@@ -1,6 +1,7 @@
 package com.anonymouschat.testsupport.security;
 
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import java.security.Principal;
 
@@ -16,7 +17,7 @@ public class PrincipalStub {
      * @return 해당 사용자 ID를 가진 Principal 객체
      */
     public static Principal authenticated(Long userId) {
-        return new CustomPrincipal(userId, null, null, "USER");
+        return new CustomPrincipal(userId, null, null, Role.USER);
     }
 
     /**

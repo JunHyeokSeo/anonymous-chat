@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.application.service;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import com.anonymouschat.anonymouschatserver.infra.token.TokenStorage;
@@ -164,7 +165,7 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("토큰에서 userId 정상 추출")
 		void extractUserId() {
-			CustomPrincipal principal = CustomPrincipal.builder().userId(99L).role("ROLE_USER").build();
+			CustomPrincipal principal = CustomPrincipal.builder().userId(99L).role(Role.USER).build();
 			when(jwtTokenProvider.getPrincipalFromToken("token")).thenReturn(principal);
 
 			Long userId = authService.getUserIdFromToken("token");
