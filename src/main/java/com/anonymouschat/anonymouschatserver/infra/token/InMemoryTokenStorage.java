@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class InMemoryTokenStorage implements TokenStorage {
 
-    private final Map<String, TokenEntry> storage = new ConcurrentHashMap<>();
+    private final Map<Long, TokenEntry> storage = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public InMemoryTokenStorage() {
@@ -20,13 +20,13 @@ public class InMemoryTokenStorage implements TokenStorage {
     }
 
     @Override
-    public void save(String key, String value, long expirationMillis) {
+    public void save(Long key, String value, long expirationMillis) {
         long expiryTime = System.currentTimeMillis() + expirationMillis;
         storage.put(key, new TokenEntry(value, expiryTime));
     }
 
     @Override
-    public Optional<String> find(String key) {
+    public Optional<String> find(Long key) {
         TokenEntry entry = storage.get(key);
         if (entry != null && !entry.isExpired()) {
             return Optional.of(entry.value());
@@ -39,7 +39,7 @@ public class InMemoryTokenStorage implements TokenStorage {
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(Long key) {
         storage.remove(key);
     }
 

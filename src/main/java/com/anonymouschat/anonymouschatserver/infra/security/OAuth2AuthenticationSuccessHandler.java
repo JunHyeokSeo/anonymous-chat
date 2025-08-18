@@ -52,7 +52,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 				authResult.isNewUser()
 		);
 
-		AuthDto.AuthResponse dto = AuthDto.AuthResponse.from(authResult);
+		AuthDto.AuthResultResponse dto = AuthDto.AuthResultResponse.from(authResult);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

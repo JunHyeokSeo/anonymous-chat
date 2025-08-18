@@ -39,7 +39,7 @@ public class AuthUseCase {
 
         if (user.getRole() != UserRole.ROLE_GUEST) {
             refreshToken = authService.generateRefreshToken(user.getId(), user.getRole().getAuthority());
-            authService.saveRefreshToken(user.getId().toString(), refreshToken);
+            authService.saveRefreshToken(user.getId(), refreshToken);
         }
 
 	    return AuthUseCaseDto.AuthResult.builder()
@@ -54,20 +54,20 @@ public class AuthUseCase {
 		authService.validateToken(oldRefreshToken);
 
 		Long userId = authService.getUserIdFromToken(oldRefreshToken);
-		String storedRefreshToken = authService.findRefreshTokenOrThrow(userId.toString());
+		String storedRefreshToken = authService.findRefreshTokenOrThrow(userId);
 
 		if (!storedRefreshToken.equals(oldRefreshToken)) {
 			log.warn("{}다른 기기에서의 RefreshToken 사용 감지 - userId = {}, token = {}", LogTag.SECURITY, userId, oldRefreshToken);
-			authService.revokeRefreshToken(userId.toString());
+			authService.revokeRefreshToken(userId);
 			throw new InvalidTokenException(ErrorCode.TOKEN_THEFT_DETECTED);
 		}
 
-		authService.revokeRefreshToken(userId.toString());
+		authService.revokeRefreshToken(userId);
 
 		User user = userService.findUser(userId);
 		String newAccessToken = authService.generateAccessToken(user.getId(), user.getRole().getAuthority());
 		String newRefreshToken = authService.generateRefreshToken(user.getId(), user.getRole().getAuthority());
-		authService.saveRefreshToken(user.getId().toString(), newRefreshToken);
+		authService.saveRefreshToken(user.getId(), newRefreshToken);
 
 		return AuthUseCaseDto.AuthTokens.builder()
 				       .accessToken(newAccessToken)
@@ -77,7 +77,7 @@ public class AuthUseCase {
 
 
 	@Transactional
-    public void logout(String userId) {
+    public void logout(Long userId) {
         log.info("{}로그아웃 요청 - userId={}", LogTag.AUTH, userId);
         authService.revokeRefreshToken(userId);
     }

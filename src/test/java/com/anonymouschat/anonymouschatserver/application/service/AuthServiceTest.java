@@ -91,9 +91,9 @@ class AuthServiceTest {
 		void saveTokenSuccessfully() {
 			when(jwtTokenProvider.getExpirationMillis("refresh-token")).thenReturn(3000L);
 
-			authService.saveRefreshToken("1", "refresh-token");
+			authService.saveRefreshToken(1L, "refresh-token");
 
-			verify(tokenStorage).save("1", "refresh-token", 3000L);
+			verify(tokenStorage).save(1L, "refresh-token", 3000L);
 		}
 	}
 
@@ -104,9 +104,9 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("저장된 토큰 정상 조회")
 		void findExistingToken() {
-			when(tokenStorage.find("1")).thenReturn(Optional.of("stored-token"));
+			when(tokenStorage.find(1L)).thenReturn(Optional.of("stored-token"));
 
-			Optional<String> result = authService.findRefreshTokenOrThrow("1").describeConstable();
+			Optional<String> result = authService.findRefreshTokenOrThrow(1L).describeConstable();
 
 			assertThat(result).contains("stored-token");
 		}
@@ -114,9 +114,9 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("토큰이 존재하지 않으면 empty 반환")
 		void tokenNotFound() {
-			doThrow(new InvalidTokenException(ErrorCode.INVALID_TOKEN)).when(tokenStorage).find("1");
+			doThrow(new InvalidTokenException(ErrorCode.INVALID_TOKEN)).when(tokenStorage).find(1L);
 
-			assertThatThrownBy(() -> authService.findRefreshTokenOrThrow("1").describeConstable())
+			assertThatThrownBy(() -> authService.findRefreshTokenOrThrow(1L).describeConstable())
 					.isInstanceOf(InvalidTokenException.class);
 		}
 	}
@@ -128,9 +128,9 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("토큰 삭제 동작 확인")
 		void revokeToken() {
-			authService.revokeRefreshToken("1");
+			authService.revokeRefreshToken(1L);
 
-			verify(tokenStorage).delete("1");
+			verify(tokenStorage).delete(1L);
 		}
 	}
 

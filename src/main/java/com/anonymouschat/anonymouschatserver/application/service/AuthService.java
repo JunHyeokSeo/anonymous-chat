@@ -35,13 +35,13 @@ public class AuthService {
 		return jwtTokenProvider.createRefreshToken(userId, role);
 	}
 
-	public void saveRefreshToken(String userId, String refreshToken) {
+	public void saveRefreshToken(Long userId, String refreshToken) {
 		long remainingMillis = jwtTokenProvider.getExpirationMillis(refreshToken);
 		tokenStorage.save(userId, refreshToken, remainingMillis);
 		log.info("{}리프레시 토큰 저장 완료 - userId={}, 만료까지 {}ms", LogTag.AUTH, userId, remainingMillis);
 	}
 
-	public String findRefreshTokenOrThrow(String userId) {
+	public String findRefreshTokenOrThrow(Long userId) {
 		return tokenStorage.find(userId)
 				       .orElseThrow(() -> {
 					       log.warn("{}리프레시 토큰 조회 실패 - userId={}", LogTag.AUTH, userId);
@@ -49,7 +49,7 @@ public class AuthService {
 				       });
 	}
 
-	public void revokeRefreshToken(String userId) {
+	public void revokeRefreshToken(Long userId) {
 		tokenStorage.delete(userId);
 		log.info("{}리프레시 토큰 폐기 완료 - userId={}", LogTag.AUTH, userId);
 	}

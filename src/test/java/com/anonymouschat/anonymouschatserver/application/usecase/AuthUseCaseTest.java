@@ -58,7 +58,7 @@ class AuthUseCaseTest {
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
 			assertThat(result.isNewUser()).isFalse();
 
-			verify(authService).saveRefreshToken("1", "refresh-token");
+			verify(authService).saveRefreshToken(1L, "refresh-token");
 		}
 
 		@Test
@@ -95,7 +95,7 @@ class AuthUseCaseTest {
 			User user = TestUtils.createUser(userId);
 
 			when(authService.getUserIdFromToken(oldToken)).thenReturn(userId);
-			when(authService.findRefreshTokenOrThrow(String.valueOf(userId))).thenReturn(oldToken);
+			when(authService.findRefreshTokenOrThrow(userId)).thenReturn(oldToken);
 			when(userService.findUser(userId)).thenReturn(user);
 			when(authService.generateAccessToken(userId, "ROLE_USER")).thenReturn("new-access");
 			when(authService.generateRefreshToken(userId, "ROLE_USER")).thenReturn("new-refresh");
@@ -105,8 +105,8 @@ class AuthUseCaseTest {
 			assertThat(tokens.accessToken()).isEqualTo("new-access");
 			assertThat(tokens.refreshToken()).isEqualTo("new-refresh");
 
-			verify(authService).revokeRefreshToken(String.valueOf(userId));
-			verify(authService).saveRefreshToken(String.valueOf(userId), "new-refresh");
+			verify(authService).revokeRefreshToken(userId);
+			verify(authService).saveRefreshToken(userId, "new-refresh");
 		}
 
 		@Test
@@ -116,13 +116,13 @@ class AuthUseCaseTest {
 			Long userId = 50L;
 
 			when(authService.getUserIdFromToken(oldToken)).thenReturn(userId);
-			when(authService.findRefreshTokenOrThrow(String.valueOf(userId))).thenReturn("stored-different-token");
+			when(authService.findRefreshTokenOrThrow(userId)).thenReturn("stored-different-token");
 
 			assertThatThrownBy(() -> authUseCase.refresh(oldToken))
 					.isInstanceOf(InvalidTokenException.class)
 					.hasMessage(ErrorCode.TOKEN_THEFT_DETECTED.getMessage());
 
-			verify(authService).revokeRefreshToken(String.valueOf(userId));
+			verify(authService).revokeRefreshToken(userId);
 		}
 
 		@Test
@@ -143,9 +143,9 @@ class AuthUseCaseTest {
 		@Test
 		@DisplayName("refresh 토큰 정상 삭제")
 		void logout() {
-			authUseCase.logout("1");
+			authUseCase.logout(1L);
 
-			verify(authService).revokeRefreshToken("1");
+			verify(authService).revokeRefreshToken(1L);
 		}
 	}
 }
