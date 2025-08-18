@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,8 +16,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
-import static com.anonymouschat.anonymouschatserver.common.code.ErrorCode.UNEXPECTED_AUTH_ERROR;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -36,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	                                @NonNull HttpServletResponse response,
 	                                @NonNull FilterChain filterChain) throws IOException, ServletException {
 
-		// 토큰 처리(추출/검증/컨텍스트 세팅)만 try-catch로 감싼다
 		try {
 			String token = tokenResolver.resolve(request);
 

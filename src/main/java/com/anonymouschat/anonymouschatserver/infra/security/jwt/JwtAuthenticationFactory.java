@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,7 +39,7 @@ public class JwtAuthenticationFactory {
 			return null;
 		}
 
-		var authority = new SimpleGrantedAuthority(principal.role());
+		var authority = principal.role();
 		log.debug("{}Authentication 객체 생성 완료 - userId={}, role={}",
 				LogTag.SECURITY_JWT,
 				principal.userId(),
