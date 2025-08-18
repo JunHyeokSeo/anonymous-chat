@@ -22,7 +22,7 @@ public class UserServiceDto {
 			OAuthProvider provider,
 			String providerId
 	) {
-		public static RegisterCommand from(UserUseCaseDto.Register dto) {
+		public static RegisterCommand from(UserUseCaseDto.RegisterRequest dto) {
 			return new RegisterCommand(
 					dto.nickname(),
 					dto.gender(),
@@ -32,19 +32,6 @@ public class UserServiceDto {
 					dto.provider(),
 					dto.providerId()
 			);
-		}
-
-		public User toEntity() {
-			return User.builder()
-					       .nickname(nickname)
-					       .gender(gender)
-					       .age(age)
-					       .region(region)
-					       .bio(bio)
-					       .provider(provider)
-					       .providerId(providerId)
-					       .role(com.anonymouschat.anonymouschatserver.domain.type.UserRole.ROLE_USER)
-					       .build();
 		}
 	}
 
@@ -56,7 +43,7 @@ public class UserServiceDto {
 			Region region,
 			String bio
 	) {
-		public static UpdateCommand from(UserUseCaseDto.Update dto) {
+		public static UpdateCommand from(UserUseCaseDto.UpdateRequest dto) {
 			return new UpdateCommand(
 					dto.id(),
 					dto.nickname(),
@@ -77,7 +64,7 @@ public class UserServiceDto {
 			Region region,
 			List<Long> blockedUserIds
 	) {
-		public static SearchCommand from(UserUseCaseDto.SearchCondition dto, List<Long> blockedUserIds) {
+		public static SearchCommand from(UserUseCaseDto.SearchConditionRequest dto, List<Long> blockedUserIds) {
 			return SearchCommand.builder()
 					       .id(dto.id())
 					       .gender(dto.gender())

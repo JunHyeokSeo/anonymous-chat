@@ -12,7 +12,7 @@ public record UserSearchResponse(
 		String profileImageUrl,
 		String lastActiveDisplay
 ) {
-	public static UserSearchResponse from(UserUseCaseDto.SearchResult result) {
+	public static UserSearchResponse from(UserUseCaseDto.SearchResponse result) {
 		return UserSearchResponse.builder()
 				       .userId(result.userId())
 				       .nickname(result.nickname())

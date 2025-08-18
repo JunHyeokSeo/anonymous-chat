@@ -72,8 +72,8 @@ class ChatRoomUseCaseTest {
 		void getMyRooms() {
 			// given
 			Long userId = 1L;
-			List<ChatRoomServiceDto.Summary> serviceResult = List.of(
-					new ChatRoomServiceDto.Summary(
+			List<ChatRoomServiceDto.SummaryResult> serviceResult = List.of(
+					new ChatRoomServiceDto.SummaryResult(
 							100L,
 							2L,
 							"상대",
@@ -87,7 +87,7 @@ class ChatRoomUseCaseTest {
 			when(chatRoomService.getMyActiveChatRooms(userId)).thenReturn(serviceResult);
 
 			// when
-			List<ChatRoomUseCaseDto.Summary> result = chatRoomUseCase.getMyActiveChatRooms(userId);
+			List<ChatRoomUseCaseDto.SummaryResponse> result = chatRoomUseCase.getMyActiveChatRooms(userId);
 
 			// then
 			assertThat(result).hasSize(1);

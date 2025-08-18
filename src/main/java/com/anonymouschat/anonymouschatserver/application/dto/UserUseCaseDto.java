@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserUseCaseDto {
-	public record Register(
+	public record RegisterRequest(
 			String nickname,
 			Gender gender,
 			int age,
@@ -19,7 +19,7 @@ public class UserUseCaseDto {
 			String providerId
 	) {}
 
-	public record Update(
+	public record UpdateRequest(
 			Long id,
 			String nickname,
 			Gender gender,
@@ -29,7 +29,7 @@ public class UserUseCaseDto {
 	) {}
 
 	@Builder
-	public record Profile(
+	public record ProfileResponse(
 			Long id,
 			String nickname,
 			Gender gender,
@@ -40,8 +40,8 @@ public class UserUseCaseDto {
 			LocalDateTime lastActiveAt,
 			List<UserProfileImageDto> profileImages
 	) {
-		public static Profile from(UserServiceDto.ProfileResult result) {
-			return Profile.builder()
+		public static ProfileResponse from(UserServiceDto.ProfileResult result) {
+			return ProfileResponse.builder()
 					       .id(result.id())
 					       .nickname(result.nickname())
 					       .gender(result.gender())
@@ -56,7 +56,7 @@ public class UserUseCaseDto {
 	}
 
 	@Builder
-	public record SearchCondition(
+	public record SearchConditionRequest(
 			Long id,
 			Gender gender,
 			Integer minAge,
@@ -65,7 +65,7 @@ public class UserUseCaseDto {
 	) {}
 
 	@Builder
-	public record SearchResult(
+	public record SearchResponse(
 			Long userId,
 			String nickname,
 			Gender gender,
@@ -74,8 +74,8 @@ public class UserUseCaseDto {
 			String profileImageUrl,
 			LocalDateTime lastActiveAt
 	) {
-		public static SearchResult from(UserServiceDto.SearchResult result) {
-			return SearchResult.builder()
+		public static SearchResponse from(UserServiceDto.SearchResult result) {
+			return SearchResponse.builder()
 					       .userId(result.userId())
 					       .nickname(result.nickname())
 					       .gender(result.gender())

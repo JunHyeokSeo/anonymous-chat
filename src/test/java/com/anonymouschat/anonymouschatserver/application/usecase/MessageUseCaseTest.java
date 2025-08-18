@@ -49,7 +49,7 @@ class MessageUseCaseTest {
 		@DisplayName("정상적으로 메시지를 전송하고 결과를 반환한다.")
 		void sendMessage() {
 			// given
-			var request = MessageUseCaseDto.SendMessage.builder()
+			var request = MessageUseCaseDto.SendMessageRequest.builder()
 					              .roomId(1L)
 					              .senderId(1L)
 					              .content("hello")
@@ -78,7 +78,7 @@ class MessageUseCaseTest {
 		@DisplayName("해당 유저의 퇴장 이후 메시지를 페이징하여 가져온다.")
 		void getMessages() {
 			// given
-			var request = MessageUseCaseDto.GetMessages.builder()
+			var request = MessageUseCaseDto.GetMessagesRequest.builder()
 					              .roomId(1L)
 					              .userId(1L)
 					              .lastMessageId(null)
@@ -109,7 +109,7 @@ class MessageUseCaseTest {
 		@DisplayName("메시지 읽음 처리만 수행한다.")
 		void markMessagesAsRead() {
 			// given
-			var request = MessageUseCaseDto.MarkMessagesAsRead.builder()
+			var request = MessageUseCaseDto.MarkMessagesAsReadRequest.builder()
 					              .roomId(1L)
 					              .userId(1L)
 					              .build();

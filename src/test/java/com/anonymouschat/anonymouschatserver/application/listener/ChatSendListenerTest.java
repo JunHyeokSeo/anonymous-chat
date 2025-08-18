@@ -28,7 +28,7 @@ class ChatSendListenerTest {
     private ChatSendListener orchestrator;
 
     @Captor
-    private ArgumentCaptor<MessageUseCaseDto.SendMessage> sendMessageCaptor;
+    private ArgumentCaptor<MessageUseCaseDto.SendMessageRequest> sendMessageCaptor;
     @Captor
     private ArgumentCaptor<ChatPersisted> persistedEventCaptor;
 
@@ -43,13 +43,13 @@ class ChatSendListenerTest {
         // given
         var chatSaveEvent = new ChatSend(100L, 200L, "안녕하세요");
 	    Long mockMessageId = 999L;
-        when(messageUseCase.sendMessage(any(MessageUseCaseDto.SendMessage.class))).thenReturn(mockMessageId);
+        when(messageUseCase.sendMessage(any(MessageUseCaseDto.SendMessageRequest.class))).thenReturn(mockMessageId);
 
         // when
         orchestrator.on(chatSaveEvent);
 
         verify(messageUseCase).sendMessage(sendMessageCaptor.capture());
-        MessageUseCaseDto.SendMessage capturedRequest = sendMessageCaptor.getValue();
+        MessageUseCaseDto.SendMessageRequest capturedRequest = sendMessageCaptor.getValue();
         assertThat(capturedRequest.roomId()).isEqualTo(200L);
         assertThat(capturedRequest.senderId()).isEqualTo(100L);
         assertThat(capturedRequest.content()).isEqualTo("안녕하세요");

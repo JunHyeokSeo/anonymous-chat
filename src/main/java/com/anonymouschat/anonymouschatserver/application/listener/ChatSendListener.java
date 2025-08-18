@@ -26,7 +26,7 @@ public class ChatSendListener {
 	public void on(ChatSend event) {
         log.info("{}ChatSend 이벤트 수신: roomId={}, senderId={}", LogTag.CHAT, event.roomId(), event.senderId());
 		// 메시지 저장
-		Long messageId = messageUseCase.sendMessage(MessageUseCaseDto.SendMessage.builder()
+		Long messageId = messageUseCase.sendMessage(MessageUseCaseDto.SendMessageRequest.builder()
 				                                    .roomId(event.roomId())
 				                                    .senderId(event.senderId())
 				                                    .content(event.content())

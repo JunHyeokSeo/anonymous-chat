@@ -5,9 +5,8 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 public class ChatRoomUseCaseDto {
-
 	@Builder
-	public record Summary(
+	public record SummaryResponse(
 			Long roomId,
 			Long opponentId,
 			String opponentNickname,
@@ -16,8 +15,8 @@ public class ChatRoomUseCaseDto {
 			String opponentProfileImageUrl,
 			LocalDateTime lastMessageTime
 	) {
-		public static Summary from(ChatRoomServiceDto.Summary result) {
-			return Summary.builder()
+		public static SummaryResponse from(ChatRoomServiceDto.SummaryResult result) {
+			return SummaryResponse.builder()
 					       .roomId(result.roomId())
 					       .opponentId(result.opponentId())
 					       .opponentNickname(result.opponentNickname())

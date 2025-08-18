@@ -28,10 +28,10 @@ public class ChatRoomUseCase {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ChatRoomUseCaseDto.Summary> getMyActiveChatRooms(Long userId) {
-		List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(userId);
+	public List<ChatRoomUseCaseDto.SummaryResponse> getMyActiveChatRooms(Long userId) {
+		List<ChatRoomServiceDto.SummaryResult> result = chatRoomService.getMyActiveChatRooms(userId);
 		return result.stream()
-				       .map(ChatRoomUseCaseDto.Summary::from)
+				       .map(ChatRoomUseCaseDto.SummaryResponse::from)
 				       .toList();
 	}
 

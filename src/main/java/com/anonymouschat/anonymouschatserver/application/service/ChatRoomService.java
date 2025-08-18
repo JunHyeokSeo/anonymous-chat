@@ -55,7 +55,7 @@ public class ChatRoomService {
 		return chatRoom;
 	}
 
-	public List<ChatRoomServiceDto.Summary> getMyActiveChatRooms(Long userId) {
+	public List<ChatRoomServiceDto.SummaryResult> getMyActiveChatRooms(Long userId) {
 		return chatRoomRepository.findActiveChatRoomsByUser(userId);
 	}
 

@@ -5,7 +5,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
 
 public class ChatRoomServiceDto {
-	public record Summary(
+	public record SummaryResult(
 			Long roomId,
 			Long opponentId,
 			String opponentNickname,
@@ -15,6 +15,6 @@ public class ChatRoomServiceDto {
 			LocalDateTime lastMessageTime
 	) {
 		@QueryProjection
-		public Summary {}
+		public SummaryResult {}
 	}
 }

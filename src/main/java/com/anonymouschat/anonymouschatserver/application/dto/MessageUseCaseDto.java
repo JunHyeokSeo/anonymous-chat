@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 public class MessageUseCaseDto {
 	@Builder
-	public record MessageResult(
+	public record MessageResponse(
 			Long messageId,
 			Long roomId,
 			Long senderId,
@@ -14,9 +14,9 @@ public class MessageUseCaseDto {
 			LocalDateTime sentAt,
 			boolean isMine
 	) {
-		public static MessageResult from(Message message, Long userId) {
+		public static MessageResponse from(Message message, Long userId) {
 			boolean isMine = message.isSentBy(userId);
-			return MessageResult.builder()
+			return MessageResponse.builder()
 					       .messageId(message.getId())
 					       .roomId(message.getChatRoom().getId())
 					       .senderId(message.getSender().getId())
@@ -28,7 +28,7 @@ public class MessageUseCaseDto {
 	}
 
 	@Builder
-	public record GetMessages(
+	public record GetMessagesRequest(
 			Long roomId,
 			Long userId,
 			Long lastMessageId, // null 이면 최신부터 시작
@@ -36,20 +36,20 @@ public class MessageUseCaseDto {
 	) {}
 
 	@Builder
-	public record SendMessage(
+	public record SendMessageRequest(
 			Long roomId,
 			Long senderId,
 			String content
 	) {}
 
 	@Builder
-	public record MarkMessagesAsRead(
+	public record MarkMessagesAsReadRequest(
 			Long roomId,
 			Long userId
 	) {}
 
 	@Builder
-	public record GetLastReadMessage(
+	public record GetLastReadMessageRequest(
 			Long roomId,
 			Long userId
 	) { }

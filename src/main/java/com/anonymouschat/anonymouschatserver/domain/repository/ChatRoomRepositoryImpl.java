@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.repository;
 
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
-import com.anonymouschat.anonymouschatserver.application.dto.QChatRoomServiceDto_Summary;
+import com.anonymouschat.anonymouschatserver.application.dto.QChatRoomServiceDto_SummaryResult;
 import com.anonymouschat.anonymouschatserver.domain.entity.QChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.QUserProfileImage;
 import com.querydsl.core.types.Expression;
@@ -19,12 +19,12 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom{
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<ChatRoomServiceDto.Summary> findActiveChatRoomsByUser(Long userId) {
+	public List<ChatRoomServiceDto.SummaryResult> findActiveChatRoomsByUser(Long userId) {
 		QChatRoom cr = QChatRoom.chatRoom;
 		QUserProfileImage img = QUserProfileImage.userProfileImage;
 
 		return queryFactory
-				       .select(new QChatRoomServiceDto_Summary(
+				       .select(new QChatRoomServiceDto_SummaryResult(
 						       cr.id,
 						       selectOpponentId(cr, userId),
 						       selectOpponentNickname(cr, userId),

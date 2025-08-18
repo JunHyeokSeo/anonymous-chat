@@ -27,7 +27,7 @@ public class UserUseCase {
 	private final BlockService blockService;
 
 	@Transactional
-	public Long register(UserUseCaseDto.Register register, List<MultipartFile> images) throws IOException {
+	public Long register(UserUseCaseDto.RegisterRequest register, List<MultipartFile> images) throws IOException {
 		log.info("{}회원가입 요청 - nickname={}, gender={}, age={}", LogTag.USER, register.nickname(), register.gender(), register.age());
 		Long userId = userService.register(UserServiceDto.RegisterCommand.from(register), images);
 		log.info("{}회원가입 완료 - userId={}", LogTag.USER, userId);
@@ -35,12 +35,12 @@ public class UserUseCase {
 	}
 
 	@Transactional(readOnly = true)
-	public UserUseCaseDto.Profile getMyProfile(Long userId) {
-		return UserUseCaseDto.Profile.from(userService.getMyProfile(userId));
+	public UserUseCaseDto.ProfileResponse getMyProfile(Long userId) {
+		return UserUseCaseDto.ProfileResponse.from(userService.getMyProfile(userId));
 	}
 
 	@Transactional
-	public void update(UserUseCaseDto.Update update, List<MultipartFile> images) throws IOException {
+	public void update(UserUseCaseDto.UpdateRequest update, List<MultipartFile> images) throws IOException {
 		log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, update.id());
 		userService.update(UserServiceDto.UpdateCommand.from(update), images);
 		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, update.id());
@@ -54,12 +54,12 @@ public class UserUseCase {
 	}
 
 	@Transactional(readOnly = true)
-	public Slice<UserUseCaseDto.SearchResult> getUserList(UserUseCaseDto.SearchCondition search, Pageable pageable) {
+	public Slice<UserUseCaseDto.SearchResponse> getUserList(UserUseCaseDto.SearchConditionRequest search, Pageable pageable) {
 		log.info("{}유저 목록 조회 요청 - searcherId={}, condition={}", LogTag.USER, search.id(), search);
 		List<Long> blockedUserIds = blockService.getBlockedUserIds(search.id());
 		UserServiceDto.SearchCommand command = UserServiceDto.SearchCommand.from(search, blockedUserIds);
-		Slice<UserUseCaseDto.SearchResult> result = userSearchService.getUsersByCondition(command, pageable)
-				                                            .map(UserUseCaseDto.SearchResult::from);
+		Slice<UserUseCaseDto.SearchResponse> result = userSearchService.getUsersByCondition(command, pageable)
+				                                            .map(UserUseCaseDto.SearchResponse::from);
 		log.info("{}유저 목록 조회 완료 - 반환 유저 수={}", LogTag.USER, result.getNumberOfElements());
 		return result;
 	}

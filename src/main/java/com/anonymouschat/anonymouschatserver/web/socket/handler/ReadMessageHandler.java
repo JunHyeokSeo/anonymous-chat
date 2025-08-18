@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
-import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto.MarkMessagesAsRead;
+import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto.MarkMessagesAsReadRequest;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
@@ -44,7 +44,7 @@ public class ReadMessageHandler implements MessageHandler{
 		try {
 			// 메시지 읽음 처리
 			Long lastReadMessageId = messageUseCase.markMessagesAsRead(
-					MarkMessagesAsRead.builder()
+					MarkMessagesAsReadRequest.builder()
 							.userId(userId)
 							.roomId(roomId)
 							.build()

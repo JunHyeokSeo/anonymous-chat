@@ -36,7 +36,7 @@ class ReadMessageHandlerTest {
     @Mock private WebSocketAccessGuard guard;
     @InjectMocks private ReadMessageHandler handler;
 
-    @Captor private ArgumentCaptor<MessageUseCaseDto.MarkMessagesAsRead> captor;
+    @Captor private ArgumentCaptor<MessageUseCaseDto.MarkMessagesAsReadRequest> captor;
 
     /**
      * 채팅방 참여자가 읽음 메시지를 보냈을 때,
@@ -60,7 +60,7 @@ class ReadMessageHandlerTest {
         // then
         // messageUseCase의 markMessagesAsRead 메소드가 올바른 인자로 호출되었는지 검증.
         verify(messageUseCase).markMessagesAsRead(captor.capture());
-        MessageUseCaseDto.MarkMessagesAsRead captured = captor.getValue();
+        MessageUseCaseDto.MarkMessagesAsReadRequest captured = captor.getValue();
         assertThat(captured.roomId()).isEqualTo(roomId);
         assertThat(captured.userId()).isEqualTo(userId);
 

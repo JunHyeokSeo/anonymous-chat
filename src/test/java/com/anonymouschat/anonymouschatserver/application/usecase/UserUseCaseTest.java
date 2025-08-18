@@ -44,7 +44,7 @@ class UserUseCaseTest {
 		void get_users_by_condition_success() {
 			// given
 			Long userId = 1L;
-			UserUseCaseDto.SearchCondition searchCondition = UserUseCaseDto.SearchCondition.builder()
+			UserUseCaseDto.SearchConditionRequest searchCondition = UserUseCaseDto.SearchConditionRequest.builder()
 					                                                 .id(userId)
 					                                                 .gender(Gender.FEMALE)
 					                                                 .minAge(20)
@@ -61,7 +61,7 @@ class UserUseCaseTest {
 			when(userSearchService.getUsersByCondition(serviceCommand, Pageable.unpaged())).thenReturn(serviceResultSlice);
 
 			// when
-			Slice<UserUseCaseDto.SearchResult> result = userUseCase.getUserList(searchCondition, Pageable.unpaged());
+			Slice<UserUseCaseDto.SearchResponse> result = userUseCase.getUserList(searchCondition, Pageable.unpaged());
 
 			// then
 			assertThat(result).hasSize(1);

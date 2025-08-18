@@ -21,7 +21,7 @@ public record GetMyProfileResponse(
 		LocalDateTime lastActiveAt,
 		List<UserProfileImageDto> profileImages
 ) {
-	public static GetMyProfileResponse from(UserUseCaseDto.Profile response) {
+	public static GetMyProfileResponse from(UserUseCaseDto.ProfileResponse response) {
 		return GetMyProfileResponse.builder()
 				       .id(response.id())
 				       .nickname(response.nickname())

@@ -25,7 +25,7 @@ public class MessageUseCase {
 	private final UserService userService;
 
 	@Transactional
-	public Long sendMessage(MessageUseCaseDto.SendMessage request) {
+	public Long sendMessage(MessageUseCaseDto.SendMessageRequest request) {
 		log.info("{}메시지 전송 요청 - senderId={}, roomId={}",
 				LogTag.MESSAGE, request.senderId(), request.roomId());
 
@@ -43,25 +43,25 @@ public class MessageUseCase {
 	}
 
 	@Transactional(readOnly = true)
-	public List<MessageUseCaseDto.MessageResult> getMessages(MessageUseCaseDto.GetMessages request) {
+	public List<MessageUseCaseDto.MessageResponse> getMessages(MessageUseCaseDto.GetMessagesRequest request) {
 		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
 		LocalDateTime lastExitedAt = chatRoom.getLastExitedAt(request.userId());
 
 		List<Message> messages = messageService.getMessages(chatRoom, lastExitedAt, request.lastMessageId(), request.limit());
 
 		return messages.stream()
-				       .map(m -> MessageUseCaseDto.MessageResult.from(m, request.userId()))
+				       .map(m -> MessageUseCaseDto.MessageResponse.from(m, request.userId()))
 				       .toList();
 	}
 
 	@Transactional
-	public Long markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsRead request) {
+	public Long markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsReadRequest request) {
 		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
 		return messageService.markMessagesAsRead(request.roomId(), request.userId());
 	}
 
 	@Transactional(readOnly = true)
-	public Long getLastReadMessageIdByOpponent(MessageUseCaseDto.GetLastReadMessage request) {
+	public Long getLastReadMessageIdByOpponent(MessageUseCaseDto.GetLastReadMessageRequest request) {
 		chatRoomService.getVerifiedChatRoomOrThrow(request.userId(), request.roomId());
 		return messageService.findLastReadMessageIdByReceiver(request.roomId(), request.userId());
 	}

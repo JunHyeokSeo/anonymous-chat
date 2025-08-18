@@ -5,5 +5,5 @@ import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import java.util.List;
 
 public interface ChatRoomRepositoryCustom {
-	List<ChatRoomServiceDto.Summary> findActiveChatRoomsByUser(Long userId);
+	List<ChatRoomServiceDto.SummaryResult> findActiveChatRoomsByUser(Long userId);
 }

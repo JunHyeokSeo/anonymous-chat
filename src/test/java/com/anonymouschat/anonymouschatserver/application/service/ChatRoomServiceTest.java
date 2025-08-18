@@ -167,11 +167,11 @@ class ChatRoomServiceTest {
         @DisplayName("사용자의 활성 채팅방 목록을 반환한다")
         void it_returns_active_chat_room_list() {
             // given
-            List<ChatRoomServiceDto.Summary> summaries = List.of(new ChatRoomServiceDto.Summary(1L, 2L, "nickname", 20, "region", "url", LocalDateTime.now()));
+            List<ChatRoomServiceDto.SummaryResult> summaries = List.of(new ChatRoomServiceDto.SummaryResult(1L, 2L, "nickname", 20, "region", "url", LocalDateTime.now()));
             when(chatRoomRepository.findActiveChatRoomsByUser(1L)).thenReturn(summaries);
 
             // when
-            List<ChatRoomServiceDto.Summary> result = chatRoomService.getMyActiveChatRooms(1L);
+            List<ChatRoomServiceDto.SummaryResult> result = chatRoomService.getMyActiveChatRooms(1L);
 
             // then
             assertThat(result).isEqualTo(summaries);
