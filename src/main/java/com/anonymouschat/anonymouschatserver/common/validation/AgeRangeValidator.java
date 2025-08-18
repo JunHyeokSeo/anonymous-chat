@@ -1,13 +1,13 @@
 package com.anonymouschat.anonymouschatserver.common.validation;
 
-import com.anonymouschat.anonymouschatserver.web.api.dto.UserControllerDto;
+import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class AgeRangeValidator implements ConstraintValidator<ValidAgeRange, UserControllerDto.SearchConditionRequest> {
+public class AgeRangeValidator implements ConstraintValidator<ValidAgeRange, UserDto.SearchConditionRequest> {
 
 	@Override
-	public boolean isValid(UserControllerDto.SearchConditionRequest value, ConstraintValidatorContext context) {
+	public boolean isValid(UserDto.SearchConditionRequest value, ConstraintValidatorContext context) {
 		if (value == null) {
 			return true; // @NotNull 같은 제약은 필드에서 처리
 		}

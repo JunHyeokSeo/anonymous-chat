@@ -1,10 +1,10 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
-import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
+import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.web.api.dto.AuthResponseDto;
+import com.anonymouschat.anonymouschatserver.web.api.dto.AuthDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,15 +41,18 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 		log.info("{}OAuth2 로그인 성공 - provider={}, providerId={}", LogTag.SECURITY_AUTHENTICATION, provider, providerId);
 
-		AuthResult authResult = authUseCase.login(provider, providerId);
+		AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
+		String maskedRefresh = authResult.refreshToken() != null
+				                       ? authResult.refreshToken().substring(0, 5)
+				                       : "null";
 		log.info("{}인증 처리 완료 - accessToken=****{}, refreshToken=****{}, 신규가입여부={}",
 				LogTag.SECURITY_AUTHENTICATION,
 				authResult.accessToken().substring(0, 5),
-				authResult.refreshToken().substring(0, 5),
+				maskedRefresh,
 				authResult.isNewUser()
 		);
 
-		AuthResponseDto dto = AuthResponseDto.from(authResult);
+		AuthDto.AuthResponse dto = AuthDto.AuthResponse.from(authResult);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

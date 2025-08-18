@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
-import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
-import com.anonymouschat.anonymouschatserver.application.dto.AuthTokens;
+import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
@@ -26,7 +25,7 @@ public class AuthUseCase {
     private final UserService userService;
 
     @Transactional
-    public AuthResult login(OAuthProvider provider, String providerId) {
+    public AuthUseCaseDto.AuthResult login(OAuthProvider provider, String providerId) {
 	    AtomicBoolean isNewUser = new AtomicBoolean(false);
 
 	    User user = userService.findByProviderAndProviderId(provider, providerId)
@@ -43,7 +42,7 @@ public class AuthUseCase {
             authService.saveRefreshToken(user.getId().toString(), refreshToken);
         }
 
-	    return AuthResult.builder()
+	    return AuthUseCaseDto.AuthResult.builder()
 			           .accessToken(accessToken)
 			           .refreshToken(refreshToken)
 			           .isNewUser(isNewUser.get())
@@ -51,7 +50,7 @@ public class AuthUseCase {
     }
 
 	@Transactional
-	public AuthTokens refresh(String oldRefreshToken) {
+	public AuthUseCaseDto.AuthTokens refresh(String oldRefreshToken) {
 		authService.validateToken(oldRefreshToken);
 
 		Long userId = authService.getUserIdFromToken(oldRefreshToken);
@@ -70,7 +69,10 @@ public class AuthUseCase {
 		String newRefreshToken = authService.generateRefreshToken(user.getId(), user.getRole().getAuthority());
 		authService.saveRefreshToken(user.getId().toString(), newRefreshToken);
 
-		return new AuthTokens(newAccessToken, newRefreshToken);
+		return AuthUseCaseDto.AuthTokens.builder()
+				       .accessToken(newAccessToken)
+				       .refreshToken(newRefreshToken)
+				       .build();
 	}
 
 

@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.application.dto;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
-import com.anonymouschat.anonymouschatserver.web.api.dto.UserControllerDto;
+import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public class UserUseCaseDto {
 			OAuthProvider provider,
 			String providerId
 	) {
-		public static RegisterRequest from(UserControllerDto.RegisterRequest request, OAuthProvider provider, String providerId) {
+		public static RegisterRequest from(UserDto.RegisterRequest request, OAuthProvider provider, String providerId) {
 			return RegisterRequest.builder()
 					       .nickname(request.nickname())
 					       .gender(request.gender())
@@ -42,7 +42,7 @@ public class UserUseCaseDto {
 			Region region,
 			String bio
 	) {
-		public static UpdateRequest from(UserControllerDto.UpdateRequest request, Long userId) {
+		public static UpdateRequest from(UserDto.UpdateRequest request, Long userId) {
 			return UpdateRequest.builder()
 					       .id(userId)
 					       .nickname(request.nickname())
@@ -89,7 +89,7 @@ public class UserUseCaseDto {
 			Integer maxAge,
 			Region region
 	) {
-		public static SearchConditionRequest from(UserControllerDto.SearchConditionRequest request, Long userId) {
+		public static SearchConditionRequest from(UserDto.SearchConditionRequest request, Long userId) {
 			return SearchConditionRequest.builder()
 					       .id(userId)
 					       .gender(request.gender())

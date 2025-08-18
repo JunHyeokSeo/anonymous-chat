@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
-import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
-import com.anonymouschat.anonymouschatserver.application.dto.AuthTokens;
+import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
@@ -19,7 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +52,7 @@ class AuthUseCaseTest {
 			when(authService.generateRefreshToken(1L, "ROLE_USER"))
 					.thenReturn("refresh-token");
 
-			AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
+			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
@@ -73,7 +73,7 @@ class AuthUseCaseTest {
 			when(authService.generateAccessToken(OAuthProvider.KAKAO, "new-user"))
 					.thenReturn("access-token");
 
-			AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
+			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isNull();
@@ -100,7 +100,7 @@ class AuthUseCaseTest {
 			when(authService.generateAccessToken(userId, "ROLE_USER")).thenReturn("new-access");
 			when(authService.generateRefreshToken(userId, "ROLE_USER")).thenReturn("new-refresh");
 
-			AuthTokens tokens = authUseCase.refresh(oldToken);
+			AuthUseCaseDto.AuthTokens tokens = authUseCase.refresh(oldToken);
 
 			assertThat(tokens.accessToken()).isEqualTo("new-access");
 			assertThat(tokens.refreshToken()).isEqualTo("new-refresh");

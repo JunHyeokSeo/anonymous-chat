@@ -8,7 +8,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 
-public class UserControllerDto {
+public class UserDto {
 
 	public record RegisterRequest(
 			@NotBlank(message = "닉네임은 필수입니다.")

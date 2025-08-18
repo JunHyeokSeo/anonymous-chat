@@ -4,7 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.ApiResponse;
-import com.anonymouschat.anonymouschatserver.web.api.dto.UserControllerDto;
+import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ public class UserController {
 	@PreAuthorize("hasRole('Guest')")
 	public ResponseEntity<ApiResponse<Long>> register(
 			@AuthenticationPrincipal CustomPrincipal principal,
-			@Valid @RequestPart("request") UserControllerDto.RegisterRequest request,
+			@Valid @RequestPart("request") UserDto.RegisterRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		Long userId = userUseCase.register(
@@ -50,12 +50,12 @@ public class UserController {
 	 */
 	@GetMapping("/me")
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<UserControllerDto.ProfileResponse>> getMyProfile(
+	public ResponseEntity<ApiResponse<UserDto.ProfileResponse>> getMyProfile(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		UserUseCaseDto.ProfileResponse profile = userUseCase.getMyProfile(principal.userId());
 		return ResponseEntity
-				       .ok(ApiResponse.success(UserControllerDto.ProfileResponse.from(profile)));
+				       .ok(ApiResponse.success(UserDto.ProfileResponse.from(profile)));
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class UserController {
 	@PreAuthorize("hasAnyRole('User','Admin')")
 	public ResponseEntity<ApiResponse<Void>> update(
 			@AuthenticationPrincipal CustomPrincipal principal,
-			@Valid @RequestPart("request") UserControllerDto.UpdateRequest request,
+			@Valid @RequestPart("request") UserDto.UpdateRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		userUseCase.update(UserUseCaseDto.UpdateRequest.from(request, principal.userId()), images);
@@ -91,14 +91,14 @@ public class UserController {
 	 */
 	@GetMapping
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<Slice<UserControllerDto.SearchResponse>>> getUserList(
+	public ResponseEntity<ApiResponse<Slice<UserDto.SearchResponse>>> getUserList(
 			@AuthenticationPrincipal CustomPrincipal principal,
-			@Valid UserControllerDto.SearchConditionRequest request,
+			@Valid UserDto.SearchConditionRequest request,
 			Pageable pageable
 	) {
 		var searchCondition = UserUseCaseDto.SearchConditionRequest.from(request, principal.userId());
 		Slice<UserUseCaseDto.SearchResponse> slice = userUseCase.getUserList(searchCondition, pageable);
 		return ResponseEntity
-				       .ok(ApiResponse.success(slice.map(UserControllerDto.SearchResponse::from)));
+				       .ok(ApiResponse.success(slice.map(UserDto.SearchResponse::from)));
 	}
 }
