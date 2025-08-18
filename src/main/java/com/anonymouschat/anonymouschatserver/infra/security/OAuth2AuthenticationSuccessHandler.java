@@ -4,7 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.AuthResult;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.web.api.auth.dto.AuthResponseDto;
+import com.anonymouschat.anonymouschatserver.web.api.dto.AuthResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
