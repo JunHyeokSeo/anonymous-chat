@@ -3,18 +3,16 @@ package com.anonymouschat.anonymouschatserver.application.service;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
-import com.anonymouschat.anonymouschatserver.domain.repository.MessageRepository;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class MessageService {
@@ -32,12 +30,10 @@ public class MessageService {
 		return saved;
 	}
 
-	@Transactional(readOnly = true)
 	public List<Message> getMessages(ChatRoom chatRoom, LocalDateTime lastExitedAt, Long lastMessageId, int limit) {
 		return messageRepository.findMessagesAfterExitTimeWithCursor(chatRoom.getId(), lastExitedAt, lastMessageId, limit);
 	}
 
-	// TODO: 추후 대량 메시지 처리 성능 개선을 위해 ReadTracking 구조 도입 고려
 	public Long markMessagesAsRead(Long roomId, Long userId) {
 		Long count = messageRepository.updateMessagesAsRead(roomId, userId);
 		log.info("{}메시지 읽음 처리 완료 - roomId={}, userId={}, updatedCount={}", LogTag.MESSAGE, roomId, userId, count);
@@ -48,5 +44,6 @@ public class MessageService {
 		return messageRepository.findMaxReadMessageId(roomId, senderId);
 	}
 }
+
 
 

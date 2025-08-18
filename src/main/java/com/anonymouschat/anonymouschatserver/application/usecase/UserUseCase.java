@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
-import com.anonymouschat.anonymouschatserver.application.dto.*;
+import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
+import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.BlockService;
 import com.anonymouschat.anonymouschatserver.application.service.UserSearchService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -24,9 +26,7 @@ public class UserUseCase {
 	private final UserSearchService userSearchService;
 	private final BlockService blockService;
 
-	/**
-	 * 회원가입을 진행합니다.
-	 */
+	@Transactional
 	public Long register(UserUseCaseDto.Register register, List<MultipartFile> images) throws IOException {
 		log.info("{}회원가입 요청 - nickname={}, gender={}, age={}", LogTag.USER, register.nickname(), register.gender(), register.age());
 		Long userId = userService.register(UserServiceDto.RegisterCommand.from(register), images);
@@ -34,34 +34,26 @@ public class UserUseCase {
 		return userId;
 	}
 
-	/**
-	 * 내 프로필을 조회합니다.
-	 */
+	@Transactional(readOnly = true)
 	public UserUseCaseDto.Profile getMyProfile(Long userId) {
 		return UserUseCaseDto.Profile.from(userService.getMyProfile(userId));
 	}
 
-	/**
-	 * 회원 정보를 수정합니다.
-	 */
+	@Transactional
 	public void update(UserUseCaseDto.Update update, List<MultipartFile> images) throws IOException {
 		log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, update.id());
 		userService.update(UserServiceDto.UpdateCommand.from(update), images);
 		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, update.id());
 	}
 
-	/**
-	 * 회원 탈퇴를 수행합니다.
-	 */
+	@Transactional
 	public void withdraw(Long userId) {
 		log.info("{}회원 탈퇴 요청 - userId={}", LogTag.USER, userId);
 		userService.withdraw(userId);
 		log.info("{}회원 탈퇴 완료 - userId={}", LogTag.USER, userId);
 	}
 
-	/**
-	 * 조건에 따라 유저 목록을 조회합니다.
-	 */
+	@Transactional(readOnly = true)
 	public Slice<UserUseCaseDto.SearchResult> getUserList(UserUseCaseDto.SearchCondition search, Pageable pageable) {
 		log.info("{}유저 목록 조회 요청 - searcherId={}, condition={}", LogTag.USER, search.id(), search);
 		List<Long> blockedUserIds = blockService.getBlockedUserIds(search.id());

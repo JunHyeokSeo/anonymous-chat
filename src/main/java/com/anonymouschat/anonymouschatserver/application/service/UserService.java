@@ -61,7 +61,6 @@ public class UserService {
 		return user.getId();
 	}
 
-	@Transactional(readOnly = true)
 	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
 		User user = findUser(userId);
 		List<UserProfileImage> images = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
@@ -92,12 +91,10 @@ public class UserService {
 		log.info("{}회원 탈퇴 처리 완료 - userId={}", LogTag.USER, userId);
 	}
 
-	@Transactional(readOnly = true)
 	public Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId) {
 		return userRepository.findByProviderAndProviderIdAndActiveTrue(provider, providerId);
 	}
 
-	@Transactional(readOnly = true)
 	public User findUser(Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
