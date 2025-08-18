@@ -20,15 +20,15 @@ public class UserUseCaseDto {
 			OAuthProvider provider,
 			String providerId
 	) {
-		public static RegisterRequest from(UserControllerDto.RegisterRequest request) {
+		public static RegisterRequest from(UserControllerDto.RegisterRequest request, OAuthProvider provider, String providerId) {
 			return RegisterRequest.builder()
 					       .nickname(request.nickname())
 					       .gender(request.gender())
 					       .age(request.age())
 					       .region(request.region())
 					       .bio(request.bio())
-					       .provider(request.provider())
-					       .providerId(request.providerId())
+					       .provider(provider)
+					       .providerId(providerId)
 					       .build();
 		}
 	}

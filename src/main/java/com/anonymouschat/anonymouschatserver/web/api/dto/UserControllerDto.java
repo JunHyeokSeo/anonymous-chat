@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.web.api.dto;
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.common.validation.ValidAgeRange;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import jakarta.validation.constraints.*;
 
@@ -27,26 +26,8 @@ public class UserControllerDto {
 			Region region,
 
 			@Size(max = 200, message = "자기소개는 최대 200자까지 입력 가능합니다.")
-			String bio,
-
-			@NotNull(message = "OAuth Provider는 필수입니다.")
-			OAuthProvider provider,
-
-			@NotBlank(message = "Provider ID는 필수입니다.")
-			String providerId
-	) {
-		public static UserUseCaseDto.RegisterRequest from(RegisterRequest request) {
-			return new UserUseCaseDto.RegisterRequest(
-					request.nickname(),
-					request.gender(),
-					request.age(),
-					request.region(),
-					request.bio(),
-					request.provider(),
-					request.providerId()
-			);
-		}
-	}
+			String bio
+	) {}
 
 	public record UpdateRequest(
 			@NotBlank(message = "닉네임은 필수입니다.")
@@ -65,18 +46,7 @@ public class UserControllerDto {
 
 			@Size(max = 200, message = "자기소개는 최대 200자까지 입력 가능합니다.")
 			String bio
-	) {
-		public static UserUseCaseDto.UpdateRequest from(UpdateRequest request, Long userId) {
-			return new UserUseCaseDto.UpdateRequest(
-					userId,
-					request.nickname(),
-					request.gender(),
-					request.age(),
-					request.region(),
-					request.bio()
-			);
-		}
-	}
+	) {}
 
 	public record ProfileResponse(
 			Long id,

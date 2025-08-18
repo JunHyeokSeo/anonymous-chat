@@ -2,7 +2,6 @@ package com.anonymouschat.anonymouschatserver.web.api.controller;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
-import com.anonymouschat.anonymouschatserver.common.code.SuccessCode;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import com.anonymouschat.anonymouschatserver.web.api.dto.UserControllerDto;
@@ -10,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,11 +37,11 @@ public class UserController {
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		Long userId = userUseCase.register(
-				UserUseCaseDto.RegisterRequest.from(request),
+				UserUseCaseDto.RegisterRequest.from(request, principal.provider(), principal.providerId()),
 				images
 		);
 		return ResponseEntity
-				       .status(SuccessCode.USER_REGISTERED.getStatus())
+				       .status(HttpStatus.CREATED)
 				       .body(ApiResponse.success(userId));
 	}
 
@@ -70,8 +70,7 @@ public class UserController {
 	) throws IOException {
 		userUseCase.update(UserUseCaseDto.UpdateRequest.from(request, principal.userId()), images);
 		return ResponseEntity
-				       .status(SuccessCode.USER_PROFILE_UPDATED.getStatus())
-				       .body(ApiResponse.success(null));
+				       .ok(ApiResponse.success(null));
 	}
 
 	/**
