@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +31,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 						                       .collect(Collectors.joining(","))
 				                     : "none";
 
-		log.warn("[AccessDeniedHandler] 403 Forbidden - method={}, URI={}, IP={}, user={}, authorities={}, message={}",
+		log.warn("{}403 Forbidden - method={}, URI={}, IP={}, user={}, authorities={}, message={}",
+				LogTag.SECURITY_AUTHORIZATION,
 				request.getMethod(),
 				request.getRequestURI(),
 				request.getRemoteAddr(),

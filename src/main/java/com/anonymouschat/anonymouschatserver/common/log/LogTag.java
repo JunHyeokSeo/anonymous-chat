@@ -10,7 +10,6 @@ public final class LogTag {
     public static final String BLOCK = "[BLOCK] ";
     public static final String CHAT = "[CHAT] ";
     public static final String MESSAGE = "[MESSAGE] ";
-    public static final String ORCHESTRATOR = "[ORCHESTRATOR] ";
     public static final String IMAGE = "[IMAGE] ";
 
     // --- WebSocket Specific Tags ---
