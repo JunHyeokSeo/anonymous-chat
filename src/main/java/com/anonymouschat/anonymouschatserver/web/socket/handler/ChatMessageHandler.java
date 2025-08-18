@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
-import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
+import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
@@ -46,7 +46,7 @@ public class ChatMessageHandler implements MessageHandler {
 	 * 수신된 채팅 메시지를 처리합니다.
 	 * 1. 사용자가 채팅방 참여자인지 확인합니다.
 	 * 2. 아웃바운드 메시지 객체를 생성합니다.
-	 * 3. 메시지 저장을 위한 {@link ChatSave} 이벤트를 발행합니다.
+	 * 3. 메시지 저장을 위한 {@link ChatSend} 이벤트를 발행합니다.
 	 * 4. 채팅방 참여자들에게 메시지를 브로드캐스트합니다.
 	 * 5. 처리 중 예외 발생 시 세션을 종료합니다.
 	 *
@@ -71,7 +71,7 @@ public class ChatMessageHandler implements MessageHandler {
 					                               .build();
 
 			// 이벤트 발행: 메시지 저장 로직은 이벤트 리스너에서 비동기적으로 처리됩니다.
-			publisher.publishEvent(ChatSave.builder().roomId(roomId).senderId(senderId).content(content).build());
+			publisher.publishEvent(ChatSend.builder().roomId(roomId).senderId(senderId).content(content).build());
 
 			// 로깅
 			log.info("{}roomId={} senderId={} ts={}", LogTag.WS_CHAT, roomId, senderId, outbound.timestamp());

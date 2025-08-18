@@ -2,8 +2,7 @@ package com.anonymouschat.anonymouschatserver.application.listener;
 
 import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.event.ChatPersisted;
-import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
-import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +17,14 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ChatSendOrchestrator {
-	private final ChatRoomService chatRoomService;
+public class ChatSendListener {
 	private final MessageUseCase messageUseCase;
 	private final ApplicationEventPublisher publisher;
 
 	@EventListener
 	@Transactional
-	public void on(ChatSave event) {
-        log.info("{}ChatSave 이벤트 수신: roomId={}, senderId={}", LogTag.ORCHESTRATOR, event.roomId(), event.senderId());
+	public void on(ChatSend event) {
+        log.info("{}ChatSend 이벤트 수신: roomId={}, senderId={}", LogTag.CHAT, event.roomId(), event.senderId());
 		// 메시지 저장
 		Long messageId = messageUseCase.sendMessage(MessageUseCaseDto.SendMessage.builder()
 				                                    .roomId(event.roomId())

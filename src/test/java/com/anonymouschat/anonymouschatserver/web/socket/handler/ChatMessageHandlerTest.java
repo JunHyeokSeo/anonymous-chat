@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
-import com.anonymouschat.anonymouschatserver.application.event.ChatSave;
+import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
@@ -38,7 +38,7 @@ class ChatMessageHandlerTest {
     @Mock private WebSocketAccessGuard guard;
     @InjectMocks private ChatMessageHandler handler;
 
-    @Captor private ArgumentCaptor<ChatSave> chatSaveEventCaptor;
+    @Captor private ArgumentCaptor<ChatSend> chatSaveEventCaptor;
     @Captor private ArgumentCaptor<ChatOutboundMessage> outboundMessageCaptor;
 
     /**
@@ -61,7 +61,7 @@ class ChatMessageHandlerTest {
         // then
         // publisher의 publishEvent 메소드가 ChatSave 이벤트로 호출되었는지 검증하고 캡처.
         verify(publisher).publishEvent(chatSaveEventCaptor.capture());
-        ChatSave capturedEvent = chatSaveEventCaptor.getValue();
+        ChatSend capturedEvent = chatSaveEventCaptor.getValue();
         // 캡처된 이벤트의 roomId, senderId, content가 예상과 일치하는지 검증.
         assertThat(capturedEvent.roomId()).isEqualTo(roomId);
         assertThat(capturedEvent.senderId()).isEqualTo(senderId);
