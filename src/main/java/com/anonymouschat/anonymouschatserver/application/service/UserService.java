@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
-import com.anonymouschat.anonymouschatserver.application.dto.*;
+import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
