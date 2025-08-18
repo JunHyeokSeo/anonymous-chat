@@ -102,16 +102,29 @@ class ChatRoomUseCaseTest {
 
 		@Test
 		@DisplayName("채팅방 나가기")
-		void exitRoom() {
+		void exitRoom() throws Exception {
 			// given
-			Long userId = 1L;
+			Long user1Id = 1L;
+			Long user2Id = 2L;
 			Long roomId = 99L;
+			ChatRoom chatRoom = TestUtils.createChatRoom(roomId, user1, user2);
+
+			when(chatRoomService.getVerifiedChatRoomOrThrow(user1Id, roomId)).thenReturn(chatRoom);
+			doNothing().when(chatRoomService).exit(user1Id, chatRoom);
 
 			// when
-			chatRoomUseCase.exitChatRoom(userId, roomId);
+			chatRoomUseCase.exitChatRoom(user1Id, roomId);
 
 			// then
-			verify(chatRoomService).exit(userId, roomId);
+			verify(chatRoomService).exit(user1Id, chatRoom);
+
+			// --- 두 번째 유저도 동일하게 ---
+			when(chatRoomService.getVerifiedChatRoomOrThrow(user2Id, roomId)).thenReturn(chatRoom);
+			doNothing().when(chatRoomService).exit(user2Id, chatRoom);
+
+			chatRoomUseCase.exitChatRoom(user2Id, roomId);
+
+			verify(chatRoomService).exit(user2Id, chatRoom);
 		}
 	}
 }

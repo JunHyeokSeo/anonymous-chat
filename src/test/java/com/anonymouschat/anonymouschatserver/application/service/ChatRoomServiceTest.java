@@ -191,26 +191,11 @@ class ChatRoomServiceTest {
         @Test
         @DisplayName("채팅방에서 나간다")
         void it_exits_from_chat_room() {
-            // given
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
-
             // when
-            chatRoomService.exit(1L, 10L);
+            chatRoomService.exit(1L, chatRoom);
 
             // then
             verify(chatRoom).exitBy(1L);
-        }
-
-        @Test
-        @DisplayName("채팅방이 없으면 예외를 던진다")
-        void it_throws_exception_if_chat_room_not_found() {
-            // given
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> chatRoomService.exit(1L, 10L))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
     }
 
@@ -229,10 +214,9 @@ class ChatRoomServiceTest {
         void it_activates_if_inactive() {
             // given
             when(chatRoom.isActive()).thenReturn(false);
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
 
             // when
-            chatRoomService.markActiveIfInactive(10L);
+            chatRoomService.markActiveIfInactive(chatRoom);
 
             // then
             verify(chatRoom).activate();
@@ -243,10 +227,9 @@ class ChatRoomServiceTest {
         void it_does_nothing_if_active() {
             // given
             when(chatRoom.isActive()).thenReturn(true);
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
 
             // when
-            chatRoomService.markActiveIfInactive(10L);
+            chatRoomService.markActiveIfInactive(chatRoom);
 
             // then
             verify(chatRoom, never()).activate();
@@ -297,11 +280,10 @@ class ChatRoomServiceTest {
         @DisplayName("사용자가 채팅방에 돌아오면 returnBy를 호출한다")
         void it_calls_returnBy() {
             // given
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
             when(chatRoom.isArchived()).thenReturn(false);
 
             // when
-            chatRoomService.returnBy(10L, 1L);
+            chatRoomService.returnBy(chatRoom, 1L);
 
             // then
             verify(chatRoom).validateParticipant(1L);
@@ -312,11 +294,10 @@ class ChatRoomServiceTest {
         @DisplayName("채팅방이 종료된 상태면 예외를 던진다")
         void it_throws_exception_if_archived() {
             // given
-            when(chatRoomRepository.findById(10L)).thenReturn(Optional.of(chatRoom));
             when(chatRoom.isArchived()).thenReturn(true);
 
             // when & then
-            assertThatThrownBy(() -> chatRoomService.returnBy(10L, 1L))
+            assertThatThrownBy(() -> chatRoomService.returnBy(chatRoom, 1L))
                     .isInstanceOf(ConflictException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHAT_ROOM_CLOSED);
         }

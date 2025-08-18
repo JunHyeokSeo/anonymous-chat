@@ -26,9 +26,15 @@ public class MessageUseCase {
 
 	@Transactional
 	public Long sendMessage(MessageUseCaseDto.SendMessage request) {
-		log.info("{}메시지 전송 요청 - senderId={}, roomId={}", LogTag.MESSAGE, request.senderId(), request.roomId());
+		log.info("{}메시지 전송 요청 - senderId={}, roomId={}",
+				LogTag.MESSAGE, request.senderId(), request.roomId());
 
-		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(request.senderId(), request.roomId());
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(
+				request.senderId(), request.roomId());
+
+		chatRoomService.markActiveIfInactive(chatRoom);
+		chatRoomService.returnBy(chatRoom, request.senderId());
+
 		User sender = userService.findUser(request.senderId());
 		Long messageId = messageService.saveMessage(chatRoom, sender, request.content()).getId();
 

@@ -5,6 +5,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
+import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class ChatRoomUseCase {
 
 	@Transactional
 	public void exitChatRoom(Long userId, Long roomId){
-		chatRoomService.exit(userId, roomId);
+		ChatRoom chatRoom = chatRoomService.getVerifiedChatRoomOrThrow(userId, roomId);
+		chatRoomService.exit(userId, chatRoom);
 	}
 }

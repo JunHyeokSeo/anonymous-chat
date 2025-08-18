@@ -59,34 +59,30 @@ public class ChatRoomService {
 		return chatRoomRepository.findActiveChatRoomsByUser(userId);
 	}
 
-	public void exit(Long userId, Long roomId) {
-		ChatRoom chatRoom = findChatRoomById(roomId);
+	public void exit(Long userId, ChatRoom chatRoom) {
 		chatRoom.exitBy(userId);
-		log.info("{}채팅방 나가기 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
+		log.info("{}채팅방 나가기 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, chatRoom.getId());
 	}
 
-	public void markActiveIfInactive(Long roomId) {
-		ChatRoom chatRoom = findChatRoomById(roomId);
+	public void markActiveIfInactive(ChatRoom chatRoom) {
 		if (!chatRoom.isActive()) {
 			chatRoom.activate();
-			log.info("{}비활성 채팅방 복원 처리 - roomId={}", LogTag.CHAT, roomId);
+			log.info("{}비활성 채팅방 복원 처리 - roomId={}", LogTag.CHAT, chatRoom.getId());
 		}
 	}
 
-	public boolean isMember(Long roomId, Long userId) {
-		return chatRoomRepository.existsByIdAndParticipantId(roomId, userId);
-	}
-
-	public void returnBy(Long roomId, Long userId) {
-		ChatRoom chatRoom = findChatRoomById(roomId);
-
+	public void returnBy(ChatRoom chatRoom, Long userId) {
 		if (chatRoom.isArchived()) {
-			log.warn("{}채팅방 복귀 불가 - 이미 종료된 채팅방 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
+			log.warn("{}채팅방 복귀 불가 - 이미 종료된 채팅방 - userId={}, roomId={}", LogTag.CHAT, userId, chatRoom.getId());
 			throw new ConflictException(ErrorCode.CHAT_ROOM_CLOSED);
 		}
 
 		chatRoom.returnBy(userId);
-		log.info("{}채팅방 복귀 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, roomId);
+		log.info("{}채팅방 복귀 처리 완료 - userId={}, roomId={}", LogTag.CHAT, userId, chatRoom.getId());
+	}
+
+	public boolean isMember(Long roomId, Long userId) {
+		return chatRoomRepository.existsByIdAndParticipantId(roomId, userId);
 	}
 
 	private ChatRoom findChatRoomById(Long roomId) {

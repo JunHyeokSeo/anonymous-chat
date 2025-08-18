@@ -27,12 +27,6 @@ public class ChatSendOrchestrator {
 	@Transactional
 	public void on(ChatSave event) {
         log.info("{}ChatSave 이벤트 수신: roomId={}, senderId={}", LogTag.ORCHESTRATOR, event.roomId(), event.senderId());
-		// 채팅방 isActive가 false 라면 true 로 변경
-		chatRoomService.markActiveIfInactive(event.roomId());
-
-		// returnBy (CHAT 시점 채팅방 복귀)
-		chatRoomService.returnBy(event.roomId(), event.senderId());
-
 		// 메시지 저장
 		Long messageId = messageUseCase.sendMessage(MessageUseCaseDto.SendMessage.builder()
 				                                    .roomId(event.roomId())

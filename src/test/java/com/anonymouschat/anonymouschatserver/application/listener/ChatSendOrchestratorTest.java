@@ -45,15 +45,11 @@ class ChatSendOrchestratorTest {
     void on_chat_save_event_then_send_message_and_publish_persisted_event() {
         // given
         var chatSaveEvent = new ChatSave(100L, 200L, "안녕하세요");
-        Long mockMessageId = 999L;
+	    Long mockMessageId = 999L;
         when(messageUseCase.sendMessage(any(MessageUseCaseDto.SendMessage.class))).thenReturn(mockMessageId);
 
         // when
         orchestrator.on(chatSaveEvent);
-
-        // then
-        verify(chatRoomService).markActiveIfInactive(200L);
-        verify(chatRoomService).returnBy(200L, 100L);
 
         verify(messageUseCase).sendMessage(sendMessageCaptor.capture());
         MessageUseCaseDto.SendMessage capturedRequest = sendMessageCaptor.getValue();
