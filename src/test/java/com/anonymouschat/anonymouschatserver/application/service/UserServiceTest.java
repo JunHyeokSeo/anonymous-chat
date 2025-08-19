@@ -12,7 +12,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
@@ -81,7 +81,7 @@ class UserServiceTest {
 
 			assertThat(id).isEqualTo(1L);
 			assertThat(guestUser.getNickname()).isEqualTo("nickname");
-			assertThat(guestUser.getRole()).isEqualTo(UserRole.ROLE_USER);
+			assertThat(guestUser.getRole()).isEqualTo(Role.USER);
 		}
 
 		@Test

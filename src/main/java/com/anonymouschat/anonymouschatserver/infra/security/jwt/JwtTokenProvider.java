@@ -4,9 +4,11 @@ import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -39,24 +41,24 @@ public class JwtTokenProvider {
 
 	public String createAccessTokenForOAuthLogin(OAuthProvider provider, String providerId) {
 		return createToken(builder -> builder
-				                              .claim("role", UserRole.ROLE_GUEST.getAuthority())
+				                              .claim("role", Role.GUEST.name())
 				                              .claim("provider", provider.name())
 				                              .claim("providerId", providerId),
 				accessTokenValidityInSeconds
 		);
 	}
 
-	public String createAccessToken(Long userId, String role) {
+	public String createAccessToken(Long userId, Role role) {
 		return createToken(builder -> builder
-				                              .claim("role", role)
+				                              .claim("role", role.name())
 				                              .claim("userId", userId),
 				accessTokenValidityInSeconds
 		);
 	}
 
-	public String createRefreshToken(Long userId, String role) {
+	public String createRefreshToken(Long userId, Role role) {
 		return createToken(builder -> builder
-				                              .claim("role", role)
+				                              .claim("role", role.name())
 				                              .claim("userId", userId),
 				refreshTokenValidityInSeconds
 		);
@@ -82,7 +84,8 @@ public class JwtTokenProvider {
 		Long userId = claims.get("userId", Long.class);
 		String providerName = claims.get("provider", String.class);
 		String providerId = claims.get("providerId", String.class);
-		Role role = claims.get("role", Role.class);
+		String roleName = claims.get("role", String.class);
+		Role role = Role.valueOf(roleName);
 
 		if (userId != null) {
 			return CustomPrincipal.builder()

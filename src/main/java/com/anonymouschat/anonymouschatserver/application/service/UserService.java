@@ -13,7 +13,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ public class UserService {
 		validateNicknameDuplication(command.nickname());
 
 		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
-		user.updateRole(UserRole.ROLE_USER);
+		user.updateRole(Role.USER);
 
 		List<UserProfileImage> profileImages = convertToProfileImages(images);
 		profileImages.forEach(user::addProfileImage);
@@ -103,7 +103,7 @@ public class UserService {
 		User guestUser = User.builder()
 				                 .provider(provider)
 				                 .providerId(providerId)
-				                 .role(UserRole.ROLE_GUEST)
+				                 .role(Role.GUEST)
 				                 .nickname("guest_" + System.currentTimeMillis())
 				                 .build();
 

@@ -6,7 +6,7 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public class TestUtils {
             .provider(OAuthProvider.GOOGLE)
             .providerId("provider-id-" + id)
             .nickname("User" + id)
-		    .role(UserRole.ROLE_USER)
+		    .role(Role.USER)
             .gender(Gender.MALE)
             .age(25)
             .region(Region.SEOUL)
@@ -31,7 +31,7 @@ public class TestUtils {
 		return User.builder()
 				            .provider(OAuthProvider.KAKAO)
 				            .providerId("provider-id")
-				            .role(UserRole.ROLE_GUEST)
+				            .role(Role.GUEST)
 				            .build();
 	}
 

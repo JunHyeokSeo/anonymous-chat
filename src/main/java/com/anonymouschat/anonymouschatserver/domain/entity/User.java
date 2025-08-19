@@ -2,10 +2,7 @@ package com.anonymouschat.anonymouschatserver.domain.entity;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
-import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.Region;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.domain.type.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -44,7 +41,7 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", nullable = false, length = 20)
-	private UserRole role;
+	private Role role;
 
 	// 사용자 정보
 	@Column(name = "nickname", nullable = false, length = 50, unique = true)
@@ -107,10 +104,10 @@ public class User {
 	}
 
 	public boolean isGuest() {
-		return UserRole.ROLE_GUEST.equals(this.role);
+		return Role.GUEST.equals(this.role);
 	}
 
-	public void updateRole(UserRole newRole) {
+	public void updateRole(Role newRole) {
 		if (newRole == null) {
 			throw new IllegalArgumentException("역할은 null이 될 수 없습니다.");
 		}
@@ -119,7 +116,7 @@ public class User {
 	}
 
 	@Builder
-	public User(OAuthProvider provider, String providerId, UserRole role, String nickname, Gender gender, int age, Region region, String bio) {
+	public User(OAuthProvider provider, String providerId, Role role, String nickname, Gender gender, int age, Region region, String bio) {
 		this.provider = Objects.requireNonNull(provider);
 		this.providerId = Objects.requireNonNull(providerId);
 		this.role = Objects.requireNonNull(role);

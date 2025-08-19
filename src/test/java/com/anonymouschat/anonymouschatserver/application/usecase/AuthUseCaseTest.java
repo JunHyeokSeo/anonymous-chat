@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.testsupport.util.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,7 +50,7 @@ class AuthUseCaseTest {
 					.thenReturn(Optional.of(existingUser));
 			when(authService.generateAccessToken(OAuthProvider.KAKAO, "abc123"))
 					.thenReturn("access-token");
-			when(authService.generateRefreshToken(1L, "ROLE_USER"))
+			when(authService.generateRefreshToken(1L, Role.USER))
 					.thenReturn("refresh-token");
 
 			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
@@ -97,8 +98,8 @@ class AuthUseCaseTest {
 			when(authService.getUserIdFromToken(oldToken)).thenReturn(userId);
 			when(authService.findRefreshTokenOrThrow(userId)).thenReturn(oldToken);
 			when(userService.findUser(userId)).thenReturn(user);
-			when(authService.generateAccessToken(userId, "ROLE_USER")).thenReturn("new-access");
-			when(authService.generateRefreshToken(userId, "ROLE_USER")).thenReturn("new-refresh");
+			when(authService.generateAccessToken(userId, Role.USER)).thenReturn("new-access");
+			when(authService.generateRefreshToken(userId, Role.USER)).thenReturn("new-refresh");
 
 			AuthUseCaseDto.AuthTokens tokens = authUseCase.refresh(oldToken);
 

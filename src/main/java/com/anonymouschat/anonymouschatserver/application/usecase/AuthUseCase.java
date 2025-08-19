@@ -8,7 +8,7 @@ import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenE
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.UserRole;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,8 +37,8 @@ public class AuthUseCase {
         String accessToken = authService.generateAccessToken(provider, providerId);
         String refreshToken = null;
 
-        if (user.getRole() != UserRole.ROLE_GUEST) {
-            refreshToken = authService.generateRefreshToken(user.getId(), user.getRole().getAuthority());
+        if (user.getRole() != Role.GUEST) {
+            refreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
             authService.saveRefreshToken(user.getId(), refreshToken);
         }
 
@@ -65,8 +65,8 @@ public class AuthUseCase {
 		authService.revokeRefreshToken(userId);
 
 		User user = userService.findUser(userId);
-		String newAccessToken = authService.generateAccessToken(user.getId(), user.getRole().getAuthority());
-		String newRefreshToken = authService.generateRefreshToken(user.getId(), user.getRole().getAuthority());
+		String newAccessToken = authService.generateAccessToken(user.getId(), user.getRole());
+		String newRefreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
 		authService.saveRefreshToken(user.getId(), newRefreshToken);
 
 		return AuthUseCaseDto.AuthTokens.builder()

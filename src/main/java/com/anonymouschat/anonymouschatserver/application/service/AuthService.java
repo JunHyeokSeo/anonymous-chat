@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenProvider;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import com.anonymouschat.anonymouschatserver.infra.token.TokenStorage;
@@ -25,12 +26,12 @@ public class AuthService {
 		return jwtTokenProvider.createAccessTokenForOAuthLogin(provider, providerId);
 	}
 
-	public String generateAccessToken(Long userId, String role) {
+	public String generateAccessToken(Long userId, Role role) {
 		log.info("{}액세스 토큰 생성 요청 - userId={}", LogTag.AUTH, userId);
 		return jwtTokenProvider.createAccessToken(userId, role);
 	}
 
-	public String generateRefreshToken(Long userId, String role) {
+	public String generateRefreshToken(Long userId, Role role) {
 		log.info("{}리프레시 토큰 생성 요청 - userId={}", LogTag.AUTH, userId);
 		return jwtTokenProvider.createRefreshToken(userId, role);
 	}

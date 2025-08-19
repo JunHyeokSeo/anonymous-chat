@@ -59,9 +59,9 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("userId 기반 액세스 토큰 정상 발급")
 		void generateAccessTokenWithUserId() {
-			when(jwtTokenProvider.createAccessToken(1L, "ROLE_USER")).thenReturn("access-token");
+			when(jwtTokenProvider.createAccessToken(1L, Role.USER)).thenReturn("access-token");
 
-			String result = authService.generateAccessToken(1L, "ROLE_USER");
+			String result = authService.generateAccessToken(1L, Role.USER);
 
 			assertThat(result).isEqualTo("access-token");
 		}
@@ -74,9 +74,9 @@ class AuthServiceTest {
 		@Test
 		@DisplayName("userId 기반 리프레시 토큰 정상 발급")
 		void generateRefreshToken() {
-			when(jwtTokenProvider.createRefreshToken(1L, "ROLE_USER")).thenReturn("refresh-token");
+			when(jwtTokenProvider.createRefreshToken(1L, Role.USER)).thenReturn("refresh-token");
 
-			String result = authService.generateRefreshToken(1L, "ROLE_USER");
+			String result = authService.generateRefreshToken(1L, Role.USER);
 
 			assertThat(result).isEqualTo("refresh-token");
 		}
