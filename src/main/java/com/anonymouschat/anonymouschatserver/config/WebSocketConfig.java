@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.config;
+package com.anonymouschat.anonymouschatserver.config;
 
 import com.anonymouschat.anonymouschatserver.web.socket.ChatWebSocketHandler;
 import com.anonymouschat.anonymouschatserver.web.socket.JwtHandshakeInterceptor;

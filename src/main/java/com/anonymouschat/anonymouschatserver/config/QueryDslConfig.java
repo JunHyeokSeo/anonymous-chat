@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.config;
+package com.anonymouschat.anonymouschatserver.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

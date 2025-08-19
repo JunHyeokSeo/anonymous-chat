@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.config;
+package com.anonymouschat.anonymouschatserver.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;

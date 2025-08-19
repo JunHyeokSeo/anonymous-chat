@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.common.exception.auth.UnsupportedAlgorithmAuthenticationException;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
-import com.anonymouschat.anonymouschatserver.infra.config.SecurityConfig;
+import com.anonymouschat.anonymouschatserver.config.SecurityConfig;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;

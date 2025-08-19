@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.config;
+package com.anonymouschat.anonymouschatserver.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

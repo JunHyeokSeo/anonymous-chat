@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.infra.config;
+package com.anonymouschat.anonymouschatserver.config;
 
 import com.anonymouschat.anonymouschatserver.infra.security.CustomAccessDeniedHandler;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomAuthenticationEntryPoint;
