@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 				ex.getMessage()
 		);
 
-		ApiResponse.writeErrorResponse(response, ErrorCode.FORBIDDEN);
+		CommonResponse.writeErrorResponse(response, ErrorCode.FORBIDDEN);
 	}
 
 	private String summarizePrincipal(Authentication auth) {

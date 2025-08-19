@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.web.api.controller;
 
 import com.anonymouschat.anonymouschatserver.application.usecase.BlockUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import com.anonymouschat.anonymouschatserver.web.api.dto.BlockDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +24,14 @@ public class BlockController {
 	 */
 	@PostMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<Void>> blockUser(
+	public ResponseEntity<CommonResponse<Void>> blockUser(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestBody BlockDto.BlockRequest request
 	) {
 		blockUseCase.blockUser(principal.userId(), request.blockedUserId());
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
-				       .body(ApiResponse.success(null));
+				       .body(CommonResponse.success(null));
 	}
 
 	/**
@@ -39,14 +39,14 @@ public class BlockController {
 	 */
 	@DeleteMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<Void>> unblockUser(
+	public ResponseEntity<CommonResponse<Void>> unblockUser(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestBody BlockDto.UnblockRequest request
 	) {
 		blockUseCase.unblockUser(principal.userId(), request.blockedUserId());
 		return ResponseEntity
 				       .status(HttpStatus.NO_CONTENT)
-				       .body(ApiResponse.success(null));
+				       .body(CommonResponse.success(null));
 	}
 }
 

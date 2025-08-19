@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.api.controller;
 import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import com.anonymouschat.anonymouschatserver.web.api.dto.MessageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class MessageController {
 	 */
 	@PostMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<MessageDto.SendMessageResponse>> sendMessage(
+	public ResponseEntity<CommonResponse<MessageDto.SendMessageResponse>> sendMessage(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestBody MessageDto.SendMessageRequest request
 	) {
@@ -36,7 +36,7 @@ public class MessageController {
 		);
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
-				       .body(ApiResponse.success(MessageDto.SendMessageResponse.from(messageId)));
+				       .body(CommonResponse.success(MessageDto.SendMessageResponse.from(messageId)));
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class MessageController {
 	 */
 	@GetMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<List<MessageDto.MessageResponse>>> getMessages(
+	public ResponseEntity<CommonResponse<List<MessageDto.MessageResponse>>> getMessages(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid MessageDto.GetMessagesRequest request
 	) {
@@ -54,7 +54,7 @@ public class MessageController {
 		List<MessageDto.MessageResponse> dtoResponses =
 				responses.stream().map(MessageDto.MessageResponse::from).toList();
 
-		return ResponseEntity.ok(ApiResponse.success(dtoResponses));
+		return ResponseEntity.ok(CommonResponse.success(dtoResponses));
 	}
 
 	/**
@@ -62,14 +62,14 @@ public class MessageController {
 	 */
 	@PostMapping("/read")
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<Long>> markMessagesAsRead(
+	public ResponseEntity<CommonResponse<Long>> markMessagesAsRead(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestBody MessageDto.MarkMessagesAsReadRequest request
 	) {
 		Long updatedCount = messageUseCase.markMessagesAsRead(
 				MessageDto.MarkMessagesAsReadRequest.from(request, principal.userId())
 		);
-		return ResponseEntity.ok(ApiResponse.success(updatedCount));
+		return ResponseEntity.ok(CommonResponse.success(updatedCount));
 	}
 
 	/**
@@ -77,13 +77,13 @@ public class MessageController {
 	 */
 	@GetMapping("/last-read")
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<Long>> getLastReadMessageIdByOpponent(
+	public ResponseEntity<CommonResponse<Long>> getLastReadMessageIdByOpponent(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid MessageDto.GetLastReadMessageRequest request
 	) {
 		Long lastReadMessageId = messageUseCase.getLastReadMessageIdByOpponent(
 				MessageDto.GetLastReadMessageRequest.from(request, principal.userId())
 		);
-		return ResponseEntity.ok(ApiResponse.success(lastReadMessageId));
+		return ResponseEntity.ok(CommonResponse.success(lastReadMessageId));
 	}
 }

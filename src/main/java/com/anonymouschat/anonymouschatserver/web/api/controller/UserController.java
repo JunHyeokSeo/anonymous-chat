@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.api.controller;
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class UserController {
 	 */
 	@PostMapping
 	@PreAuthorize("hasRole('Guest')")
-	public ResponseEntity<ApiResponse<Long>> register(
+	public ResponseEntity<CommonResponse<Long>> register(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.RegisterRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
@@ -42,7 +42,7 @@ public class UserController {
 		);
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
-				       .body(ApiResponse.success(userId));
+				       .body(CommonResponse.success(userId));
 	}
 
 	/**
@@ -50,12 +50,12 @@ public class UserController {
 	 */
 	@GetMapping("/me")
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<UserDto.ProfileResponse>> getMyProfile(
+	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getMyProfile(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		UserUseCaseDto.ProfileResponse profile = userUseCase.getMyProfile(principal.userId());
 		return ResponseEntity
-				       .ok(ApiResponse.success(UserDto.ProfileResponse.from(profile)));
+				       .ok(CommonResponse.success(UserDto.ProfileResponse.from(profile)));
 	}
 
 	/**
@@ -63,14 +63,14 @@ public class UserController {
 	 */
 	@PutMapping("/me")
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<Void>> update(
+	public ResponseEntity<CommonResponse<Void>> update(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.UpdateRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		userUseCase.update(UserUseCaseDto.UpdateRequest.from(request, principal.userId()), images);
 		return ResponseEntity
-				       .ok(ApiResponse.success(null));
+				       .ok(CommonResponse.success(null));
 	}
 
 	/**
@@ -78,12 +78,12 @@ public class UserController {
 	 */
 	@DeleteMapping("/me")
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<Void>> withdraw(
+	public ResponseEntity<CommonResponse<Void>> withdraw(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		userUseCase.withdraw(principal.userId());
 		return ResponseEntity
-				       .ok(ApiResponse.success(null));
+				       .ok(CommonResponse.success(null));
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class UserController {
 	 */
 	@GetMapping
 	@PreAuthorize("hasAnyRole('User','Admin')")
-	public ResponseEntity<ApiResponse<Slice<UserDto.SearchResponse>>> getUserList(
+	public ResponseEntity<CommonResponse<Slice<UserDto.SearchResponse>>> getUserList(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid UserDto.SearchConditionRequest request,
 			Pageable pageable
@@ -99,6 +99,6 @@ public class UserController {
 		var searchCondition = UserUseCaseDto.SearchConditionRequest.from(request, principal.userId());
 		Slice<UserUseCaseDto.SearchResponse> slice = userUseCase.getUserList(searchCondition, pageable);
 		return ResponseEntity
-				       .ok(ApiResponse.success(slice.map(UserDto.SearchResponse::from)));
+				       .ok(CommonResponse.success(slice.map(UserDto.SearchResponse::from)));
 	}
 }

@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.api.controller;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.ChatRoomUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import com.anonymouschat.anonymouschatserver.web.api.dto.ChatRoomDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +27,14 @@ public class ChatRoomController {
 	 */
 	@PostMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<ChatRoomDto.CreateResponse>> createOrFind(
+	public ResponseEntity<CommonResponse<ChatRoomDto.CreateResponse>> createOrFind(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestBody ChatRoomDto.CreateRequest request
 	) {
 		Long roomId = chatRoomUseCase.createOrFind(principal.userId(), request.recipientId());
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
-				       .body(ApiResponse.success(ChatRoomDto.CreateResponse.from(roomId)));
+				       .body(CommonResponse.success(ChatRoomDto.CreateResponse.from(roomId)));
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class ChatRoomController {
 	 */
 	@GetMapping
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<List<ChatRoomDto.SummaryResponse>>> getMyActiveChatRooms(
+	public ResponseEntity<CommonResponse<List<ChatRoomDto.SummaryResponse>>> getMyActiveChatRooms(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		List<ChatRoomUseCaseDto.SummaryResponse> result = chatRoomUseCase.getMyActiveChatRooms(principal.userId());
@@ -50,7 +50,7 @@ public class ChatRoomController {
 				                                              .map(ChatRoomDto.SummaryResponse::from)
 				                                              .toList();
 		return ResponseEntity
-				       .ok(ApiResponse.success(responses));
+				       .ok(CommonResponse.success(responses));
 	}
 
 	/**
@@ -58,13 +58,13 @@ public class ChatRoomController {
 	 */
 	@DeleteMapping("/{roomId}")
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	public ResponseEntity<ApiResponse<Void>> exitChatRoom(
+	public ResponseEntity<CommonResponse<Void>> exitChatRoom(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@PathVariable Long roomId
 	) {
 		chatRoomUseCase.exitChatRoom(principal.userId(), roomId);
 		return ResponseEntity
 				       .status(HttpStatus.NO_CONTENT)
-				       .body(ApiResponse.success(null));
+				       .body(CommonResponse.success(null));
 	}
 }

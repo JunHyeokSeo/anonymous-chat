@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.UnsupportedAlgorithmAuthenticationException;
 import com.anonymouschat.anonymouschatserver.common.log.LogTag;
-import com.anonymouschat.anonymouschatserver.web.ApiResponse;
+import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
 		log.warn("{}인증 실패 - URI={}, code={}, message={}", LogTag.SECURITY_ENTRYPOINT, request.getRequestURI(), errorCode.name(), errorCode.getMessage());
 
-		ApiResponse.writeErrorResponse(response, errorCode);
+		CommonResponse.writeErrorResponse(response, errorCode);
 	}
 
 	private ErrorCode resolveErrorCode(AuthenticationException ex) {
