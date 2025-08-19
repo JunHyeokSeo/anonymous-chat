@@ -2,10 +2,8 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
-import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.web.api.dto.AuthDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +22,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 	private final AuthUseCase authUseCase;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
-	private final ObjectMapper objectMapper;
 
 	@Override
 	public void onAuthenticationSuccess(
@@ -34,29 +31,29 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	) throws IOException {
 
 		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-		log.debug("{}OAuth2User 속성 추출 - attributes={}", LogTag.SECURITY_AUTHENTICATION, oAuth2User.getAttributes());
+		log.debug("{}OAuth2User 속성 추출 - attributes={}",
+				LogTag.SECURITY_AUTHENTICATION, oAuth2User.getAttributes());
 
-		OAuthProvider provider = oAuth2ProviderResolver.resolve(oAuth2User);
+		OAuthProvider provider = oAuth2ProviderResolver.resolve(authentication);
 		String providerId = provider.extractProviderId(oAuth2User.getAttributes());
 
 		log.info("{}OAuth2 로그인 성공 - provider={}, providerId={}", LogTag.SECURITY_AUTHENTICATION, provider, providerId);
 
 		AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
-		String maskedRefresh = authResult.refreshToken() != null
-				                       ? authResult.refreshToken().substring(0, 5)
-				                       : "null";
-		log.info("{}인증 처리 완료 - accessToken=****{}, refreshToken=****{}, 신규가입여부={}",
-				LogTag.SECURITY_AUTHENTICATION,
-				authResult.accessToken().substring(0, 5),
-				maskedRefresh,
-				authResult.isNewUser()
-		);
 
-		AuthDto.AuthResultResponse dto = AuthDto.AuthResultResponse.from(authResult);
+		// 토큰 쿠키 저장 (HttpOnly, Secure)
+		response.addHeader("Set-Cookie",
+				String.format("accessToken=%s; HttpOnly; Path=/; Secure; SameSite=Strict", authResult.accessToken()));
 
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		objectMapper.writeValue(response.getWriter(), dto);
+		if (authResult.refreshToken() != null) {
+			response.addHeader("Set-Cookie",
+					String.format("refreshToken=%s; HttpOnly; Path=/; Secure; SameSite=Strict", authResult.refreshToken()));
+		}
+
+		if (authResult.isNewUser()) {
+			response.sendRedirect("/register");
+		} else {
+			response.sendRedirect("/users");
+		}
 	}
 }

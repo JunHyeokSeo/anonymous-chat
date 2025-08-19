@@ -49,12 +49,11 @@ public class SecurityConfig {
 				// 인가 규칙
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers(
-								                               "/api/v1/auth/**",
-								                               "/oauth2/**",
-								                               "/swagger-ui.html",
-								                               "/swagger-ui/**",
-								                               "/api-docs/**",
-								                               "/actuator/health"
+															   "/css/**", "/js/**", "/images/**", "/uploads/**",
+								                               "/api/v1/auth/**", "/oauth2/**",
+								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
+								                               "/actuator/health",
+								                               "/login", "/register"
 						                               ).permitAll()
 						                               .anyRequest().authenticated()
 				)
