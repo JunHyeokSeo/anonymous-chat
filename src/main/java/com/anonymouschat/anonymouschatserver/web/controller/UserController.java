@@ -34,7 +34,7 @@ public class UserController {
 	private final UserUseCase userUseCase;
 
 	@PostMapping
-	@PreAuthorize("hasRole('Guest')")
+	@PreAuthorize("hasRole('GUEST')")
 	@Operation(
 			summary = "회원가입",
 			description = "신규 사용자가 회원가입합니다. (Guest만 허용)",
@@ -76,7 +76,7 @@ public class UserController {
 	}
 
 	@GetMapping("/me")
-	@PreAuthorize("hasAnyRole('User','Admin')")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@Operation(
 			summary = "내 프로필 조회",
 			description = "로그인한 사용자의 프로필을 조회합니다. (User, Admin 허용)",
@@ -119,7 +119,7 @@ public class UserController {
 	}
 
 	@PutMapping("/me")
-	@PreAuthorize("hasAnyRole('User','Admin')")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@Operation(
 			summary = "내 정보 수정",
 			description = "내 정보를 수정합니다. (User, Admin 허용)",
@@ -156,7 +156,7 @@ public class UserController {
 	}
 
 	@DeleteMapping("/me")
-	@PreAuthorize("hasAnyRole('User','Admin')")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@Operation(
 			summary = "회원 탈퇴",
 			description = "회원 탈퇴 처리합니다. (User, Admin 허용)",
@@ -190,7 +190,7 @@ public class UserController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAnyRole('User','Admin')")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@Operation(
 			summary = "유저 목록 검색",
 			description = "검색 조건에 맞는 유저 목록을 Slice 페이징으로 조회합니다. (User, Admin 허용)",
