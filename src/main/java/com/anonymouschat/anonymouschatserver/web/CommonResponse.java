@@ -10,17 +10,18 @@ import lombok.Getter;
 import java.io.IOException;
 
 @Getter
+@Schema(name = "CommonResponse", description = "공통 응답 포맷")
 public class CommonResponse<T> {
 
 	@Schema(description = "성공 여부", example = "true")
 	private final boolean success;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@Schema(description = "응답 데이터", nullable = true)
+	@Schema(description = "실제 응답 데이터")
 	private final T data;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@Schema(description = "에러 정보", nullable = true)
+	@Schema(description = "에러 정보 (실패 시 반환)", implementation = ErrorBody.class)
 	private final ErrorBody error;
 
 	private CommonResponse(boolean success, T data, ErrorBody error) {
