@@ -30,17 +30,9 @@ public class JwtAuthenticationFactory {
 	}
 
 	public Authentication createAuthentication(CustomPrincipal principal) {
-		if (!principal.isAuthenticatedUser()) {
-			log.debug("{}비인증 사용자 - SecurityContext 미적용 - userId={}, provider={}",
-					LogTag.SECURITY_JWT,
-					principal.userId(),
-					principal.provider()
-			);
-			return null;
-		}
+		var authority = principal.role(); // 항상 Role 있음 (USER, ADMIN, GUEST)
 
-		var authority = principal.role();
-		log.debug("{}Authentication 객체 생성 완료 - userId={}, role={}",
+		log.debug("{}Authentication 객체 생성 - userId={}, role={}",
 				LogTag.SECURITY_JWT,
 				principal.userId(),
 				principal.role()
