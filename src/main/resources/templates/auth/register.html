@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>회원가입 - Anonymous Chat</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- layout.html 의 content fragment를 교체 -->
+<div th:replace="layout :: content">
+	<section class="card">
+		<h2>회원가입</h2>
+		<form id="register-form" enctype="multipart/form-data">
+			<label>
+				<input type="text" name="nickname" placeholder="닉네임 (2~20자)" required>
+			</label><br>
+
+			<label>
+				<select name="gender" required>
+					<option value="" disabled selected>성별 선택</option>
+					<option value="MALE">남성</option>
+					<option value="FEMALE">여성</option>
+					<option value="NONE">선택 안함</option>
+				</select>
+			</label><br>
+
+			<label>
+				<input type="number" name="age" placeholder="나이" min="0" max="100">
+			</label><br>
+
+			<label>
+				<select name="region" required>
+					<option value="" disabled selected>지역 선택</option>
+					<option value="SEOUL">서울</option>
+					<option value="BUSAN">부산</option>
+					<option value="DAEGU">대구</option>
+					<option value="INCHEON">인천</option>
+					<option value="GWANGJU">광주</option>
+					<option value="DAEJEON">대전</option>
+					<option value="ULSAN">울산</option>
+					<option value="SEJONG">세종</option>
+					<option value="GYEONGGI">경기</option>
+					<option value="GANGWON">강원</option>
+					<option value="CHUNGBUK">충북</option>
+					<option value="CHUNGNAM">충남</option>
+					<option value="JEONBUK">전북</option>
+					<option value="JEONNAM">전남</option>
+					<option value="GYEONGBUK">경북</option>
+					<option value="GYEONGNAM">경남</option>
+					<option value="JEJU">제주</option>
+				</select>
+			</label><br>
+
+			<label>
+				<textarea name="bio" placeholder="자기소개 (최대 200자)" maxlength="200"></textarea>
+			</label><br>
+
+			<label>프로필 이미지 (최대 3장 업로드)</label><br>
+			<input type="file" name="images" multiple accept="image/*"><br><br>
+
+			<button type="submit">회원가입</button>
+		</form>
+	</section>
+</div>
+
+<script>
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData();
+
+        // request body 구성
+        const request = {
+            nickname: form.nickname.value,
+            gender: form.gender.value,
+            age: form.age.value ? parseInt(form.age.value) : null,
+            region: form.region.value,
+            bio: form.bio.value
+        };
+
+        formData.append("request", new Blob([JSON.stringify(request)], { type: "application/json" }));
+
+        // 이미지 파일 여러 개 추가
+        if (form.images.files.length > 0) {
+            Array.from(form.images.files).forEach(file => {
+                formData.append("images", file);
+            });
+        }
+
+        fetch("/api/v1/users", {
+            method: "POST",
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("회원가입 성공!");
+                    window.location.href = "/login"; // 가입 성공 후 로그인 화면으로 이동
+                } else {
+                    alert("회원가입 실패: " + data.error?.message);
+                }
+            })
+            .catch(err => alert("오류 발생: " + err));
+    });
+</script>
+</body>
+</html>
