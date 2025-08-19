@@ -61,6 +61,9 @@ dependencies {
     implementation("org.webjars:sockjs-client:1.5.1")
     implementation("org.webjars:stomp-websocket:2.3.4")
 
+    // Thymeleaf
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
     // 테스트용 WebSocket 클라이언트
     testImplementation("org.springframework:spring-messaging")
 

@@ -41,5 +41,5 @@ springdoc:
     operations-sorter: method
 
 file:
-  upload-dir: ${UPLOAD_DIR:/Users/jun/Documents/anonymous-chat/user-profile-images}
-  access-url-prefix: /images
+  upload-dir: ${UPLOAD_DIR:uploads}
+  access-url-prefix: /uploads

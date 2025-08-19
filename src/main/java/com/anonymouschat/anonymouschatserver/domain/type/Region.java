@@ -3,6 +3,7 @@ package com.anonymouschat.anonymouschatserver.domain.type;
 public enum Region {
 
 	// 광역시
+	UNKNOWN("선택 안 함"),
 	SEOUL("서울"),
 	BUSAN("부산"),
 	DAEGU("대구"),

@@ -1,10 +1,10 @@
-package com.anonymouschat.anonymouschatserver.web.api.controller;
+package com.anonymouschat.anonymouschatserver.web.controller;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.CommonResponse;
-import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
+import com.anonymouschat.anonymouschatserver.web.controller.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

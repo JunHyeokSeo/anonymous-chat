@@ -1,9 +1,9 @@
-package com.anonymouschat.anonymouschatserver.web.api.controller;
+package com.anonymouschat.anonymouschatserver.web.controller;
 
 import com.anonymouschat.anonymouschatserver.application.usecase.BlockUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.web.CommonResponse;
-import com.anonymouschat.anonymouschatserver.web.api.dto.BlockDto;
+import com.anonymouschat.anonymouschatserver.web.controller.dto.BlockDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

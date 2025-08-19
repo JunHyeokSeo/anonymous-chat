@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.application.dto;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
-import com.anonymouschat.anonymouschatserver.web.api.dto.UserDto;
+import com.anonymouschat.anonymouschatserver.web.controller.dto.UserDto;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

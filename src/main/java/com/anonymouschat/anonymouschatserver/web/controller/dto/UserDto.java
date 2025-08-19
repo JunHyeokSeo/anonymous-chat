@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.web.api.dto;
+package com.anonymouschat.anonymouschatserver.web.controller.dto;
 
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.common.validation.ValidAgeRange;

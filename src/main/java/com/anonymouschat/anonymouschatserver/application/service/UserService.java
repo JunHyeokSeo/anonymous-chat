@@ -6,15 +6,17 @@ import com.anonymouschat.anonymouschatserver.common.exception.BadRequestExceptio
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
-import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -105,7 +107,12 @@ public class UserService {
 				                 .providerId(providerId)
 				                 .role(Role.GUEST)
 				                 .nickname("guest_" + System.currentTimeMillis())
+				                 .gender(Gender.UNKNOWN)
+				                 .age(0)
+				                 .region(Region.UNKNOWN)
+				                 .bio("")
 				                 .build();
+
 
 		User saved = userRepository.save(guestUser);
 		log.info("{}게스트 유저 생성 완료 - userId={}", LogTag.USER, saved.getId());
