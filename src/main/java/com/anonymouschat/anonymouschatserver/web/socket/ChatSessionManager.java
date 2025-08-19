@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;

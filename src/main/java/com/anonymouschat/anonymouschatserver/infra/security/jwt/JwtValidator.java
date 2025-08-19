@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.UnsupportedAlgorithmAuthenticationException;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

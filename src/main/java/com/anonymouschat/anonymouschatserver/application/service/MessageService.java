@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;

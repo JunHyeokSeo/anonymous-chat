@@ -5,7 +5,7 @@ import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
 import com.anonymouschat.anonymouschatserver.common.exception.InternalServerException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.repository.ChatRoomRepository;

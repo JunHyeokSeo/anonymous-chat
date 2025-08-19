@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -6,7 +6,7 @@ import com.anonymouschat.anonymouschatserver.application.service.BlockService;
 import com.anonymouschat.anonymouschatserver.application.service.UserSearchService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;

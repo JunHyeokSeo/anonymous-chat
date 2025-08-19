@@ -4,7 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.event.ChatPersisted;
 import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

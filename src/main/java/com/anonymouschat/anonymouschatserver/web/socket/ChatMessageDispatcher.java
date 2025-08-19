@@ -3,7 +3,7 @@ package com.anonymouschat.anonymouschatserver.web.socket;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.socket.MessageValidationException;
 import com.anonymouschat.anonymouschatserver.common.exception.socket.UnsupportedMessageTypeException;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import com.anonymouschat.anonymouschatserver.web.socket.handler.MessageHandler;

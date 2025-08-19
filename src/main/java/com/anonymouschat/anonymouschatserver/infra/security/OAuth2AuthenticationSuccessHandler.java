@@ -2,7 +2,7 @@ package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.web.api.dto.AuthDto;
 import com.fasterxml.jackson.databind.ObjectMapper;

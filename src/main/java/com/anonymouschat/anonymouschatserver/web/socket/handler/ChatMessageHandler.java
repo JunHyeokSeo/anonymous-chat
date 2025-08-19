@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.web.socket.handler;
 
 import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;

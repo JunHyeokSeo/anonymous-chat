@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket;
 
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;

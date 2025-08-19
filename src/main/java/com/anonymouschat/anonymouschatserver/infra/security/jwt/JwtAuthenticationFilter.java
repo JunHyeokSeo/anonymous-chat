@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.infra.security.jwt;
 
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

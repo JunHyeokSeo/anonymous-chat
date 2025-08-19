@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.common.log;
+package com.anonymouschat.anonymouschatserver.infra.log;
 
 public final class LogTag {
     private LogTag() {}

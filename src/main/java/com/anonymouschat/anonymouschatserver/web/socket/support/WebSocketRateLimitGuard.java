@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.web.socket.support;
 
-import com.anonymouschat.anonymouschatserver.common.log.LogTag;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
