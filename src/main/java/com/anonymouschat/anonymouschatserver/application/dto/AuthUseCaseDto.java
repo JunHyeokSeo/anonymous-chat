@@ -9,7 +9,7 @@ public class AuthUseCaseDto {
 	public record AuthResult(
 			String accessToken,
 			@Nullable String refreshToken,
-			boolean isNewUser
+			boolean isGuestUser
 	) {}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

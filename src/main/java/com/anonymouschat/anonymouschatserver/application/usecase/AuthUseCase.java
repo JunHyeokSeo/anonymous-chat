@@ -26,26 +26,25 @@ public class AuthUseCase {
 
     @Transactional
     public AuthUseCaseDto.AuthResult login(OAuthProvider provider, String providerId) {
-	    AtomicBoolean isNewUser = new AtomicBoolean(false);
+	    AtomicBoolean isGuestUser = new AtomicBoolean(false);
 
 	    User user = userService.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> {
-					isNewUser.set(true);
-	                return userService.createGuestUser(provider, providerId);
-				});
+                .orElseGet(() -> userService.createGuestUser(provider, providerId));
 
         String accessToken = authService.generateAccessToken(provider, providerId);
         String refreshToken = null;
 
-        if (user.getRole() != Role.GUEST) {
-            refreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
-            authService.saveRefreshToken(user.getId(), refreshToken);
-        }
+	    if (user.getRole() != Role.GUEST) {
+		    refreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
+		    authService.saveRefreshToken(user.getId(), refreshToken);
+	    } else {
+			isGuestUser.set(true);
+	    }
 
 	    return AuthUseCaseDto.AuthResult.builder()
 			           .accessToken(accessToken)
 			           .refreshToken(refreshToken)
-			           .isNewUser(isNewUser.get())
+			           .isGuestUser(isGuestUser.get())
 			           .build();
     }
 

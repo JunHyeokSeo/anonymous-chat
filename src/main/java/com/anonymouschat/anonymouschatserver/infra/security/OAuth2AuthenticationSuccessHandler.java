@@ -50,7 +50,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 					String.format("refreshToken=%s; HttpOnly; Path=/; Secure; SameSite=Strict", authResult.refreshToken()));
 		}
 
-		if (authResult.isNewUser()) {
+		if (authResult.isGuestUser()) {
 			response.sendRedirect("/register");
 		} else {
 			response.sendRedirect("/users");
