@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<title>회원가입 - Anonymous Chat</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
-<body>
-<!-- layout.html 의 content fragment를 교체 -->
-<div th:replace="layout :: content">
+<div th:fragment="content">
 	<section class="card">
 		<h2>회원가입</h2>
 		<form id="register-form" enctype="multipart/form-data">
@@ -61,47 +52,44 @@
 			<button type="submit">회원가입</button>
 		</form>
 	</section>
-</div>
+	<script>
+        document.getElementById("register-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData();
 
-<script>
-    document.getElementById("register-form").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData();
+            // request body 구성
+            const request = {
+                nickname: form.nickname.value,
+                gender: form.gender.value,
+                age: form.age.value ? parseInt(form.age.value) : null,
+                region: form.region.value,
+                bio: form.bio.value
+            };
 
-        // request body 구성
-        const request = {
-            nickname: form.nickname.value,
-            gender: form.gender.value,
-            age: form.age.value ? parseInt(form.age.value) : null,
-            region: form.region.value,
-            bio: form.bio.value
-        };
+            formData.append("request", new Blob([JSON.stringify(request)], { type: "application/json" }));
 
-        formData.append("request", new Blob([JSON.stringify(request)], { type: "application/json" }));
+            // 이미지 파일 여러 개 추가
+            if (form.images.files.length > 0) {
+                Array.from(form.images.files).forEach(file => {
+                    formData.append("images", file);
+                });
+            }
 
-        // 이미지 파일 여러 개 추가
-        if (form.images.files.length > 0) {
-            Array.from(form.images.files).forEach(file => {
-                formData.append("images", file);
-            });
-        }
-
-        fetch("/api/v1/users", {
-            method: "POST",
-            body: formData
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert("회원가입 성공!");
-                    window.location.href = "/login"; // 가입 성공 후 로그인 화면으로 이동
-                } else {
-                    alert("회원가입 실패: " + data.error?.message);
-                }
+            fetch("/api/v1/users", {
+                method: "POST",
+                body: formData
             })
-            .catch(err => alert("오류 발생: " + err));
-    });
-</script>
-</body>
-</html>
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("회원가입 성공!");
+                        window.location.href = "/login"; // 가입 성공 후 로그인 화면으로 이동
+                    } else {
+                        alert("회원가입 실패: " + data.error?.message);
+                    }
+                })
+                .catch(err => alert("오류 발생: " + err));
+        });
+	</script>
+</div>

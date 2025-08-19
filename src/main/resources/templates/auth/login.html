@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head>
-	<meta charset="UTF-8">
-	<title>Anonymous Chat - 로그인</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
-<body>
-<main class="login-container">
-	<h1>Anonymous Chat</h1>
-	<p>구글 계정으로 로그인하여 시작하세요.</p>
+<div th:fragment="content">
+	<section class="login-container">
+		<p>구글 계정으로 로그인하여 시작하세요.</p>
 
-	<!-- Spring Security OAuth2 로그인 엔드포인트 -->
-	<a class="google-login-btn" href="/oauth2/authorization/google">
-		<img src="/images/google-auth-login-logo.png" alt="Google Logo" width="756" height="160">
-		Google 로그인
-	</a>
-</main>
-</body>
-</html>
+		<a class="google-login-btn" href="/oauth2/authorization/google">
+			<img src="/images/google-auth-login-logo.png" alt="Google Logo" width="756" height="160">
+			Google 로그인
+		</a>
+	</section>
+</div>
