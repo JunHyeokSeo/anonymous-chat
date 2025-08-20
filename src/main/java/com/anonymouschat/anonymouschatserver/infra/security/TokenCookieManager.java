@@ -15,9 +15,9 @@ public class TokenCookieManager {
 	 * User 토큰을 쿠키에 저장
 	 */
 	public void writeTokens(HttpServletResponse response, AuthUseCaseDto.AuthResult result) {
-		addCookie(response, ACCESS_TOKEN, result.accessToken(), true);
+		addCookie(response, ACCESS_TOKEN, result.accessToken());
 		if (result.refreshToken() != null) {
-			addCookie(response, REFRESH_TOKEN, result.refreshToken(), true);
+			addCookie(response, REFRESH_TOKEN, result.refreshToken());
 		}
 	}
 
@@ -29,9 +29,9 @@ public class TokenCookieManager {
 		deleteCookie(response, REFRESH_TOKEN);
 	}
 
-	private void addCookie(HttpServletResponse response, String name, String value, boolean httpOnly) {
+	private void addCookie(HttpServletResponse response, String name, String value) {
 		ResponseCookie cookie = ResponseCookie.from(name, value)
-				                        .httpOnly(httpOnly)
+				                        .httpOnly(true)
 //				                        .secure(true)
 				                        .sameSite("Strict")
 				                        .path("/")

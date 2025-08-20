@@ -1,5 +1,8 @@
 package com.anonymouschat.anonymouschatserver.domain.type;
 
+import lombok.Getter;
+
+@Getter
 public enum Region {
 
 	// 광역시
@@ -28,9 +31,5 @@ public enum Region {
 
 	Region(String displayName) {
 		this.displayName = displayName;
-	}
-
-	public String getDisplayName() {
-		return displayName;
 	}
 }
