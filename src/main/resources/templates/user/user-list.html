@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<title>유저 목록 - Anonymous Chat</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
-<body>
-<!-- layout.html 의 content fragment 교체 -->
-<div th:replace="layout :: content">
+<div th:fragment="content">
 	<section>
 		<h2>유저 검색</h2>
 		<form id="search-form" class="card">
@@ -61,7 +52,7 @@
 		<div id="user-list"></div>
 	</section>
 </div>
-
+<script src="/js/csrfFetch.js"></script>
 <script>
     const userListContainer = document.getElementById("user-list");
 
@@ -80,7 +71,7 @@
         params.append("page", "0");
         params.append("size", "20");
 
-        fetch("/api/v1/users?" + params.toString(), {
+        csrfFetch("/api/v1/users?" + params.toString(), {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
@@ -124,5 +115,3 @@
         });
     }
 </script>
-</body>
-</html>

@@ -34,7 +34,7 @@
 		</div>
 	</section>
 </div>
-
+<script src="/js/csrfFetch.js"></script>
 <script>
     // URL에서 roomId 추출
     const pathParts = window.location.pathname.split("/");
@@ -47,7 +47,7 @@
 
     // 1. 채팅 히스토리 로드
     function loadHistory() {
-        fetch(`/api/v1/messages?roomId=${roomId}&limit=30`, {
+        csrfFetch(`/api/v1/messages?roomId=${roomId}&limit=30`, {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token,

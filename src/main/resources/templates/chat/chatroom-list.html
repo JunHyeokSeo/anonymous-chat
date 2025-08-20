@@ -13,12 +13,12 @@
 		<div id="chatroom-list"></div>
 	</section>
 </div>
-
+<script src="/js/csrfFetch.js"></script>
 <script>
     const chatroomListContainer = document.getElementById("chatroom-list");
 
     // 채팅방 목록 조회
-    fetch("/api/v1/chatrooms", {
+    csrfFetch("/api/v1/chatrooms", {
         method: "GET",
         headers: { "Content-Type": "application/json" }
     })

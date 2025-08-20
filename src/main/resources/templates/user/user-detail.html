@@ -17,7 +17,7 @@
 		</div>
 	</section>
 </div>
-
+<script src="/js/csrfFetch.js"></script>
 <script>
     // 현재 URL에서 userId 추출
     const pathParts = window.location.pathname.split("/");
@@ -28,7 +28,7 @@
     const blockBtn = document.getElementById("block-btn");
 
     // 유저 상세 조회 (API에 맞춰 수정 필요)
-    fetch("/api/v1/users/" + userId, {
+    csrfFetch("/api/v1/users/" + userId, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
     })
@@ -66,7 +66,7 @@
 
     // 채팅 시작 버튼
     chatBtn.addEventListener("click", () => {
-        fetch("/api/v1/chatrooms", {
+        csrfFetch("/api/v1/chatrooms", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ recipientId: parseInt(userId) })
@@ -88,7 +88,7 @@
     blockBtn.addEventListener("click", () => {
         if (!confirm("정말 이 사용자를 차단하시겠습니까?")) return;
 
-        fetch("/api/v1/blocks", {
+        csrfFetch("/api/v1/blocks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ blockedUserId: parseInt(userId) })
