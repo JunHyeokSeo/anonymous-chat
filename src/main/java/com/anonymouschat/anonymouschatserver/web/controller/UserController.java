@@ -1,8 +1,11 @@
 package com.anonymouschat.anonymouschatserver.web.controller;
 
+import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
+import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
+import com.anonymouschat.anonymouschatserver.infra.security.TokenCookieManager;
 import com.anonymouschat.anonymouschatserver.web.CommonResponse;
 import com.anonymouschat.anonymouschatserver.web.controller.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +36,8 @@ import java.util.List;
 public class UserController {
 
 	private final UserUseCase userUseCase;
+	private final AuthUseCase authUseCase;
+	private final TokenCookieManager tokenCookieManager;
 
 	@PostMapping
 	@PreAuthorize("hasRole('GUEST')")
@@ -64,12 +70,19 @@ public class UserController {
 	public ResponseEntity<CommonResponse<Long>> register(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.RegisterRequest request,
-			@RequestPart(value = "images", required = false) List<MultipartFile> images
+			@RequestPart(value = "images", required = false) List<MultipartFile> images,
+			HttpServletResponse response
 	) throws IOException {
 		Long userId = userUseCase.register(
 				UserUseCaseDto.RegisterRequest.from(request, principal.provider(), principal.providerId()),
 				images
 		);
+
+		AuthUseCaseDto.AuthResult authResult = authUseCase.login(principal.provider(), principal.providerId());
+
+		tokenCookieManager.clearTokens(response);
+		tokenCookieManager.writeTokens(response, authResult);
+
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
 				       .body(CommonResponse.success(userId));

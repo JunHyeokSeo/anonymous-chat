@@ -22,6 +22,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 	private final AuthUseCase authUseCase;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
+	private final TokenCookieManager tokenCookieManager;
 
 	@Override
 	public void onAuthenticationSuccess(
@@ -41,14 +42,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 		AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
 
-		// 토큰 쿠키 저장 (HttpOnly, Secure)
-		response.addHeader("Set-Cookie",
-				String.format("accessToken=%s; HttpOnly; Path=/; Secure; SameSite=Strict", authResult.accessToken()));
-
-		if (authResult.refreshToken() != null) {
-			response.addHeader("Set-Cookie",
-					String.format("refreshToken=%s; HttpOnly; Path=/; Secure; SameSite=Strict", authResult.refreshToken()));
-		}
+		tokenCookieManager.clearTokens(response);
+		tokenCookieManager.writeTokens(response, authResult);
 
 		if (authResult.isGuestUser()) {
 			response.sendRedirect("/register");
