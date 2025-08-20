@@ -57,7 +57,7 @@ class AuthUseCaseTest {
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
-			assertThat(result.isNewUser()).isFalse();
+			assertThat(result.isGuestUser()).isFalse();
 
 			verify(authService).saveRefreshToken(1L, "refresh-token");
 		}
@@ -78,7 +78,7 @@ class AuthUseCaseTest {
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isNull();
-			assertThat(result.isNewUser()).isTrue();
+			assertThat(result.isGuestUser()).isTrue();
 
 			verify(authService, never()).generateRefreshToken(any(), any());
 		}

@@ -68,7 +68,7 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 
 				// JWT 필터 등록 ExceptionTranslationFilter
-				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, customAuthenticationEntryPoint()),
+				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory),
 						UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
@@ -78,10 +78,9 @@ public class SecurityConfig {
 	public JwtAuthenticationFilter jwtAuthenticationFilter(
 			JwtTokenResolver tokenResolver,
 			JwtValidator jwtValidator,
-			JwtAuthenticationFactory authFactory,
-			CustomAuthenticationEntryPoint entryPoint
+			JwtAuthenticationFactory authFactory
 	) {
-		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, entryPoint);
+		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory);
 	}
 
 	@Bean

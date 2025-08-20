@@ -90,7 +90,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value("EXPIRED_TOKEN"));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -104,7 +105,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value(MALFORMED_TOKEN.getCode()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -119,7 +121,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value(UNSUPPORTED_TOKEN.getCode()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -133,8 +136,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value("INVALID_SIGNATURE"))
-				.andExpect(jsonPath("$.error.message").value(INVALID_SIGNATURE.getMessage()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -147,8 +150,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value("INVALID_TOKEN"))
-				.andExpect(jsonPath("$.error.message").value(INVALID_TOKEN.getMessage()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -161,8 +164,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value("UNSUPPORTED_ALGORITHM"))
-				.andExpect(jsonPath("$.error.message").value(UNSUPPORTED_ALGORITHM.getMessage()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -174,8 +177,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value(UNEXPECTED_AUTH_ERROR.getCode()))
-				.andExpect(jsonPath("$.error.message").value(UNEXPECTED_AUTH_ERROR.getMessage()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
@@ -186,7 +189,8 @@ class SecurityExceptionHandlingWebTest {
 
 		mockMvc.perform(get("/secure/user").header("Authorization", "Basic abcdef"))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()));
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
