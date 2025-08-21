@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
 	<meta charset="UTF-8">
 	<title>채팅방 - Anonymous Chat</title>
@@ -24,7 +26,7 @@
 	</style>
 </head>
 <body>
-<div th:replace="layout :: content">
+<div layout:fragment="content">
 	<section>
 		<h2>채팅방</h2>
 		<div id="chat-messages"></div>
@@ -34,7 +36,6 @@
 		</div>
 	</section>
 </div>
-<script src="/js/csrfFetch.js"></script>
 <script>
     // URL에서 roomId 추출
     const pathParts = window.location.pathname.split("/");
@@ -47,7 +48,7 @@
 
     // 1. 채팅 히스토리 로드
     function loadHistory() {
-        csrfFetch(`/api/v1/messages?roomId=${roomId}&limit=30`, {
+        authFetch(`/api/v1/messages?roomId=${roomId}&limit=30`, {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token,
@@ -85,7 +86,7 @@
         socket.onerror = (err) => console.error("WebSocket 오류:", err);
     } else {
         alert("로그인이 필요합니다.");
-        window.location.href = "/login";
+        window.location.href = "/view/login";
     }
 
     // 3. 메시지 전송

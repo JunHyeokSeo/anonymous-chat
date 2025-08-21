@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="header">
+	<header class="site-header">
+		<nav class="navbar">
+			<a href="/" class="logo">Anonymous Chat</a>
+			<ul class="nav-links">
+				<li><a th:href="@{/users}">사용자 목록</a></li>
+				<li><a th:href="@{/chatrooms}">채팅방</a></li>
+				<li><a th:href="@{/login}">로그인</a></li>
+				<li><a th:href="@{/register}">회원가입</a></li>
+			</ul>
+		</nav>
+	</header>
+</div>
+</body>
+</html>

@@ -1,6 +1,14 @@
-<div th:fragment="content">
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+	<title>유저 목록</title>
+</head>
+<body>
+<div layout:fragment="content">
 	<section>
-		<h2>유저 검색</h2>
+		<h2>유저 목록</h2>
 		<form id="search-form" class="card">
 			<label>성별</label>
 			<label>
@@ -52,7 +60,6 @@
 		<div id="user-list"></div>
 	</section>
 </div>
-<script src="/js/csrfFetch.js"></script>
 <script>
     const userListContainer = document.getElementById("user-list");
 
@@ -71,7 +78,7 @@
         params.append("page", "0");
         params.append("size", "20");
 
-        csrfFetch("/api/v1/users?" + params.toString(), {
+        authFetch("/api/v1/users?" + params.toString(), {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
@@ -107,7 +114,7 @@
                         <h3>${user.nickname} (${user.age}세)</h3>
                         <p>${user.region}</p>
                         <p>마지막 활동: ${new Date(user.lastActiveAt).toLocaleString()}</p>
-                        <button onclick="location.href='/users/${user.userId}'">프로필 보기</button>
+                        <button onclick="location.href='/view/users/${user.userId}'">프로필 보기</button>
                     </div>
                 </div>
             `;
@@ -115,3 +122,5 @@
         });
     }
 </script>
+</body>
+</html>

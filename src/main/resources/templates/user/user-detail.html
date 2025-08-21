@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
 	<meta charset="UTF-8">
 	<title>유저 상세 - Anonymous Chat</title>
@@ -17,7 +19,6 @@
 		</div>
 	</section>
 </div>
-<script src="/js/csrfFetch.js"></script>
 <script>
     // 현재 URL에서 userId 추출
     const pathParts = window.location.pathname.split("/");
@@ -28,7 +29,7 @@
     const blockBtn = document.getElementById("block-btn");
 
     // 유저 상세 조회 (API에 맞춰 수정 필요)
-    csrfFetch("/api/v1/users/" + userId, {
+    authFetch("/api/v1/users/" + userId, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
     })
@@ -66,7 +67,7 @@
 
     // 채팅 시작 버튼
     chatBtn.addEventListener("click", () => {
-        csrfFetch("/api/v1/chatrooms", {
+        authFetch("/api/v1/chatrooms", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ recipientId: parseInt(userId) })
@@ -76,7 +77,7 @@
                 if (data.success) {
                     const roomId = data.data.roomId;
                     alert("채팅방이 생성되었습니다.");
-                    window.location.href = "/chatrooms/" + roomId;
+                    window.location.href = "/view/chatrooms/" + roomId;
                 } else {
                     alert("채팅 시작 실패: " + data.error?.message);
                 }
@@ -88,7 +89,7 @@
     blockBtn.addEventListener("click", () => {
         if (!confirm("정말 이 사용자를 차단하시겠습니까?")) return;
 
-        csrfFetch("/api/v1/blocks", {
+        authFetch("/api/v1/blocks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ blockedUserId: parseInt(userId) })
@@ -97,7 +98,7 @@
             .then(data => {
                 if (data.success) {
                     alert("사용자가 차단되었습니다.");
-                    window.location.href = "/users";
+                    window.location.href = "/view/users";
                 } else {
                     alert("차단 실패: " + data.error?.message);
                 }

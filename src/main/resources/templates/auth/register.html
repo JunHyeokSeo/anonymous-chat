@@ -1,28 +1,36 @@
-<div th:fragment="content">
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+	<title>회원가입</title>
+</head>
+<body>
+<div layout:fragment="content">
 	<section class="card">
 		<h2>회원가입</h2>
 		<form id="register-form" enctype="multipart/form-data">
 			<label>
-				<input type="text" name="nickname" placeholder="닉네임 (2~20자)" required>
+				<input type="text" name="nickname" placeholder="닉네임 (2~20자)" value="test" required>
 			</label><br>
 
 			<label>
 				<select name="gender" required>
 					<option value="" disabled selected>성별 선택</option>
-					<option value="MALE">남성</option>
+					<option selected value="MALE">남성</option>
 					<option value="FEMALE">여성</option>
 					<option value="NONE">선택 안함</option>
 				</select>
 			</label><br>
 
 			<label>
-				<input type="number" name="age" placeholder="나이" min="0" max="100">
+				<input type="number" name="age" placeholder="나이" min="0" max="100" value="10">
 			</label><br>
 
 			<label>
 				<select name="region" required>
-					<option value="" disabled selected>지역 선택</option>
-					<option value="SEOUL">서울</option>
+					<option value="" disabled>지역 선택</option>
+					<option value="SEOUL" selected>서울</option>
 					<option value="BUSAN">부산</option>
 					<option value="DAEGU">대구</option>
 					<option value="INCHEON">인천</option>
@@ -43,7 +51,7 @@
 			</label><br>
 
 			<label>
-				<textarea name="bio" placeholder="자기소개 (최대 200자)" maxlength="200"></textarea>
+				<textarea name="bio" placeholder="자기소개 (최대 200자)" maxlength="200">test</textarea>
 			</label><br>
 
 			<label>프로필 이미지 (최대 3장 업로드)</label><br>
@@ -52,14 +60,12 @@
 			<button type="submit">회원가입</button>
 		</form>
 	</section>
-	<script src="/js/csrfFetch.js"></script>
 	<script>
-        document.getElementById("register-form").addEventListener("submit", function (e) {
+        document.getElementById("register-form").addEventListener("submit", async function (e) {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData();
 
-            // request body 구성
             const request = {
                 nickname: form.nickname.value,
                 gender: form.gender.value,
@@ -70,28 +76,37 @@
 
             formData.append("request", new Blob([JSON.stringify(request)], { type: "application/json" }));
 
-            // 이미지 파일 여러 개 추가
             if (form.images.files.length > 0) {
                 Array.from(form.images.files).forEach(file => {
                     formData.append("images", file);
                 });
             }
 
-            csrfFetch("/api/v1/users", {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("회원가입 성공!");
-                        window.location.href = "/users";
-                    } else {
-                        alert("회원가입 실패: " + data.error?.message);
-                    }
-                })
-                .catch(err => alert("오류 발생: " + err));
+            try {
+                const res = await authFetch("/api/v1/users", {
+                    method: "POST",
+                    body: formData,
+                    // headers는 authFetch에서 합쳐짐 → 여기선 따로 지정 안 함
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // accessToken 저장
+                    sessionStorage.setItem("accessToken", data.data.accessToken);
+
+                    alert("회원가입 성공!");
+                    window.location.href = "/view/users";
+                } else {
+                    alert("회원가입 실패: " + data.error?.message);
+                }
+            } catch (err) {
+                alert("오류 발생: " + err);
+            }
         });
 	</script>
+
 </div>
+
+</body>
+</html>
