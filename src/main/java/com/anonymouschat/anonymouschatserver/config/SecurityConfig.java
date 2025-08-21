@@ -14,11 +14,11 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +35,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 				// CORS/CSRF
-				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+				.csrf(AbstractHttpConfigurer::disable)
 				.cors(Customizer.withDefaults())
 
 				// 세션: STATELESS
@@ -50,13 +50,13 @@ public class SecurityConfig {
 				// 인가 규칙
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers(
-															   "/css/**", "/js/**", "/images/**", "/uploads/**",
-								                               "/api/v1/auth/**", "/oauth2/**",
+								                               "/css/**", "/js/**", "/images/**", "/uploads/**",
 								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
 								                               "/actuator/health",
-								                               "/login", "/register"
+								                               "/view/**"
 						                               ).permitAll()
-						                               .anyRequest().authenticated()
+						                               .requestMatchers("/api/**").authenticated() // API만 인증
+						                               .anyRequest().denyAll()
 				)
 
 				// OAuth2 로그인
@@ -91,5 +91,16 @@ public class SecurityConfig {
 	@Bean
 	public CustomAccessDeniedHandler customAccessDeniedHandler() {
 		return new CustomAccessDeniedHandler();
+	}
+
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.ignoring().requestMatchers(
+				"/css/**",
+				"/js/**",
+				"/images/**",
+				"/uploads/**",
+				"/favicon.ico"
+		);
 	}
 }

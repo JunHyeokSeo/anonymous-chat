@@ -22,7 +22,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 	private final AuthUseCase authUseCase;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
-	private final TokenCookieManager tokenCookieManager;
 
 	@Override
 	public void onAuthenticationSuccess(
@@ -42,13 +41,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 		AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
 
-		tokenCookieManager.clearTokens(response);
-		tokenCookieManager.writeTokens(response, authResult);
+		String redirectUrl = authResult.isGuestUser() ? "/view/register" : "/view/users";
 
-		if (authResult.isGuestUser()) {
-			response.sendRedirect("/register");
-		} else {
-			response.sendRedirect("/users");
-		}
+		redirectUrl += "#accessToken=" + authResult.accessToken();
+		response.sendRedirect(redirectUrl);
 	}
 }

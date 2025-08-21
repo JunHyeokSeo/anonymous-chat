@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +35,13 @@ public class UserDto {
 			@Schema(description = "자기소개 (최대 200자)", example = "안녕하세요! 백엔드 개발자입니다.")
 			@Size(max = 200, message = "자기소개는 최대 200자까지 입력 가능합니다.")
 			String bio
+	) {}
+
+	@Schema(description = "회원가입 응답 DTO")
+	@Builder
+	public record RegisterResponse(
+			@Schema(description = "ROLE_USER accessToken, 세션 스토리지 저장용")
+			String accessToken
 	) {}
 
 	@Schema(description = "회원정보 수정 요청 DTO")

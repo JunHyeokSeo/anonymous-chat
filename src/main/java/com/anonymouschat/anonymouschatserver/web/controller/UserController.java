@@ -56,7 +56,9 @@ public class UserController {
 											value = """
                         {
                           "success": true,
-                          "data": 101,
+                          "data": {
+                                accessToken: "eyJhbGciOi..."
+                          }
                           "error": null
                         }
                         """
@@ -67,25 +69,27 @@ public class UserController {
 					@ApiResponse(responseCode = "401", description = "인증 실패")
 			}
 	)
-	public ResponseEntity<CommonResponse<Long>> register(
+	public ResponseEntity<CommonResponse<UserDto.RegisterResponse>> register(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.RegisterRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images,
 			HttpServletResponse response
 	) throws IOException {
-		Long userId = userUseCase.register(
+		userUseCase.register(
 				UserUseCaseDto.RegisterRequest.from(request, principal.provider(), principal.providerId()),
 				images
 		);
 
 		AuthUseCaseDto.AuthResult authResult = authUseCase.login(principal.provider(), principal.providerId());
 
-		tokenCookieManager.clearTokens(response);
-		tokenCookieManager.writeTokens(response, authResult);
+		tokenCookieManager.clearRefreshToken(response);
+		tokenCookieManager.writeRefreshToken(response, authResult.refreshToken());
 
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
-				       .body(CommonResponse.success(userId));
+				       .body(CommonResponse.success(UserDto.RegisterResponse.builder()
+						                                    .accessToken(authResult.accessToken())
+						                                    .build()));
 	}
 
 	@GetMapping("/me")

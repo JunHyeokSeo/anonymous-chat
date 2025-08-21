@@ -1,52 +1,43 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
-import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class TokenCookieManager {
-
-	private static final String ACCESS_TOKEN = "accessToken";
 	private static final String REFRESH_TOKEN = "refreshToken";
 
 	/**
-	 * User 토큰을 쿠키에 저장
+	 * Refresh 토큰만 쿠키에 저장
 	 */
-	public void writeTokens(HttpServletResponse response, AuthUseCaseDto.AuthResult result) {
-		addCookie(response, ACCESS_TOKEN, result.accessToken());
-		if (result.refreshToken() != null) {
-			addCookie(response, REFRESH_TOKEN, result.refreshToken());
+	public void writeRefreshToken(HttpServletResponse response, String refreshToken) {
+		if (refreshToken != null) {
+			log.debug("REFRESH 토큰 쿠키 설정 완료 - {}", refreshToken);
+			ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, refreshToken)
+					                        .httpOnly(true)
+					                        .secure(true)   // 배포 환경에서는 true
+					                        .sameSite("Strict")
+					                        .path("/")
+					                        .build();
+			response.addHeader("Set-Cookie", cookie.toString());
 		}
 	}
 
 	/**
-	 * 기존 토큰(Guest 등)을 삭제
+	 * Refresh 토큰 쿠키 삭제
 	 */
-	public void clearTokens(HttpServletResponse response) {
-		deleteCookie(response, ACCESS_TOKEN);
-		deleteCookie(response, REFRESH_TOKEN);
-	}
-
-	private void addCookie(HttpServletResponse response, String name, String value) {
-		ResponseCookie cookie = ResponseCookie.from(name, value)
+	public void clearRefreshToken(HttpServletResponse response) {
+		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, "")
 				                        .httpOnly(true)
-//				                        .secure(true)
+				                        .secure(true)
 				                        .sameSite("Strict")
 				                        .path("/")
+				                        .maxAge(0)
 				                        .build();
 		response.addHeader("Set-Cookie", cookie.toString());
-	}
-
-	private void deleteCookie(HttpServletResponse response, String name) {
-		ResponseCookie cookie = ResponseCookie.from(name, "")
-				                        .httpOnly(true)
-//				                        .secure(true)
-				                        .sameSite("Strict")
-				                        .path("/")
-				                        .maxAge(0) // 즉시 만료
-				                        .build();
-		response.addHeader("Set-Cookie", cookie.toString());
+		log.debug("REFRESH 토큰 쿠키에서 삭제 완료");
 	}
 }
