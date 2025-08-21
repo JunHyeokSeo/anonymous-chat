@@ -63,6 +63,7 @@ dependencies {
 
     // Thymeleaf
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
 
     // 테스트용 WebSocket 클라이언트
     testImplementation("org.springframework:spring-messaging")
