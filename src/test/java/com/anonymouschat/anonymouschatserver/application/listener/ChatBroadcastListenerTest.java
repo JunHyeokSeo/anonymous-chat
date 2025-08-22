@@ -1,9 +1,9 @@
 package com.anonymouschat.anonymouschatserver.application.listener;
 
 import com.anonymouschat.anonymouschatserver.application.event.ChatPersisted;
-import com.anonymouschat.anonymouschatserver.web.socket.dto.ChatOutboundMessage;
-import com.anonymouschat.anonymouschatserver.web.socket.dto.MessageType;
-import com.anonymouschat.anonymouschatserver.web.socket.support.MessageBroadcaster;
+import com.anonymouschat.anonymouschatserver.presentation.socket.dto.ChatOutboundMessage;
+import com.anonymouschat.anonymouschatserver.presentation.socket.dto.MessageType;
+import com.anonymouschat.anonymouschatserver.presentation.socket.support.MessageBroadcaster;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.anonymouschat.anonymouschatserver.common.validation;
 
-import com.anonymouschat.anonymouschatserver.web.controller.dto.UserDto;
+import com.anonymouschat.anonymouschatserver.presentation.controller.dto.UserDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

@@ -1,7 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
-import com.anonymouschat.anonymouschatserver.web.CommonResponse;
+import com.anonymouschat.anonymouschatserver.presentation.CommonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
