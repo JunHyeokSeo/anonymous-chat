@@ -1,13 +1,12 @@
 package com.anonymouschat.anonymouschatserver.infra.config;
 
-import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
+import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomAccessDeniedHandler;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomAuthenticationEntryPoint;
 import com.anonymouschat.anonymouschatserver.infra.security.OAuth2AuthenticationSuccessHandler;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFilter;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
-import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,9 +28,8 @@ public class SecurityConfig {
 
 	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 	private final JwtTokenResolver tokenResolver;
-	private final JwtValidator jwtValidator;
 	private final JwtAuthenticationFactory authFactory;
-	private final AuthUseCase authUseCase;
+	private final AuthService authService;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -70,7 +68,7 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 
 				// JWT 필터 등록 ExceptionTranslationFilter
-				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, authUseCase),
+				.addFilterBefore(jwtAuthenticationFilter(tokenResolver, authFactory, authService),
 						UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
@@ -79,11 +77,10 @@ public class SecurityConfig {
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter(
 			JwtTokenResolver tokenResolver,
-			JwtValidator jwtValidator,
 			JwtAuthenticationFactory authFactory,
-			AuthUseCase authUseCase
+			AuthService authService
 	) {
-		return new JwtAuthenticationFilter(tokenResolver, jwtValidator, authFactory, authUseCase);
+		return new JwtAuthenticationFilter(tokenResolver, authFactory, authService);
 	}
 
 	@Bean

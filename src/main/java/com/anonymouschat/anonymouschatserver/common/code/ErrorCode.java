@@ -63,7 +63,12 @@ public enum ErrorCode {
 	CONTENT_LENGTH_EXCEEDED(HttpStatus.BAD_REQUEST, "메시지 길이가 제한을 초과했습니다."),
 	CONTENT_SHOULD_BE_EMPTY(HttpStatus.BAD_REQUEST, "해당 메시지 타입은 내용이 비어있어야 합니다."),
 	SENDER_ID_REQUIRED(HttpStatus.BAD_REQUEST, "송신자 ID가 필요합니다."),
-	TIMESTAMP_REQUIRED(HttpStatus.BAD_REQUEST, "타임스탬프가 필요합니다.");
+	TIMESTAMP_REQUIRED(HttpStatus.BAD_REQUEST, "타임스탬프가 필요합니다."),
+
+	// 데이터 저장소 관련
+	TOKEN_SERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 데이터 직렬화에 실패했습니다."),
+	TOKEN_DESERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 데이터 역직렬화에 실패했습니다."),
+	TOKEN_STORAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 저장소 처리 중 오류가 발생했습니다.");
 
 	private final HttpStatus status;
 	private final String message;

@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.presentation.controller;
 
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
+import com.anonymouschat.anonymouschatserver.infra.web.HttpRequestExtractor;
 import com.anonymouschat.anonymouschatserver.presentation.CommonResponse;
 import com.anonymouschat.anonymouschatserver.presentation.controller.dto.AuthDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
 	private final AuthUseCase authUseCase;
+	private final HttpRequestExtractor httpRequestExtractor;
 
 	@PostMapping("/refresh")
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
@@ -62,9 +65,18 @@ public class AuthController {
 			}
 	)
 	public ResponseEntity<CommonResponse<AuthDto.AuthTokensResponse>> refresh(
-			@Valid @RequestBody AuthDto.RefreshRequest request
+			@Valid @RequestBody AuthDto.RefreshRequest request,
+			HttpServletRequest httpRequest
 	) {
 		var tokens = authUseCase.refresh(request.refreshToken());
+
+		// 새 RefreshToken 저장
+		Long userId = authUseCase.getUserIdFromToken(tokens.refreshToken());
+		String userAgent = httpRequestExtractor.extractUserAgent(httpRequest);
+		String ipAddress = httpRequestExtractor.extractClientIpAddress(httpRequest);
+
+		authUseCase.saveRefreshToken(userId, tokens.refreshToken(), userAgent, ipAddress);
+
 		return ResponseEntity
 				       .status(HttpStatus.OK)
 				       .body(CommonResponse.success(AuthDto.AuthTokensResponse.from(tokens)));
@@ -99,9 +111,11 @@ public class AuthController {
 	)
 	public ResponseEntity<CommonResponse<Void>> logout(
 			@Parameter(hidden = true)
-			@AuthenticationPrincipal CustomPrincipal principal
+			@AuthenticationPrincipal CustomPrincipal principal,
+			HttpServletRequest httpRequest
 	) {
-		authUseCase.logout(principal.userId());
+		String accessToken = httpRequestExtractor.extractAccessToken(httpRequest);
+		authUseCase.logout(principal.userId(), accessToken);
 		return ResponseEntity
 				       .status(HttpStatus.OK)
 				       .body(CommonResponse.success(null));

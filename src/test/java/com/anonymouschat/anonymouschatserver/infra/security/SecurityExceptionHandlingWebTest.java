@@ -1,11 +1,12 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
+import com.anonymouschat.anonymouschatserver.application.service.AuthService;
+import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.UnsupportedAlgorithmAuthenticationException;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.config.SecurityConfig;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
-import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,11 +35,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Web 슬라이스 테스트 (보안 필터/핸들러 집중 검증)
- * - 기존 셋업/임포트 유지
- * - permitAll 엔드포인트(/actuator/health) 추가
- */
 @WebMvcTest
 @Import({
 		SecurityConfig.class,
@@ -52,30 +48,36 @@ class SecurityExceptionHandlingWebTest {
 
 	@MockitoBean OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 	@MockitoBean JwtTokenResolver tokenResolver;
-	@MockitoBean JwtValidator jwtValidator;
+	@MockitoBean AuthService authService;
 	@MockitoBean JwtAuthenticationFactory authFactory;
 
 	// ---------- helpers ----------
 	private void stubResolveNoToken() {
 		when(tokenResolver.resolve(any(HttpServletRequest.class))).thenReturn(null);
 	}
+
 	private void stubResolveToken(String token) {
 		when(tokenResolver.resolve(any(HttpServletRequest.class))).thenReturn(token);
 	}
+
 	private void mockAuthenticatedUser(String token, Authentication authentication) {
 		stubResolveToken(token);
-		doNothing().when(jwtValidator).validate(token);
+		doNothing().when(authService).validateToken(token);
 		when(authFactory.createPrincipal(token))
-				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, Role.USER));
+				.thenReturn(CustomPrincipal.builder()
+						            .userId(123L)
+						            .role(Role.USER)
+						            .build());
 		when(authFactory.createAuthentication(any())).thenReturn(authentication);
 	}
 
 	// ---------- tests: UNAUTHORIZED(401) ----------
 	@Test
-	@DisplayName("보호 경로: 토큰 없음 → 401 UNAUTHORIZED (EntryPoint)")
+	@DisplayName("보호 경로: 토큰 없음 → 401 UNAUTHORIZED")
 	void protected_without_token_should_401() throws Exception {
 		stubResolveNoToken();
-		mockMvc.perform(get("/secure/user"))
+
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
 	}
@@ -86,40 +88,53 @@ class SecurityExceptionHandlingWebTest {
 		String token = "expired";
 		stubResolveToken(token);
 		doThrow(new CredentialsExpiredException(EXPIRED_TOKEN.getMessage()))
-				.when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
-	@DisplayName("Malformed → 401 MALFORMED_TOKEN")
+	@DisplayName("블랙리스트된 토큰 → 401 INVALID_TOKEN")
+	void blacklisted_token_should_401() throws Exception {
+		String token = "blacklisted";
+		stubResolveToken(token);
+		doThrow(new InvalidTokenException(INVALID_TOKEN))
+				.when(authService).validateToken(token);
+
+		mockMvc.perform(get("/api/secure/user"))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
+	}
+
+	@Test
+	@DisplayName("Malformed JWT → 401 MALFORMED_TOKEN")
 	void malformed_token_should_401() throws Exception {
 		String token = "malformed";
 		stubResolveToken(token);
 		doThrow(new BadCredentialsException(MALFORMED_TOKEN.getMessage(),
 				new io.jsonwebtoken.MalformedJwtException("bad")))
-				.when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
-	@DisplayName("Unsupported → 401 UNSUPPORTED_TOKEN")
+	@DisplayName("Unsupported JWT → 401 UNSUPPORTED_TOKEN")
 	void unsupported_token_should_401() throws Exception {
 		String token = "unsupported";
 		stubResolveToken(token);
 		doThrow(new BadCredentialsException(UNSUPPORTED_TOKEN.getMessage(),
 				new UnsupportedJwtException("unsupported")))
-            .when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
@@ -132,9 +147,9 @@ class SecurityExceptionHandlingWebTest {
 		stubResolveToken(token);
 		doThrow(new BadCredentialsException(INVALID_SIGNATURE.getMessage(),
 				new SecurityException("sig invalid")))
-				.when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
@@ -146,9 +161,9 @@ class SecurityExceptionHandlingWebTest {
 		String token = "invalid";
 		stubResolveToken(token);
 		doThrow(new BadCredentialsException(INVALID_TOKEN.getMessage()))
-				.when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
@@ -160,34 +175,24 @@ class SecurityExceptionHandlingWebTest {
 		String token = "alg-mismatch";
 		stubResolveToken(token);
 		doThrow(new UnsupportedAlgorithmAuthenticationException(UNSUPPORTED_ALGORITHM.getMessage()))
-				.when(jwtValidator).validate(token);
+				.when(authService).validateToken(token);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
 	}
 
 	@Test
-	@DisplayName("필터 처리 중 예기치 못한 예외 → 401 UNAUTHORIZED")
-	void unexpected_exception_should_401_unauthorized() throws Exception {
-		String token = "boom";
+	@DisplayName("Principal 생성 실패 → 401")
+	void principal_creation_failed_should_401() throws Exception {
+		String token = "principal-fail";
 		stubResolveToken(token);
-		doThrow(new RuntimeException("boom")).when(jwtValidator).validate(token);
+		doNothing().when(authService).validateToken(token);
+		when(authFactory.createPrincipal(token))
+				.thenThrow(new RuntimeException("Principal creation failed"));
 
-		mockMvc.perform(get("/secure/user"))
-				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
-				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
-	}
-
-	@Test
-	@DisplayName("Authorization: Basic ... → 토큰 미존재와 동일하게 401")
-	void non_bearer_scheme_should_401() throws Exception {
-		// JwtTokenResolver는 Bearer만 추출 → 여기서는 토큰 미검출로 처리
-		when(tokenResolver.resolve(any(HttpServletRequest.class))).thenReturn(null);
-
-		mockMvc.perform(get("/secure/user").header("Authorization", "Basic abcdef"))
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
@@ -198,12 +203,39 @@ class SecurityExceptionHandlingWebTest {
 	void authentication_factory_returns_null_should_401() throws Exception {
 		String token = "ok-but-null-auth";
 		stubResolveToken(token);
-		doNothing().when(jwtValidator).validate(token);
+		doNothing().when(authService).validateToken(token);
 		when(authFactory.createPrincipal(token))
-				.thenReturn(new com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal(123L, null, null, Role.USER));
-		when(authFactory.createAuthentication(any())).thenReturn(null); // 핵심
+				.thenReturn(CustomPrincipal.builder()
+						            .userId(123L)
+						            .role(Role.USER)
+						            .build());
+		when(authFactory.createAuthentication(any())).thenReturn(null);
 
-		mockMvc.perform(get("/secure/user"))
+		mockMvc.perform(get("/api/secure/user"))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
+	}
+
+	@Test
+	@DisplayName("Authorization: Basic ... → 토큰 미존재와 동일하게 401")
+	void non_bearer_scheme_should_401() throws Exception {
+		when(tokenResolver.resolve(any(HttpServletRequest.class))).thenReturn(null);
+
+		mockMvc.perform(get("/api/secure/user").header("Authorization", "Basic abcdef"))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
+				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
+	}
+
+	@Test
+	@DisplayName("필터 처리 중 예기치 못한 예외 → 401 UNAUTHORIZED")
+	void unexpected_exception_should_401_unauthorized() throws Exception {
+		String token = "boom";
+		stubResolveToken(token);
+		doThrow(new RuntimeException("boom")).when(authService).validateToken(token);
+
+		mockMvc.perform(get("/api/secure/user"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.error.code").value(UNAUTHORIZED.getCode()))
 				.andExpect(jsonPath("$.error.message").value(UNAUTHORIZED.getMessage()));
@@ -211,7 +243,7 @@ class SecurityExceptionHandlingWebTest {
 
 	// ---------- tests: FORBIDDEN(403) ----------
 	@Test
-	@DisplayName("인증은 됐지만 권한 부족 → 403 FORBIDDEN (AccessDeniedHandler)")
+	@DisplayName("인증은 됐지만 권한 부족 → 403 FORBIDDEN")
 	void authenticated_but_forbidden_should_403() throws Exception {
 		String token = "ok";
 		var auth = org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
@@ -219,7 +251,7 @@ class SecurityExceptionHandlingWebTest {
 		);
 		mockAuthenticatedUser(token, auth);
 
-		mockMvc.perform(get("/secure/admin"))
+		mockMvc.perform(get("/api/secure/admin"))
 				.andExpect(status().isForbidden())
 				.andExpect(content().contentTypeCompatibleWith("application/json"))
 				.andExpect(jsonPath("$.error.code").value(FORBIDDEN.getCode()))
@@ -228,7 +260,21 @@ class SecurityExceptionHandlingWebTest {
 
 	// ---------- tests: OK(200) ----------
 	@Test
-	@DisplayName("ROLE_ADMIN 보유 시 /secure/admin → 200")
+	@DisplayName("ROLE_USER 권한으로 /api/secure/user → 200")
+	void user_with_user_role_should_200() throws Exception {
+		String token = "user-ok";
+		var auth = org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
+				"user-123", null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+		);
+		mockAuthenticatedUser(token, auth);
+
+		mockMvc.perform(get("/api/secure/user"))
+				.andExpect(status().isOk())
+				.andExpect(content().string("user ok"));
+	}
+
+	@Test
+	@DisplayName("ROLE_ADMIN 권한으로 /api/secure/admin → 200")
 	void admin_with_admin_role_should_200() throws Exception {
 		String token = "admin-ok";
 		var auth = org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
@@ -236,7 +282,7 @@ class SecurityExceptionHandlingWebTest {
 		);
 		mockAuthenticatedUser(token, auth);
 
-		mockMvc.perform(get("/secure/admin"))
+		mockMvc.perform(get("/api/secure/admin"))
 				.andExpect(status().isOk())
 				.andExpect(content().string("admin ok"));
 	}
@@ -244,12 +290,33 @@ class SecurityExceptionHandlingWebTest {
 	@Test
 	@DisplayName("permitAll 경로(/actuator/health): 토큰 없이 200")
 	void permit_all_endpoint_should_200_without_token() throws Exception {
-		// 토큰 아예 안 줌(또는 아래처럼 명시적으로 null 스텁)
 		stubResolveNoToken();
 
 		mockMvc.perform(get("/actuator/health"))
 				.andExpect(status().isOk())
 				.andExpect(content().string("ok"));
+	}
+
+	@Test
+	@DisplayName("GUEST 역할도 USER 엔드포인트 접근 가능")
+	void guest_can_access_user_endpoint() throws Exception {
+		String token = "guest-ok";
+		var auth = org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
+				"guest-123", null, List.of(new SimpleGrantedAuthority("ROLE_GUEST"))
+		);
+
+		stubResolveToken(token);
+		doNothing().when(authService).validateToken(token);
+		when(authFactory.createPrincipal(token))
+				.thenReturn(CustomPrincipal.builder()
+						            .userId(123L)
+						            .role(Role.GUEST)
+						            .build());
+		when(authFactory.createAuthentication(any())).thenReturn(auth);
+
+		mockMvc.perform(get("/api/secure/user"))
+				.andExpect(status().isOk())
+				.andExpect(content().string("user ok"));
 	}
 
 	// ========= 테스트 전용 빈들 =========
@@ -262,16 +329,16 @@ class SecurityExceptionHandlingWebTest {
 	}
 
 	@Configuration
-	@EnableMethodSecurity() // @PreAuthorize 활성화
+	@EnableMethodSecurity
 	static class MethodSecurityTestConfig {}
 
 	@Configuration
 	static class SecurityTestStubs {
-		// oauth2Login 의존 스텁
 		@Bean
 		org.springframework.security.oauth2.client.registration.ClientRegistrationRepository clientRegistrationRepository() {
 			return id -> null;
 		}
+
 		@Bean
 		org.springframework.security.oauth2.client.OAuth2AuthorizedClientService authorizedClientService(
 				org.springframework.security.oauth2.client.registration.ClientRegistrationRepository repo) {
@@ -279,20 +346,22 @@ class SecurityExceptionHandlingWebTest {
 		}
 	}
 
-	// ====== 테스트 전용 컨트롤러 ======
 	@RestController
 	public static class TestSecurityController {
-		// 보호 엔드포인트
-		@GetMapping("/secure/user")
-		public ResponseEntity<String> user() { return ResponseEntity.ok("user ok"); }
+		@GetMapping("/api/secure/user")
+		public ResponseEntity<String> user() {
+			return ResponseEntity.ok("user ok");
+		}
 
-		// ROLE_ADMIN 필요
 		@org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-		@GetMapping("/secure/admin")
-		public ResponseEntity<String> admin() { return ResponseEntity.ok("admin ok"); }
+		@GetMapping("/api/secure/admin")
+		public ResponseEntity<String> admin() {
+			return ResponseEntity.ok("admin ok");
+		}
 
-		// SecurityConfig 에서 permitAll로 열어둔 경로 중 하나
 		@GetMapping("/actuator/health")
-		public ResponseEntity<String> health() { return ResponseEntity.ok("ok"); }
+		public ResponseEntity<String> health() {
+			return ResponseEntity.ok("ok");
+		}
 	}
 }

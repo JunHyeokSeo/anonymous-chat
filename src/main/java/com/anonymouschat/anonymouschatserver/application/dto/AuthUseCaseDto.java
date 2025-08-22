@@ -5,11 +5,14 @@ import jakarta.annotation.Nullable;
 import lombok.Builder;
 
 public class AuthUseCaseDto {
+
 	@Builder
 	public record AuthResult(
 			String accessToken,
 			@Nullable String refreshToken,
-			boolean isGuestUser
+			boolean isGuestUser,
+			@Nullable Long userId,
+			@Nullable String userNickname
 	) {}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,5 +20,14 @@ public class AuthUseCaseDto {
 	public record AuthTokens(
 			String accessToken,
 			@Nullable String refreshToken
+	) {}
+
+	@Builder
+	public record OAuthTempData(
+			String accessToken,
+			String refreshToken,
+			boolean isGuestUser,
+			Long userId,
+			String userNickname
 	) {}
 }

@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.usecase;
 
+import com.anonymouschat.anonymouschatserver.application.dto.AuthServiceDto;
 import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +38,6 @@ class AuthUseCaseTest {
 	@Mock
 	UserService userService;
 
-
 	@Nested
 	@DisplayName("login()")
 	class Login {
@@ -48,9 +49,9 @@ class AuthUseCaseTest {
 
 			when(userService.findByProviderAndProviderId(OAuthProvider.KAKAO, "abc123"))
 					.thenReturn(Optional.of(existingUser));
-			when(authService.generateAccessToken(OAuthProvider.KAKAO, "abc123"))
+			when(authService.createAccessToken(OAuthProvider.KAKAO, "abc123"))
 					.thenReturn("access-token");
-			when(authService.generateRefreshToken(1L, Role.USER))
+			when(authService.createRefreshToken(1L, Role.USER))
 					.thenReturn("refresh-token");
 
 			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
@@ -58,8 +59,8 @@ class AuthUseCaseTest {
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
 			assertThat(result.isGuestUser()).isFalse();
-
-			verify(authService).saveRefreshToken(1L, "refresh-token");
+			assertThat(result.userId()).isEqualTo(1L);
+			assertThat(result.userNickname()).isEqualTo(existingUser.getNickname());
 		}
 
 		@Test
@@ -71,7 +72,7 @@ class AuthUseCaseTest {
 					.thenReturn(Optional.empty());
 			when(userService.createGuestUser(OAuthProvider.KAKAO, "new-user"))
 					.thenReturn(guestUser);
-			when(authService.generateAccessToken(OAuthProvider.KAKAO, "new-user"))
+			when(authService.createAccessToken(OAuthProvider.KAKAO, "new-user"))
 					.thenReturn("access-token");
 
 			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
@@ -79,8 +80,10 @@ class AuthUseCaseTest {
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isNull();
 			assertThat(result.isGuestUser()).isTrue();
+			assertThat(result.userId()).isEqualTo(guestUser.getId());
+			assertThat(result.userNickname()).isEqualTo(guestUser.getNickname());
 
-			verify(authService, never()).generateRefreshToken(any(), any());
+			verify(authService, never()).createRefreshToken(any(), any());
 		}
 	}
 
@@ -95,19 +98,28 @@ class AuthUseCaseTest {
 			Long userId = 99L;
 			User user = TestUtils.createUser(userId);
 
-			when(authService.getUserIdFromToken(oldToken)).thenReturn(userId);
-			when(authService.findRefreshTokenOrThrow(userId)).thenReturn(oldToken);
+			AuthServiceDto.RefreshTokenInfo tokenInfo = AuthServiceDto.RefreshTokenInfo.builder()
+					                                            .token(oldToken)
+					                                            .userId(userId)
+					                                            .issuedAt(LocalDateTime.now())
+					                                            .expiresAt(LocalDateTime.now().plusDays(7))
+					                                            .userAgent("test-agent")
+					                                            .ipAddress("127.0.0.1")
+					                                            .build();
+
+			when(authService.extractUserId(oldToken)).thenReturn(userId);
+			when(authService.getRefreshTokenInfo(userId)).thenReturn(tokenInfo);
 			when(userService.findUser(userId)).thenReturn(user);
-			when(authService.generateAccessToken(userId, Role.USER)).thenReturn("new-access");
-			when(authService.generateRefreshToken(userId, Role.USER)).thenReturn("new-refresh");
+			when(authService.createAccessToken(userId, Role.USER)).thenReturn("new-access");
+			when(authService.createRefreshToken(userId, Role.USER)).thenReturn("new-refresh");
 
 			AuthUseCaseDto.AuthTokens tokens = authUseCase.refresh(oldToken);
 
 			assertThat(tokens.accessToken()).isEqualTo("new-access");
 			assertThat(tokens.refreshToken()).isEqualTo("new-refresh");
 
-			verify(authService).revokeRefreshToken(userId);
-			verify(authService).saveRefreshToken(userId, "new-refresh");
+			verify(authService).validateToken(oldToken);
+			verify(authService).invalidateRefreshToken(userId);
 		}
 
 		@Test
@@ -116,14 +128,23 @@ class AuthUseCaseTest {
 			String oldToken = "fake-token";
 			Long userId = 50L;
 
-			when(authService.getUserIdFromToken(oldToken)).thenReturn(userId);
-			when(authService.findRefreshTokenOrThrow(userId)).thenReturn("stored-different-token");
+			AuthServiceDto.RefreshTokenInfo tokenInfo = AuthServiceDto.RefreshTokenInfo.builder()
+					                                            .token("stored-different-token")
+					                                            .userId(userId)
+					                                            .issuedAt(LocalDateTime.now())
+					                                            .expiresAt(LocalDateTime.now().plusDays(7))
+					                                            .userAgent("test-agent")
+					                                            .ipAddress("127.0.0.1")
+					                                            .build();
+
+			when(authService.extractUserId(oldToken)).thenReturn(userId);
+			when(authService.getRefreshTokenInfo(userId)).thenReturn(tokenInfo);
 
 			assertThatThrownBy(() -> authUseCase.refresh(oldToken))
 					.isInstanceOf(InvalidTokenException.class)
 					.hasMessage(ErrorCode.TOKEN_THEFT_DETECTED.getMessage());
 
-			verify(authService).revokeRefreshToken(userId);
+			verify(authService).revokeAllUserTokens(userId);
 		}
 
 		@Test
@@ -141,12 +162,104 @@ class AuthUseCaseTest {
 	@Nested
 	@DisplayName("logout()")
 	class Logout {
-		@Test
-		@DisplayName("refresh 토큰 정상 삭제")
-		void logout() {
-			authUseCase.logout(1L);
 
-			verify(authService).revokeRefreshToken(1L);
+		@Test
+		@DisplayName("refresh 토큰 및 access 토큰 무효화 처리")
+		void logout() {
+			Long userId = 1L;
+			String accessToken = "access-token";
+
+			authUseCase.logout(userId, accessToken);
+
+			verify(authService).invalidateRefreshToken(userId);
+			verify(authService).blacklistAccessToken(accessToken);
+		}
+	}
+
+	@Nested
+	@DisplayName("storeOAuthTempData()")
+	class StoreOAuthTempData {
+
+		@Test
+		@DisplayName("OAuth 임시 데이터 저장 성공")
+		void storeOAuthTempDataSuccess() {
+			AuthUseCaseDto.AuthResult authResult = AuthUseCaseDto.AuthResult.builder()
+					                                       .accessToken("access-token")
+					                                       .refreshToken("refresh-token")
+					                                       .isGuestUser(false)
+					                                       .userId(1L)
+					                                       .userNickname("testUser")
+					                                       .build();
+
+			when(authService.storeOAuthTempData(any(AuthUseCaseDto.OAuthTempData.class)))
+					.thenReturn("temp-code");
+
+			String result = authUseCase.storeOAuthTempData(authResult);
+
+			assertThat(result).isEqualTo("temp-code");
+			verify(authService).storeOAuthTempData(any(AuthUseCaseDto.OAuthTempData.class));
+		}
+	}
+
+	@Nested
+	@DisplayName("consumeOAuthTempData()")
+	class ConsumeOAuthTempData {
+
+		@Test
+		@DisplayName("OAuth 임시 데이터 소비 성공")
+		void consumeOAuthTempDataSuccess() {
+			String tempCode = "temp-code";
+			AuthUseCaseDto.OAuthTempData expectedData = AuthUseCaseDto.OAuthTempData.builder()
+					                                            .accessToken("access-token")
+					                                            .refreshToken("refresh-token")
+					                                            .isGuestUser(false)
+					                                            .userId(1L)
+					                                            .userNickname("testUser")
+					                                            .build();
+
+			when(authService.consumeOAuthTempData(tempCode)).thenReturn(expectedData);
+
+			AuthUseCaseDto.OAuthTempData result = authUseCase.consumeOAuthTempData(tempCode);
+
+			assertThat(result).isEqualTo(expectedData);
+			verify(authService).consumeOAuthTempData(tempCode);
+		}
+	}
+
+	@Nested
+	@DisplayName("saveRefreshToken()")
+	class SaveRefreshToken {
+
+		@Test
+		@DisplayName("리프레시 토큰 저장 성공")
+		void saveRefreshTokenSuccess() {
+			Long userId = 1L;
+			String refreshToken = "refresh-token";
+			String userAgent = "test-agent";
+			String ipAddress = "127.0.0.1";
+
+			authUseCase.saveRefreshToken(userId, refreshToken, userAgent, ipAddress);
+
+			verify(authService).saveRefreshToken(userId, refreshToken, userAgent, ipAddress);
+		}
+	}
+
+	@Nested
+	@DisplayName("getUserIdFromToken()")
+	class GetUserIdFromToken {
+
+		@Test
+		@DisplayName("토큰에서 userId 추출 성공")
+		void getUserIdFromTokenSuccess() {
+			String token = "test-token";
+			Long expectedUserId = 1L;
+
+			when(authService.extractUserId(token)).thenReturn(expectedUserId);
+
+			Long result = authUseCase.getUserIdFromToken(token);
+
+			assertThat(result).isEqualTo(expectedUserId);
+			verify(authService).extractUserId(token);
 		}
 	}
 }

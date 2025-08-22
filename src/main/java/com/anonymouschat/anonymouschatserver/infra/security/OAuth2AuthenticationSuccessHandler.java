@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.infra.security;
 
 import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
+import com.anonymouschat.anonymouschatserver.application.port.TokenStoragePort;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
@@ -22,6 +23,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 	private final AuthUseCase authUseCase;
 	private final OAuth2ProviderResolver oAuth2ProviderResolver;
+	private final TokenStoragePort tokenStoragePort;
 
 	@Override
 	public void onAuthenticationSuccess(
@@ -30,20 +32,38 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 			Authentication authentication
 	) throws IOException {
 
-		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-		log.debug("{}OAuth2User 속성 추출 - attributes={}",
-				LogTag.SECURITY_AUTHENTICATION, oAuth2User.getAttributes());
+		try {
+			OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+			OAuthProvider provider = oAuth2ProviderResolver.resolve(authentication);
+			String providerId = provider.extractProviderId(oAuth2User.getAttributes());
 
-		OAuthProvider provider = oAuth2ProviderResolver.resolve(authentication);
-		String providerId = provider.extractProviderId(oAuth2User.getAttributes());
+			log.info("{}OAuth2 로그인 성공 - provider: {}, providerId: {}",
+					LogTag.SECURITY_AUTHENTICATION, provider, providerId);
 
-		log.info("{}OAuth2 로그인 성공 - provider={}, providerId={}", LogTag.SECURITY_AUTHENTICATION, provider, providerId);
+			AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
 
-		AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
+			if (!tokenStoragePort.isAvailable()) {
+				log.error("토큰 저장소 사용 불가 - fallback 처리");
+				handleFallback(response, authResult);
+				return;
+			}
 
-		String redirectUrl = authResult.isGuestUser() ? "/view/register" : "/view/users";
+			String tempCode = authUseCase.storeOAuthTempData(authResult);
+			response.sendRedirect("/auth/callback?code=" + tempCode);
 
+		} catch (Exception e) {
+			log.error("{}OAuth2 인증 처리 실패", LogTag.SECURITY_AUTHENTICATION, e);
+			response.sendRedirect("/login?error=processing_failed");
+		}
+	}
+
+	private void handleFallback(HttpServletResponse response, AuthUseCaseDto.AuthResult authResult)
+			throws IOException {
+		String redirectUrl = authResult.isGuestUser() ? "/register" : "/";
 		redirectUrl += "#accessToken=" + authResult.accessToken();
+		if (authResult.refreshToken() != null) {
+			redirectUrl += "&refreshToken=" + authResult.refreshToken();
+		}
 		response.sendRedirect(redirectUrl);
 	}
 }

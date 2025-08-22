@@ -5,7 +5,6 @@ import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
-import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
@@ -14,59 +13,54 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthUseCase {
 
-    private final AuthService authService;
-    private final UserService userService;
+	private final AuthService authService;
+	private final UserService userService;
 
-    @Transactional
-    public AuthUseCaseDto.AuthResult login(OAuthProvider provider, String providerId) {
-	    AtomicBoolean isGuestUser = new AtomicBoolean(false);
+	@Transactional
+	public AuthUseCaseDto.AuthResult login(OAuthProvider provider, String providerId) {
+		User user = userService.findByProviderAndProviderId(provider, providerId)
+				            .orElseGet(() -> userService.createGuestUser(provider, providerId));
 
-	    User user = userService.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> userService.createGuestUser(provider, providerId));
+		String accessToken = authService.createAccessToken(provider, providerId);
+		String refreshToken = null;
+		boolean isGuestUser = user.getRole() == Role.GUEST;
 
-        String accessToken = authService.generateAccessToken(provider, providerId);
-        String refreshToken = null;
+		if (!isGuestUser) {
+			refreshToken = authService.createRefreshToken(user.getId(), user.getRole());
+		}
 
-	    if (user.getRole() != Role.GUEST) {
-		    refreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
-		    authService.saveRefreshToken(user.getId(), refreshToken);
-	    } else {
-			isGuestUser.set(true);
-	    }
-
-	    return AuthUseCaseDto.AuthResult.builder()
-			           .accessToken(accessToken)
-			           .refreshToken(refreshToken)
-			           .isGuestUser(isGuestUser.get())
-			           .build();
-    }
+		return AuthUseCaseDto.AuthResult.builder()
+				       .accessToken(accessToken)
+				       .refreshToken(refreshToken)
+				       .isGuestUser(isGuestUser)
+				       .userId(user.getId())
+				       .userNickname(user.getNickname())
+				       .build();
+	}
 
 	@Transactional
 	public AuthUseCaseDto.AuthTokens refresh(String oldRefreshToken) {
 		authService.validateToken(oldRefreshToken);
+		Long userId = authService.extractUserId(oldRefreshToken);
 
-		Long userId = authService.getUserIdFromToken(oldRefreshToken);
-		String storedRefreshToken = authService.findRefreshTokenOrThrow(userId);
+		var storedTokenInfo = authService.getRefreshTokenInfo(userId);
 
-		if (!storedRefreshToken.equals(oldRefreshToken)) {
-			log.warn("{}다른 기기에서의 RefreshToken 사용 감지 - userId = {}, token = {}", LogTag.SECURITY, userId, oldRefreshToken);
-			authService.revokeRefreshToken(userId);
+		if (!storedTokenInfo.token().equals(oldRefreshToken)) {
+			log.warn("토큰 탈취 감지 - userId: {}", userId);
+			authService.revokeAllUserTokens(userId);
 			throw new InvalidTokenException(ErrorCode.TOKEN_THEFT_DETECTED);
 		}
 
-		authService.revokeRefreshToken(userId);
+		authService.invalidateRefreshToken(userId);
 
 		User user = userService.findUser(userId);
-		String newAccessToken = authService.generateAccessToken(user.getId(), user.getRole());
-		String newRefreshToken = authService.generateRefreshToken(user.getId(), user.getRole());
-		authService.saveRefreshToken(user.getId(), newRefreshToken);
+		String newAccessToken = authService.createAccessToken(user.getId(), user.getRole());
+		String newRefreshToken = authService.createRefreshToken(user.getId(), user.getRole());
 
 		return AuthUseCaseDto.AuthTokens.builder()
 				       .accessToken(newAccessToken)
@@ -74,10 +68,33 @@ public class AuthUseCase {
 				       .build();
 	}
 
-
 	@Transactional
-    public void logout(Long userId) {
-        log.info("{}로그아웃 요청 - userId={}", LogTag.AUTH, userId);
-        authService.revokeRefreshToken(userId);
-    }
+	public void logout(Long userId, String accessToken) {
+		authService.invalidateRefreshToken(userId);
+		authService.blacklistAccessToken(accessToken);
+	}
+
+	public String storeOAuthTempData(AuthUseCaseDto.AuthResult authResult) {
+		AuthUseCaseDto.OAuthTempData tempData = AuthUseCaseDto.OAuthTempData.builder()
+				                                        .accessToken(authResult.accessToken())
+				                                        .refreshToken(authResult.refreshToken())
+				                                        .isGuestUser(authResult.isGuestUser())
+				                                        .userId(authResult.userId())
+				                                        .userNickname(authResult.userNickname())
+				                                        .build();
+
+		return authService.storeOAuthTempData(tempData);
+	}
+
+	public AuthUseCaseDto.OAuthTempData consumeOAuthTempData(String code) {
+		return authService.consumeOAuthTempData(code);
+	}
+
+	public void saveRefreshToken(Long userId, String refreshToken, String userAgent, String ipAddress) {
+		authService.saveRefreshToken(userId, refreshToken, userAgent, ipAddress);
+	}
+
+	public Long getUserIdFromToken(String token) {
+		return authService.extractUserId(token);
+	}
 }

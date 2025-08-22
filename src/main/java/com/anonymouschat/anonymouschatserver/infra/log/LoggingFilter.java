@@ -46,7 +46,7 @@ public class LoggingFilter extends OncePerRequestFilter {
 			filterChain.doFilter(cachingRequest, cachingResponse);
 		} finally {
 			logRequest(cachingRequest);
-			logResponse(cachingResponse);
+//			logResponse(cachingResponse);
 			cachingResponse.copyBodyToResponse();
 		}
 	}
