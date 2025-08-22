@@ -53,7 +53,7 @@ public class SecurityConfig {
 								                               "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico",
 								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
 								                               "/actuator/health",
-								                               "/login", "/register", "/", "/chat/", "/profile"
+								                               "/login", "/register", "/", "/chat/", "/profile", "/auth/callback"
 						                               ).permitAll()
 						                               .requestMatchers("/api/**").authenticated() // API만 인증
 						                               .anyRequest().denyAll()
