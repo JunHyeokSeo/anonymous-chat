@@ -7,7 +7,7 @@ import lombok.Builder;
 public class AuthUseCaseDto {
 
 	@Builder
-	public record AuthResult(
+	public record AuthData(
 			String accessToken,
 			@Nullable String refreshToken,
 			boolean isGuestUser,
@@ -22,7 +22,7 @@ public class AuthUseCaseDto {
 	) {}
 
 	@Builder
-	public record OAuthTempData(
+	public record AuthTempData(
 			String accessToken,
 			String refreshToken,
 			boolean isGuestUser,

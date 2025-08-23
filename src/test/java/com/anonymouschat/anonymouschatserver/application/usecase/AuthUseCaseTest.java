@@ -54,7 +54,7 @@ class AuthUseCaseTest {
 			when(authService.createRefreshToken(1L, Role.USER))
 					.thenReturn("refresh-token");
 
-			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
+			AuthUseCaseDto.AuthData result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
@@ -75,7 +75,7 @@ class AuthUseCaseTest {
 			when(authService.createAccessToken(OAuthProvider.KAKAO, "new-user"))
 					.thenReturn("access-token");
 
-			AuthUseCaseDto.AuthResult result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
+			AuthUseCaseDto.AuthData result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isNull();
@@ -222,7 +222,7 @@ class AuthUseCaseTest {
 		@Test
 		@DisplayName("OAuth 임시 데이터 저장 성공")
 		void storeOAuthTempDataSuccess() {
-			AuthUseCaseDto.AuthResult authResult = AuthUseCaseDto.AuthResult.builder()
+			AuthUseCaseDto.AuthData authResult = AuthUseCaseDto.AuthData.builder()
 					                                       .accessToken("access-token")
 					                                       .refreshToken("refresh-token")
 					                                       .isGuestUser(false)
@@ -230,13 +230,13 @@ class AuthUseCaseTest {
 					                                       .userNickname("testUser")
 					                                       .build();
 
-			when(authService.storeOAuthTempData(any(AuthUseCaseDto.OAuthTempData.class)))
+			when(authService.storeOAuthTempData(any(AuthUseCaseDto.AuthTempData.class)))
 					.thenReturn("temp-code");
 
 			String result = authUseCase.storeOAuthTempData(authResult);
 
 			assertThat(result).isEqualTo("temp-code");
-			verify(authService).storeOAuthTempData(any(AuthUseCaseDto.OAuthTempData.class));
+			verify(authService).storeOAuthTempData(any(AuthUseCaseDto.AuthTempData.class));
 		}
 	}
 
@@ -248,7 +248,7 @@ class AuthUseCaseTest {
 		@DisplayName("OAuth 임시 데이터 소비 성공")
 		void consumeOAuthTempDataSuccess() {
 			String tempCode = "temp-code";
-			AuthUseCaseDto.OAuthTempData expectedData = AuthUseCaseDto.OAuthTempData.builder()
+			AuthUseCaseDto.AuthTempData expectedData = AuthUseCaseDto.AuthTempData.builder()
 					                                            .accessToken("access-token")
 					                                            .refreshToken("refresh-token")
 					                                            .isGuestUser(false)
@@ -258,7 +258,7 @@ class AuthUseCaseTest {
 
 			when(authService.consumeOAuthTempData(tempCode)).thenReturn(expectedData);
 
-			AuthUseCaseDto.OAuthTempData result = authUseCase.consumeOAuthTempData(tempCode);
+			AuthUseCaseDto.AuthTempData result = authUseCase.consumeOAuthTempData(tempCode);
 
 			assertThat(result).isEqualTo(expectedData);
 			verify(authService).consumeOAuthTempData(tempCode);

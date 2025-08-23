@@ -80,7 +80,7 @@ public class UserController {
 				images
 		);
 
-		AuthUseCaseDto.AuthResult authResult = authUseCase.login(principal.provider(), principal.providerId());
+		AuthUseCaseDto.AuthData authResult = authUseCase.login(principal.provider(), principal.providerId());
 
 		tokenCookieManager.clearRefreshToken(response);
 		tokenCookieManager.writeRefreshToken(response, authResult.refreshToken());

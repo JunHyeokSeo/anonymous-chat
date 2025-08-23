@@ -38,15 +38,15 @@ public class TokenStorageDto {
 	}
 
 	@Builder
-	public record OAuthTempData(
+	public record AuthTempData(
 			String accessToken,
 			String refreshToken,
 			boolean isGuestUser,
 			Long userId,
 			String userNickname
 	) {
-		public static OAuthTempData from(AuthServiceDto.OAuthTempInfo info) {
-			return OAuthTempData.builder()
+		public static AuthTempData from(AuthServiceDto.OAuthTempInfo info) {
+			return AuthTempData.builder()
 					       .accessToken(info.accessToken())
 					       .refreshToken(info.refreshToken())
 					       .isGuestUser(info.isGuestUser())

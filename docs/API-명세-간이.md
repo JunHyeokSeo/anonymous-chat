@@ -103,7 +103,7 @@
 
 ### 🔹 채팅방 생성
 
-* **POST** `/api/v1/chatrooms`
+* **POST** `/api/v1/chat-rooms`
 * **요청 Body**
 
 ```json
@@ -124,7 +124,7 @@
 
 ### 🔹 채팅방 목록 조회
 
-* **GET** `/api/v1/chatrooms`
+* **GET** `/api/v1/chat-rooms`
 * **응답** `200 OK`
 
 ```json
@@ -144,7 +144,7 @@
 
 ### 🔹 채팅방 나가기
 
-* **PATCH** `/api/v1/chatrooms/{roomId}/exit`
+* **PATCH** `/api/v1/chat-rooms/{roomId}/exit`
 * **응답** `200 OK`
 
 ```json
@@ -160,7 +160,7 @@
 
 ### 🔹 메시지 전송
 
-* **POST** `/api/v1/chatrooms/{roomId}/messages`
+* **POST** `/api/v1/chat-rooms/{roomId}/messages`
 * **요청 Body**
 
 ```json
@@ -181,7 +181,7 @@
 
 ### 🔹 메시지 조회
 
-* **GET** `/api/v1/chatrooms/{roomId}/messages?page=0&size=20`
+* **GET** `/api/v1/chat-rooms/{roomId}/messages?page=0&size=20`
 * **응답** `200 OK`
 
 ```json

@@ -34,7 +34,7 @@ public class AuthServiceDto {
 			Long userId,
 			String userNickname
 	) {
-		public static OAuthTempInfo from(AuthUseCaseDto.OAuthTempData data) {
+		public static OAuthTempInfo from(AuthUseCaseDto.AuthTempData data) {
 			return OAuthTempInfo.builder()
 					       .accessToken(data.accessToken())
 					       .refreshToken(data.refreshToken())
@@ -44,8 +44,8 @@ public class AuthServiceDto {
 					       .build();
 		}
 
-		public AuthUseCaseDto.OAuthTempData toUseCaseDto() {
-			return AuthUseCaseDto.OAuthTempData.builder()
+		public AuthUseCaseDto.AuthTempData toUseCaseDto() {
+			return AuthUseCaseDto.AuthTempData.builder()
 					       .accessToken(accessToken)
 					       .refreshToken(refreshToken)
 					       .isGuestUser(isGuestUser)

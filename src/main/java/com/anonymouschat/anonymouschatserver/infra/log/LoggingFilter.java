@@ -34,6 +34,29 @@ public class LoggingFilter extends OncePerRequestFilter {
 	);
 
 	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String uri = request.getRequestURI();
+
+		// PageController 뷰 경로
+		if (uri.equals("/login")
+				    || uri.equals("/register")
+				    || uri.equals("/")
+				    || uri.startsWith("/chat/")
+				    || uri.equals("/chats")
+				    || uri.equals("/profile")
+				    || uri.equals("/auth/callback")) {
+			return true;
+		}
+
+		// 정적 자원 (CSS, JS, 이미지, 파비콘 등)
+		return uri.endsWith(".html")
+				       || uri.startsWith("/css")
+				       || uri.startsWith("/js")
+				       || uri.startsWith("/images")
+				       || uri.startsWith("/favicon");
+	}
+
+	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request,
 	                                @NonNull HttpServletResponse response,
 	                                FilterChain filterChain)

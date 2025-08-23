@@ -20,7 +20,7 @@ public class AuthUseCase {
 	private final UserService userService;
 
 	@Transactional
-	public AuthUseCaseDto.AuthResult login(OAuthProvider provider, String providerId) {
+	public AuthUseCaseDto.AuthData login(OAuthProvider provider, String providerId) {
 		User user = userService.findByProviderAndProviderId(provider, providerId)
 				            .orElseGet(() -> userService.createGuestUser(provider, providerId));
 
@@ -32,7 +32,7 @@ public class AuthUseCase {
 			refreshToken = authService.createRefreshToken(user.getId(), user.getRole());
 		}
 
-		return AuthUseCaseDto.AuthResult.builder()
+		return AuthUseCaseDto.AuthData.builder()
 				       .accessToken(accessToken)
 				       .refreshToken(refreshToken)
 				       .isGuestUser(isGuestUser)
@@ -67,8 +67,8 @@ public class AuthUseCase {
 		authService.blacklistAccessToken(accessToken);
 	}
 
-	public String storeOAuthTempData(AuthUseCaseDto.AuthResult authResult) {
-		AuthUseCaseDto.OAuthTempData tempData = AuthUseCaseDto.OAuthTempData.builder()
+	public String storeOAuthTempData(AuthUseCaseDto.AuthData authResult) {
+		AuthUseCaseDto.AuthTempData tempData = AuthUseCaseDto.AuthTempData.builder()
 				                                        .accessToken(authResult.accessToken())
 				                                        .refreshToken(authResult.refreshToken())
 				                                        .isGuestUser(authResult.isGuestUser())
@@ -79,7 +79,7 @@ public class AuthUseCase {
 		return authService.storeOAuthTempData(tempData);
 	}
 
-	public AuthUseCaseDto.OAuthTempData consumeOAuthTempData(String code) {
+	public AuthUseCaseDto.AuthTempData consumeOAuthTempData(String code) {
 		return authService.consumeOAuthTempData(code);
 	}
 

@@ -40,7 +40,7 @@ public class RedisTokenStorageAdapter implements TokenStoragePort {
 	public String storeOAuthTempData(AuthServiceDto.OAuthTempInfo data) {
 		String tempCode = generateSecureCode();
 		String key = OAUTH_TEMP_PREFIX + tempCode;
-		TokenStorageDto.OAuthTempData storageData = TokenStorageDto.OAuthTempData.from(data);
+		TokenStorageDto.AuthTempData storageData = TokenStorageDto.AuthTempData.from(data);
 		store(key, storageData, 300);
 		return tempCode;
 	}
@@ -48,7 +48,7 @@ public class RedisTokenStorageAdapter implements TokenStoragePort {
 	@Override
 	public Optional<AuthServiceDto.OAuthTempInfo> consumeOAuthTempData(String tempCode) {
 		String key = OAUTH_TEMP_PREFIX + tempCode;
-		Optional<TokenStorageDto.OAuthTempData> data = get(key, TokenStorageDto.OAuthTempData.class);
+		Optional<TokenStorageDto.AuthTempData> data = get(key, TokenStorageDto.AuthTempData.class);
 
 		if (data.isPresent()) {
 			try {

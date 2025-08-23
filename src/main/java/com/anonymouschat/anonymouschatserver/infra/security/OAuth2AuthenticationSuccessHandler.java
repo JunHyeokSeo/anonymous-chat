@@ -40,7 +40,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 			log.info("{}OAuth2 로그인 성공 - provider: {}, providerId: {}",
 					LogTag.SECURITY_AUTHENTICATION, provider, providerId);
 
-			AuthUseCaseDto.AuthResult authResult = authUseCase.login(provider, providerId);
+			AuthUseCaseDto.AuthData authResult = authUseCase.login(provider, providerId);
 
 			if (!tokenStoragePort.isAvailable()) {
 				log.error("토큰 저장소 사용 불가 - fallback 처리");
@@ -57,7 +57,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		}
 	}
 
-	private void handleFallback(HttpServletResponse response, AuthUseCaseDto.AuthResult authResult)
+	private void handleFallback(HttpServletResponse response, AuthUseCaseDto.AuthData authResult)
 			throws IOException {
 		String redirectUrl = authResult.isGuestUser() ? "/register" : "/";
 		redirectUrl += "#accessToken=" + authResult.accessToken();

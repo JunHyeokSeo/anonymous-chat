@@ -74,12 +74,12 @@ public class AuthService {
 		tokenStorage.deleteAllUserTokens(userId);
 	}
 
-	public String storeOAuthTempData(AuthUseCaseDto.OAuthTempData data) {
+	public String storeOAuthTempData(AuthUseCaseDto.AuthTempData data) {
 		AuthServiceDto.OAuthTempInfo info = AuthServiceDto.OAuthTempInfo.from(data);
 		return tokenStorage.storeOAuthTempData(info);
 	}
 
-	public AuthUseCaseDto.OAuthTempData consumeOAuthTempData(String code) {
+	public AuthUseCaseDto.AuthTempData consumeOAuthTempData(String code) {
 		return tokenStorage.consumeOAuthTempData(code)
 				       .map(AuthServiceDto.OAuthTempInfo::toUseCaseDto)
 				       .orElseThrow(() -> new InvalidTokenException(ErrorCode.INVALID_TOKEN));

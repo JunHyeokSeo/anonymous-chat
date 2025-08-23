@@ -66,7 +66,7 @@ class RedisTokenStorageAdapterTest {
 					                                        .userNickname("testUser")
 					                                        .build();
 
-			TokenStorageDto.OAuthTempData storageData = TokenStorageDto.OAuthTempData.from(tempInfo);
+			TokenStorageDto.AuthTempData storageData = TokenStorageDto.AuthTempData.from(tempInfo);
 			String expectedJson = "{\"accessToken\":\"access-token\"}";
 
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -110,7 +110,7 @@ class RedisTokenStorageAdapterTest {
 			String key = "oauth_temp:" + tempCode;
 			String jsonData = "{\"accessToken\":\"access-token\"}";
 
-			TokenStorageDto.OAuthTempData storageData = TokenStorageDto.OAuthTempData.builder()
+			TokenStorageDto.AuthTempData storageData = TokenStorageDto.AuthTempData.builder()
 					                                            .accessToken("access-token")
 					                                            .refreshToken("refresh-token")
 					                                            .isGuestUser(false)
@@ -120,7 +120,7 @@ class RedisTokenStorageAdapterTest {
 
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 			when(valueOperations.get(key)).thenReturn(jsonData);
-			when(objectMapper.readValue(jsonData, TokenStorageDto.OAuthTempData.class)).thenReturn(storageData);
+			when(objectMapper.readValue(jsonData, TokenStorageDto.AuthTempData.class)).thenReturn(storageData);
 
 			// when
 			Optional<AuthServiceDto.OAuthTempInfo> result = redisTokenStorageAdapter.consumeOAuthTempData(tempCode);
@@ -159,7 +159,7 @@ class RedisTokenStorageAdapterTest {
 
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 			when(valueOperations.get(key)).thenReturn(invalidJson);
-			when(objectMapper.readValue(invalidJson, TokenStorageDto.OAuthTempData.class))
+			when(objectMapper.readValue(invalidJson, TokenStorageDto.AuthTempData.class))
 					.thenThrow(new JsonProcessingException("deserialization error") {});
 
 			// when & then

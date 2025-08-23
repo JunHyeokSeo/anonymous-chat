@@ -85,19 +85,12 @@ public class AuthCallbackController {
 		log.info("OAuth 콜백 처리 시작 - code: {}", code);
 
 		try {
-			AuthUseCaseDto.OAuthTempData tokenData = authUseCase.consumeOAuthTempData(code);
+			AuthUseCaseDto.AuthTempData oldTokens = authUseCase.consumeOAuthTempData(code);
+			AuthUseCaseDto.AuthTokens newTokens = authUseCase.refreshByUserId(oldTokens.userId(), httpRequestExtractor.extractUserAgent(request), httpRequestExtractor.extractClientIpAddress(request));
+			log.info("새로운 토큰 발급 완료 - accessToken: {}", newTokens.accessToken());
+			model.addAttribute("tokenData", newTokens);
 
-			if (tokenData.refreshToken() != null && tokenData.userId() != null) {
-				String userAgent = httpRequestExtractor.extractUserAgent(request);
-				String ipAddress = httpRequestExtractor.extractClientIpAddress(request);
-
-				authUseCase.saveRefreshToken(tokenData.userId(), tokenData.refreshToken(), userAgent, ipAddress);
-			}
-
-			model.addAttribute("tokenData", tokenData);
-
-			log.info("OAuth 콜백 처리 완료 - userId: {}, isGuest: {}",
-					tokenData.userId(), tokenData.isGuestUser());
+			log.info("OAuth 콜백 처리 완료 - userId: {}, isGuest: {}", oldTokens.userId(), oldTokens.isGuestUser());
 
 			return "auth-callback";
 
