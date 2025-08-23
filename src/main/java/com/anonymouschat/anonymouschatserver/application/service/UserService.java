@@ -39,13 +39,13 @@ public class UserService {
 	private final ImageValidator imageValidator;
 
 	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
-		log.info("{}회원 등록 시작 - provider={}, providerId={}", LogTag.USER, command.provider(), command.providerId());
+		log.info("{}회원 등록 시작 - userId={}", LogTag.USER, command.userId());
 
-		User user = userRepository.findByProviderAndProviderIdAndActiveTrue(command.provider(), command.providerId())
+		User user = userRepository.findById(command.userId())
 				            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND));
 
 		if (!user.isGuest()) {
-			log.warn("{}이미 등록된 유저 접근 차단 - providerId={}", LogTag.USER, command.providerId());
+			log.warn("{}이미 등록된 유저 접근 차단 - userId={}", LogTag.USER, command.userId());
 			throw new BadRequestException(ErrorCode.ALREADY_REGISTERED_USER);
 		}
 

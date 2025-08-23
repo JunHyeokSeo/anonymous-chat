@@ -1,7 +1,6 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.anonymouschatserver.presentation.controller.dto.UserDto;
 import lombok.Builder;
@@ -12,23 +11,21 @@ import java.util.List;
 public class UserUseCaseDto {
 	@Builder
 	public record RegisterRequest(
+			Long userId,
 			String nickname,
 			Gender gender,
 			int age,
 			Region region,
-			String bio,
-			OAuthProvider provider,
-			String providerId
+			String bio
 	) {
-		public static RegisterRequest from(UserDto.RegisterRequest request, OAuthProvider provider, String providerId) {
+		public static RegisterRequest from(UserDto.RegisterRequest request, Long userId) {
 			return RegisterRequest.builder()
+					       .userId(userId)
 					       .nickname(request.nickname())
 					       .gender(request.gender())
 					       .age(request.age())
 					       .region(request.region())
-					       .bio(request.bio())
-					       .provider(provider)
-					       .providerId(providerId)
+					       .bio(request.bio() == null ? "" : request.bio())
 					       .build();
 		}
 	}

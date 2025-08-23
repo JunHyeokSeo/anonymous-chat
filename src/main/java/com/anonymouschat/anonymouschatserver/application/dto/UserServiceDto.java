@@ -3,7 +3,6 @@ package com.anonymouschat.anonymouschatserver.application.dto;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
@@ -12,26 +11,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserServiceDto {
-
+	@Builder
 	public record RegisterCommand(
+			Long userId,
 			String nickname,
 			Gender gender,
 			int age,
 			Region region,
-			String bio,
-			OAuthProvider provider,
-			String providerId
+			String bio
 	) {
 		public static RegisterCommand from(UserUseCaseDto.RegisterRequest dto) {
-			return new RegisterCommand(
-					dto.nickname(),
-					dto.gender(),
-					dto.age(),
-					dto.region(),
-					dto.bio(),
-					dto.provider(),
-					dto.providerId()
-			);
+			return RegisterCommand.builder()
+					       .userId(dto.userId())
+					       .nickname(dto.nickname())
+					       .gender(dto.gender())
+					       .age(dto.age())
+					       .region(dto.region())
+					       .bio(dto.bio())
+					       .build();
 		}
 	}
 

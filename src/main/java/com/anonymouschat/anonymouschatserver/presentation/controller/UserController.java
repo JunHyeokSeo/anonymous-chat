@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -71,8 +73,10 @@ public class UserController {
 			@Valid @RequestPart("request") UserDto.RegisterRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
+		log.debug("principal.provider(): {}, principal.providerId(): {}", principal.provider(), principal.providerId());
+
 		userUseCase.register(
-				UserUseCaseDto.RegisterRequest.from(request, principal.provider(), principal.providerId()),
+				UserUseCaseDto.RegisterRequest.from(request, principal.userId()),
 				images
 		);
 

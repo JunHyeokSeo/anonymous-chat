@@ -12,13 +12,15 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserProfileImageRepository;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.file.FileStorage;
-import com.anonymouschat.anonymouschatserver.domain.type.Gender;
-import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.testsupport.util.TestUtils;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -56,15 +58,14 @@ class UserServiceTest {
 
 		@BeforeEach
 		void setUp() {
-			validCommand = new UserServiceDto.RegisterCommand(
-					"nickname",
-					Gender.MALE,
-					25,
-					Region.SEOUL,
-					"Hello!",
-					OAuthProvider.GOOGLE,
-					"google-id"
-			);
+			validCommand = UserServiceDto.RegisterCommand.builder()
+					               .userId(1L)
+					               .nickname("nickname")
+					               .gender(Gender.MALE)
+					               .age(25)
+					               .region(Region.SEOUL)
+					               .bio("Hello!")
+					               .build();
 
 			guestUser = TestUtils.guestUser();
 			ReflectionTestUtils.setField(guestUser, "id", 1L);
@@ -73,8 +74,7 @@ class UserServiceTest {
 		@Test
 		@DisplayName("이미지 없이 회원가입 성공")
 		void registerUserWithoutImages() throws IOException {
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(guestUser));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
 			Long id = userService.register(validCommand, List.of());
@@ -89,8 +89,7 @@ class UserServiceTest {
 		void registerUserWithImages() throws IOException {
 			MultipartFile image = mock(MultipartFile.class);
 
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(guestUser));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(fileStorage.upload(image)).thenReturn("https://image.com");
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
@@ -104,12 +103,11 @@ class UserServiceTest {
 		}
 
 		@Test
-		@DisplayName("OAuth 임시 유저가 아닌 경우 예외 발생")
+		@DisplayName("게스트 유저가 아닌 경우 예외 발생")
 		void register_nonGuestUser_throwsException() throws Exception {
 			User alreadyRegistered = TestUtils.createUser(3L);
 
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(alreadyRegistered));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(alreadyRegistered));
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of()))
 					.isInstanceOf(BadRequestException.class)
@@ -117,10 +115,9 @@ class UserServiceTest {
 		}
 
 		@Test
-		@DisplayName("OAuth 임시 유저가 존재하지 않으면 예외 발생")
+		@DisplayName("게스트 유저가 존재하지 않으면 예외 발생")
 		void register_guestUserNotFound_throwsException() {
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.empty());
+			when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of()))
 					.isInstanceOf(NotFoundException.class)
@@ -130,8 +127,7 @@ class UserServiceTest {
 		@Test
 		@DisplayName("닉네임 중복 시 예외 발생")
 		void register_duplicateNickname_throwsException() {
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(guestUser));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname("nickname")).thenReturn(true);
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of()))
@@ -143,10 +139,10 @@ class UserServiceTest {
 		@DisplayName("이미지 유효성 검사 실패 시 예외 발생")
 		void register_imageValidationFails_throwsException() {
 			MultipartFile image = mock(MultipartFile.class);
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(guestUser));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
-			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT)).when(imageValidator).validate(image);
+			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT))
+					.when(imageValidator).validate(image);
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of(image)))
 					.isInstanceOf(UnsupportedImageFormatException.class)
@@ -157,8 +153,7 @@ class UserServiceTest {
 		@DisplayName("파일 업로드 실패 시 예외 발생")
 		void register_imageUploadFails_throwsIOException() throws IOException {
 			MultipartFile image = mock(MultipartFile.class);
-			when(userRepository.findByProviderAndProviderIdAndActiveTrue(any(), any()))
-					.thenReturn(Optional.of(guestUser));
+			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 			doNothing().when(imageValidator).validate(image);
 			when(fileStorage.upload(image)).thenThrow(new IOException("upload fail"));
@@ -168,7 +163,6 @@ class UserServiceTest {
 					.hasMessage("upload fail");
 		}
 	}
-
 
 	@Nested
 	@DisplayName("프로필 조회")

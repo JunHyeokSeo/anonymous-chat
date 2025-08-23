@@ -10,6 +10,8 @@ import com.anonymouschat.anonymouschatserver.common.exception.BadRequestExceptio
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
+import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.testsupport.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,10 +55,14 @@ class UserUseCaseTest {
 		@DisplayName("정상적으로 회원가입에 성공한다")
 		void success() throws Exception {
 			// given
-			UserUseCaseDto.RegisterRequest request = new UserUseCaseDto.RegisterRequest(
-					"닉네임", TestUtils.createUser(1L).getGender(), 25,
-					TestUtils.createUser(1L).getRegion(), "소개", TestUtils.createUser(1L).getProvider(), "provider-1"
-			);
+			UserUseCaseDto.RegisterRequest request = UserUseCaseDto.RegisterRequest.builder()
+					                                         .userId(1L)
+					                                         .nickname("닉네임")
+					                                         .gender(Gender.MALE)
+					                                         .age(25)
+					                                         .region(Region.SEOUL)
+					                                         .bio("소개")
+					                                         .build();
 
 			given(userService.register(any(UserServiceDto.RegisterCommand.class), anyList())).willReturn(1L);
 
@@ -71,14 +77,18 @@ class UserUseCaseTest {
 		@Test
 		@DisplayName("게스트 유저를 찾을 수 없으면 예외 발생")
 		void guestNotFound() throws Exception {
-			// given
-			UserUseCaseDto.RegisterRequest request = new UserUseCaseDto.RegisterRequest(
-					"닉네임", TestUtils.createUser(1L).getGender(), 25,
-					TestUtils.createUser(1L).getRegion(), "소개", TestUtils.createUser(1L).getProvider(), "provider-1"
-			);
-			willThrow(new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND)).given(userService).register(any(), anyList());
+			UserUseCaseDto.RegisterRequest request = UserUseCaseDto.RegisterRequest.builder()
+					                                         .userId(1L)
+					                                         .nickname("닉네임")
+					                                         .gender(Gender.MALE)
+					                                         .age(25)
+					                                         .region(Region.SEOUL)
+					                                         .bio("소개")
+					                                         .build();
 
-			// when & then
+			willThrow(new NotFoundException(ErrorCode.USER_GUEST_NOT_FOUND))
+					.given(userService).register(any(), anyList());
+
 			assertThatThrownBy(() -> userUseCase.register(request, Collections.emptyList()))
 					.isInstanceOf(NotFoundException.class);
 		}
@@ -86,11 +96,17 @@ class UserUseCaseTest {
 		@Test
 		@DisplayName("닉네임이 중복되면 예외 발생")
 		void duplicateNickname() throws Exception {
-			UserUseCaseDto.RegisterRequest request = new UserUseCaseDto.RegisterRequest(
-					"중복닉네임", TestUtils.createUser(1L).getGender(), 25,
-					TestUtils.createUser(1L).getRegion(), "소개", TestUtils.createUser(1L).getProvider(), "provider-1"
-			);
-			willThrow(new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME)).given(userService).register(any(), anyList());
+			UserUseCaseDto.RegisterRequest request = UserUseCaseDto.RegisterRequest.builder()
+					                                         .userId(1L)
+					                                         .nickname("중복닉네임")
+					                                         .gender(Gender.MALE)
+					                                         .age(25)
+					                                         .region(Region.SEOUL)
+					                                         .bio("소개")
+					                                         .build();
+
+			willThrow(new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME))
+					.given(userService).register(any(), anyList());
 
 			assertThatThrownBy(() -> userUseCase.register(request, Collections.emptyList()))
 					.isInstanceOf(DuplicateNicknameException.class);
@@ -99,11 +115,17 @@ class UserUseCaseTest {
 		@Test
 		@DisplayName("이미 등록된 유저라면 예외 발생")
 		void alreadyRegistered() throws Exception {
-			UserUseCaseDto.RegisterRequest request = new UserUseCaseDto.RegisterRequest(
-					"닉네임", TestUtils.createUser(1L).getGender(), 25,
-					TestUtils.createUser(1L).getRegion(), "소개", TestUtils.createUser(1L).getProvider(), "provider-1"
-			);
-			willThrow(new BadRequestException(ErrorCode.ALREADY_REGISTERED_USER)).given(userService).register(any(), anyList());
+			UserUseCaseDto.RegisterRequest request = UserUseCaseDto.RegisterRequest.builder()
+					                                         .userId(1L)
+					                                         .nickname("닉네임")
+					                                         .gender(Gender.MALE)
+					                                         .age(25)
+					                                         .region(Region.SEOUL)
+					                                         .bio("소개")
+					                                         .build();
+
+			willThrow(new BadRequestException(ErrorCode.ALREADY_REGISTERED_USER))
+					.given(userService).register(any(), anyList());
 
 			assertThatThrownBy(() -> userUseCase.register(request, Collections.emptyList()))
 					.isInstanceOf(BadRequestException.class);
