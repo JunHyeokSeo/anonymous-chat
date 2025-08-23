@@ -1,6 +1,9 @@
 package com.anonymouschat.anonymouschatserver.presentation.socket.handler;
 
-import com.anonymouschat.anonymouschatserver.application.event.ChatSend;
+import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
+import com.anonymouschat.anonymouschatserver.application.event.MessageStoreFailure;
+import com.anonymouschat.anonymouschatserver.application.event.PushNotificationRequired;
+import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.presentation.socket.ChatSessionManager;
 import com.anonymouschat.anonymouschatserver.presentation.socket.dto.ChatInboundMessage;
 import com.anonymouschat.anonymouschatserver.presentation.socket.dto.ChatOutboundMessage;
@@ -18,110 +21,185 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.socket.CloseStatus;
+
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link ChatMessageHandler}에 대한 단위 테스트 클래스입니다.
- * 채팅 메시지(`MessageType.CHAT`) 처리 로직을 검증합니다.
+ * {@link ChatMessageHandler} 단위 테스트 (정리 버전).
+ * - 브로드캐스트
+ * - 메시지 저장/실패
+ * - 푸시 알림 이벤트
+ * - 세션 종료 시나리오
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChatMessageHandler 테스트")
 class ChatMessageHandlerTest {
 
-    @Mock private ChatSessionManager sessionManager;
-    @Mock private ApplicationEventPublisher publisher;
-    @Mock private MessageBroadcaster broadcaster;
-    @Mock private WebSocketAccessGuard guard;
-    @InjectMocks private ChatMessageHandler handler;
+	@Mock private ChatSessionManager sessionManager;
+	@Mock private MessageBroadcaster broadcaster;
+	@Mock private WebSocketAccessGuard guard;
+	@Mock private MessageUseCase messageUseCase;
+	@Mock private ApplicationEventPublisher publisher;
+	@InjectMocks private ChatMessageHandler handler;
 
-    @Captor private ArgumentCaptor<ChatSend> chatSaveEventCaptor;
-    @Captor private ArgumentCaptor<ChatOutboundMessage> outboundMessageCaptor;
+	@Captor private ArgumentCaptor<ChatOutboundMessage> outboundMessageCaptor;
+	@Captor private ArgumentCaptor<MessageUseCaseDto.SendMessageRequest> sendMessageRequestCaptor;
+	@Captor private ArgumentCaptor<PushNotificationRequired> pushNotificationCaptor;
+	@Captor private ArgumentCaptor<MessageStoreFailure> messageStoreFailureCaptor;
 
-    /**
-     * 채팅방 참여자가 메시지를 보냈을 때,
-     * 메시지 저장 이벤트가 발행되고, 채팅방 참여자들에게 메시지가 브로드캐스트되는지 검증합니다.
-     */
-    @Test
-    @DisplayName("참여자가 보낸 메시지를 이벤트로 발행하고 브로드캐스트한다")
-    void should_publish_event_and_broadcast_message_from_participant() {
-        // given
-        long roomId = 100L, senderId = 1L;
-        var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
-        var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+	@Test
+	@DisplayName("핸들러가 CHAT 타입을 반환한다")
+	void should_return_chat_message_type() {
+		assertThat(handler.type()).isEqualTo(MessageType.CHAT);
+	}
 
-	    when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
+	@Test
+	@DisplayName("참여자가 보낸 메시지를 브로드캐스트하고 메시지를 저장한다")
+	void should_broadcast_and_save_message() {
+		// given
+		long roomId = 100L, senderId = 1L;
+		String content = "안녕하세요";
+		var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
+		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, content);
 
-	    // when
-	    handler.handle(session, inbound);
+		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
+		when(broadcaster.broadcast(eq(roomId), any(ChatOutboundMessage.class))).thenReturn(2);
+		when(messageUseCase.sendMessage(any())).thenReturn(1000L);
 
-        // then
-        // publisher의 publishEvent 메소드가 ChatSave 이벤트로 호출되었는지 검증하고 캡처.
-        verify(publisher).publishEvent(chatSaveEventCaptor.capture());
-        ChatSend capturedEvent = chatSaveEventCaptor.getValue();
-        // 캡처된 이벤트의 roomId, senderId, content가 예상과 일치하는지 검증.
-        assertThat(capturedEvent.roomId()).isEqualTo(roomId);
-        assertThat(capturedEvent.senderId()).isEqualTo(senderId);
-        assertThat(capturedEvent.content()).isEqualTo("안녕하세요");
+		// when
+		handler.handle(session, inbound);
 
-        // broadcaster의 broadcast 메소드가 올바른 roomId와 아웃바운드 메시지로 호출되었는지 검증.
-        verify(broadcaster).broadcast(eq(roomId), outboundMessageCaptor.capture());
-        ChatOutboundMessage capturedMessage = outboundMessageCaptor.getValue();
-        // 캡처된 아웃바운드 메시지의 roomId, senderId, content가 예상과 일치하는지 검증.
-        assertThat(capturedMessage.roomId()).isEqualTo(roomId);
-        assertThat(capturedMessage.senderId()).isEqualTo(senderId);
-        assertThat(capturedMessage.content()).isEqualTo("안녕하세요");
-    }
+		// then
+		// 브로드캐스트 메시지 검증
+		verify(broadcaster).broadcast(eq(roomId), outboundMessageCaptor.capture());
+		ChatOutboundMessage outbound = outboundMessageCaptor.getValue();
+		assertThat(outbound.roomId()).isEqualTo(roomId);
+		assertThat(outbound.senderId()).isEqualTo(senderId);
+		assertThat(outbound.content()).isEqualTo(content);
+		assertThat(outbound.type()).isEqualTo(MessageType.CHAT);
+		assertThat(outbound.timestamp()).isNotNull();
 
-    /**
-     * 메시지를 보낸 사용자가 채팅방 참여자가 아닐 때,
-     * 메시지 저장 이벤트 발행 및 브로드캐스트가 수행되지 않는지 검증합니다.
-     */
-    @Test
-    @DisplayName("참여자가 아니면 메시지를 처리하지 않는다")
-    void should_not_handle_message_if_not_a_participant() {
-        // given
-        long roomId = 100L, senderId = 1L;
-        var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
-        var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+		// 저장 요청 검증
+		verify(messageUseCase).sendMessage(sendMessageRequestCaptor.capture());
+		MessageUseCaseDto.SendMessageRequest request = sendMessageRequestCaptor.getValue();
+		assertThat(request.roomId()).isEqualTo(roomId);
+		assertThat(request.senderId()).isEqualTo(senderId);
+		assertThat(request.content()).isEqualTo(content);
+	}
 
-        when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(false);
+	@Test
+	@DisplayName("메시지 저장 성공 시, 온라인 수신자가 없을 때만 푸시 알림 이벤트 발행")
+	void should_publish_push_notification_only_when_no_online_receivers() {
+		long roomId = 100L, senderId = 1L;
+		String content = "안녕하세요";
+		Long messageId = 1000L;
+		when(messageUseCase.sendMessage(any())).thenReturn(messageId);
 
-        // when
-        handler.handle(session, inbound);
+		// case1: 온라인 수신자 있음
+		handler.saveMessageAsync(roomId, senderId, content, false);
+		verify(publisher, never()).publishEvent(any(PushNotificationRequired.class));
 
-        // then
-        // publisher의 publishEvent 메소드가 호출되지 않았는지 검증.
-        verify(publisher, never()).publishEvent(any());
-        // broadcaster의 broadcast 메소드가 호출되지 않았는지 검증.
-        verify(broadcaster, never()).broadcast(anyLong(), any());
-    }
+		// case2: 온라인 수신자 없음
+		reset(publisher);
+		handler.saveMessageAsync(roomId, senderId, content, true);
+		verify(publisher).publishEvent(pushNotificationCaptor.capture());
+		PushNotificationRequired event = pushNotificationCaptor.getValue();
+		assertThat(event.roomId()).isEqualTo(roomId);
+		assertThat(event.senderId()).isEqualTo(senderId);
+		assertThat(event.messageId()).isEqualTo(messageId);
+		assertThat(event.content()).isEqualTo(content);
+	}
 
-    /**
-     * 메시지 처리 중 예외가 발생했을 때,
-     * 세션이 `CloseStatus.SERVER_ERROR` 상태로 종료되는지 검증합니다.
-     */
-    @Test
-    @DisplayName("처리 중 예외 발생 시 세션을 종료한다")
-    void should_close_session_on_exception() {
-        // given
-        long roomId = 100L, senderId = 1L;
-        var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
-        var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+	@Test
+	@DisplayName("메시지 저장 실패 시 실패 이벤트를 발행한다")
+	void should_publish_failure_event_when_message_save_fails() {
+		long roomId = 100L, senderId = 1L;
+		String content = "실패 케이스";
+		when(messageUseCase.sendMessage(any())).thenThrow(new RuntimeException("DB 오류"));
 
-        // guard가 참여자임을 허용하고, broadcaster가 예외를 발생시키도록 설정.
-        when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
-        doThrow(new RuntimeException("Broadcast failed")).when(broadcaster).broadcast(anyLong(), any());
+		handler.saveMessageAsync(roomId, senderId, content, false);
 
-        // when
-        // 핸들러의 handle 메소드를 호출하여 채팅 메시지를 처리합니다.
-        handler.handle(session, inbound);
+		verify(publisher).publishEvent(messageStoreFailureCaptor.capture());
+		MessageStoreFailure failure = messageStoreFailureCaptor.getValue();
+		assertThat(failure.roomId()).isEqualTo(roomId);
+		assertThat(failure.senderId()).isEqualTo(senderId);
+		assertThat(failure.content()).isEqualTo(content);
+		assertThat(failure.retryCount()).isZero();
+		assertThat(failure.failedAt()).isNotNull();
+	}
 
-        // then
-        // sessionManager의 forceDisconnect 메소드가 SERVER_ERROR 상태로 호출되었는지 검증합니다.
-        verify(sessionManager).forceDisconnect(eq(session), any());
-    }
+	@Test
+	@DisplayName("참여자가 아니면 메시지를 처리하지 않는다")
+	void should_not_handle_message_if_not_participant() {
+		long roomId = 100L, senderId = 1L;
+		var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
+		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+
+		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(false);
+
+		handler.handle(session, inbound);
+
+		verify(broadcaster, never()).broadcast(anyLong(), any());
+		verify(messageUseCase, never()).sendMessage(any());
+		verify(publisher, never()).publishEvent(any());
+	}
+
+	@Test
+	@DisplayName("브로드캐스트 중 예외 발생 시 세션을 종료한다")
+	void should_close_session_on_broadcast_exception() {
+		long roomId = 100L, senderId = 1L;
+		var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
+		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+
+		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
+		doThrow(new RuntimeException("브로드캐스트 실패")).when(broadcaster).broadcast(anyLong(), any());
+
+		handler.handle(session, inbound);
+
+		verify(sessionManager).forceDisconnect(eq(session), eq(CloseStatus.SERVER_ERROR));
+	}
+
+	@Test
+	@DisplayName("guard 검증 중 예외 발생 시 세션을 종료한다")
+	void should_close_session_on_guard_exception() {
+		long roomId = 100L, senderId = 1L;
+		var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
+		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+
+		when(guard.ensureParticipant(session, roomId, senderId))
+				.thenThrow(new RuntimeException("권한 검증 실패"));
+
+		handler.handle(session, inbound);
+
+		verify(sessionManager).forceDisconnect(eq(session), eq(CloseStatus.SERVER_ERROR));
+		verify(broadcaster, never()).broadcast(anyLong(), any());
+	}
+
+	@Test
+	@DisplayName("아웃바운드 메시지의 타임스탬프가 올바르게 설정된다")
+	void should_set_correct_timestamp_in_outbound_message() {
+		long roomId = 100L, senderId = 1L;
+		var session = WebSocketSessionStub.withPrincipal(PrincipalStub.authenticated(senderId));
+		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
+
+		Instant before = Instant.now();
+
+		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
+		when(broadcaster.broadcast(eq(roomId), any(ChatOutboundMessage.class))).thenReturn(1);
+
+		handler.handle(session, inbound);
+
+		Instant after = Instant.now();
+
+		verify(broadcaster).broadcast(eq(roomId), outboundMessageCaptor.capture());
+		ChatOutboundMessage message = outboundMessageCaptor.getValue();
+		assertThat(message.timestamp())
+				.isAfter(before.minusSeconds(1))
+				.isBefore(after.plusSeconds(1));
+	}
 }
