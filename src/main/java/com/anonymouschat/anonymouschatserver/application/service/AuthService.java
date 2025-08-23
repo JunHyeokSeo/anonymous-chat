@@ -5,6 +5,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.port.TokenStoragePort;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenProvider;
@@ -83,6 +84,25 @@ public class AuthService {
 		return tokenStorage.consumeOAuthTempData(code)
 				       .map(AuthServiceDto.OAuthTempInfo::toUseCaseDto)
 				       .orElseThrow(() -> new InvalidTokenException(ErrorCode.INVALID_TOKEN));
+	}
+
+	public AuthUseCaseDto.AuthData issueTokensForUser(User user, String userAgent, String ipAddress) {
+		String accessToken = createAccessToken(user.getId(), user.getRole());
+		String refreshToken = null;
+		boolean isGuestUser = user.getRole() == Role.GUEST;
+
+		if (!isGuestUser) {
+			refreshToken = createRefreshToken(user.getId(), user.getRole());
+			saveRefreshToken(user.getId(), refreshToken, userAgent, ipAddress);
+		}
+
+		return AuthUseCaseDto.AuthData.builder()
+				       .accessToken(accessToken)
+				       .refreshToken(refreshToken)
+				       .isGuestUser(isGuestUser)
+				       .userId(user.getId())
+				       .userNickname(user.getNickname())
+				       .build();
 	}
 
 	private String hashToken(String token) {

@@ -5,7 +5,6 @@ import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
-import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,21 +23,7 @@ public class AuthUseCase {
 		User user = userService.findByProviderAndProviderId(provider, providerId)
 				            .orElseGet(() -> userService.createGuestUser(provider, providerId));
 
-		String accessToken = authService.createAccessToken(provider, providerId);
-		String refreshToken = null;
-		boolean isGuestUser = user.getRole() == Role.GUEST;
-
-		if (!isGuestUser) {
-			refreshToken = authService.createRefreshToken(user.getId(), user.getRole());
-		}
-
-		return AuthUseCaseDto.AuthData.builder()
-				       .accessToken(accessToken)
-				       .refreshToken(refreshToken)
-				       .isGuestUser(isGuestUser)
-				       .userId(user.getId())
-				       .userNickname(user.getNickname())
-				       .build();
+		return authService.issueTokensForUser(user, null, null);
 	}
 
 	@Transactional
@@ -65,6 +50,15 @@ public class AuthUseCase {
 	public void logout(Long userId, String accessToken) {
 		authService.invalidateRefreshToken(userId);
 		authService.blacklistAccessToken(accessToken);
+	}
+
+	@Transactional
+	public AuthUseCaseDto.AuthData handleOAuthCallback(String code, String userAgent, String ipAddress) {
+		AuthUseCaseDto.AuthTempData tempData = authService.consumeOAuthTempData(code);
+
+		User user = userService.findUser(tempData.userId());
+
+		return authService.issueTokensForUser(user, userAgent, ipAddress);
 	}
 
 	public String storeOAuthTempData(AuthUseCaseDto.AuthData authResult) {

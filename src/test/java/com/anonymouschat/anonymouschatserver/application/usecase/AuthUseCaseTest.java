@@ -49,22 +49,26 @@ class AuthUseCaseTest {
 
 			when(userService.findByProviderAndProviderId(OAuthProvider.KAKAO, "abc123"))
 					.thenReturn(Optional.of(existingUser));
-			when(authService.createAccessToken(OAuthProvider.KAKAO, "abc123"))
-					.thenReturn("access-token");
-			when(authService.createRefreshToken(1L, Role.USER))
-					.thenReturn("refresh-token");
+			when(authService.issueTokensForUser(existingUser, null, null))
+					.thenReturn(AuthUseCaseDto.AuthData.builder()
+							            .accessToken("access-token")
+							            .refreshToken("refresh-token")
+							            .isGuestUser(false)
+							            .userId(existingUser.getId())
+							            .userNickname(existingUser.getNickname())
+							            .build());
 
 			AuthUseCaseDto.AuthData result = authUseCase.login(OAuthProvider.KAKAO, "abc123");
 
 			assertThat(result.accessToken()).isEqualTo("access-token");
 			assertThat(result.refreshToken()).isEqualTo("refresh-token");
 			assertThat(result.isGuestUser()).isFalse();
-			assertThat(result.userId()).isEqualTo(1L);
+			assertThat(result.userId()).isEqualTo(existingUser.getId());
 			assertThat(result.userNickname()).isEqualTo(existingUser.getNickname());
 		}
 
 		@Test
-		@DisplayName("신규 유저 로그인 시 guest로 생성되고 refreshToken 없이 반환")
+		@DisplayName("신규 유저 로그인 시 guest로 생성되고 issueTokensForUser 결과가 반환됨")
 		void loginNewUserAsGuest() {
 			User guestUser = TestUtils.guestUser();
 
@@ -72,8 +76,14 @@ class AuthUseCaseTest {
 					.thenReturn(Optional.empty());
 			when(userService.createGuestUser(OAuthProvider.KAKAO, "new-user"))
 					.thenReturn(guestUser);
-			when(authService.createAccessToken(OAuthProvider.KAKAO, "new-user"))
-					.thenReturn("access-token");
+			when(authService.issueTokensForUser(guestUser, null, null))
+					.thenReturn(AuthUseCaseDto.AuthData.builder()
+							            .accessToken("access-token")
+							            .refreshToken(null)
+							            .isGuestUser(true)
+							            .userId(guestUser.getId())
+							            .userNickname(guestUser.getNickname())
+							            .build());
 
 			AuthUseCaseDto.AuthData result = authUseCase.login(OAuthProvider.KAKAO, "new-user");
 
@@ -82,8 +92,6 @@ class AuthUseCaseTest {
 			assertThat(result.isGuestUser()).isTrue();
 			assertThat(result.userId()).isEqualTo(guestUser.getId());
 			assertThat(result.userNickname()).isEqualTo(guestUser.getNickname());
-
-			verify(authService, never()).createRefreshToken(any(), any());
 		}
 	}
 

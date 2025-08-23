@@ -85,13 +85,12 @@ public class AuthCallbackController {
 		log.info("OAuth 콜백 처리 시작 - code: {}", code);
 
 		try {
-			AuthUseCaseDto.AuthTempData oldTokens = authUseCase.consumeOAuthTempData(code);
-			AuthUseCaseDto.AuthTokens newTokens = authUseCase.refreshByUserId(oldTokens.userId(), httpRequestExtractor.extractUserAgent(request), httpRequestExtractor.extractClientIpAddress(request));
-			log.info("새로운 토큰 발급 완료 - accessToken: {}", newTokens.accessToken());
-			model.addAttribute("tokenData", newTokens);
+			String userAgent = httpRequestExtractor.extractUserAgent(request);
+			String ipAddress = httpRequestExtractor.extractClientIpAddress(request);
 
-			log.info("OAuth 콜백 처리 완료 - userId: {}, isGuest: {}", oldTokens.userId(), oldTokens.isGuestUser());
+			AuthUseCaseDto.AuthData authData = authUseCase.handleOAuthCallback(code, userAgent, ipAddress);
 
+			model.addAttribute("authData", authData);
 			return "auth-callback";
 
 		} catch (InvalidTokenException e) {
