@@ -88,48 +88,67 @@ class AuthUseCaseTest {
 	}
 
 	@Nested
-	@DisplayName("refresh()")
-	class Refresh {
+	@DisplayName("refreshByUserId()")
+	class RefreshByUserId {
 
 		@Test
-		@DisplayName("유효한 리프레시 토큰으로 재발급 성공")
-		void validRefreshToken() throws Exception {
-			String oldToken = "old-token";
+		@DisplayName("유효한 사용자 ID로 토큰 재발급 성공")
+		void validUserIdRefresh() throws Exception {
 			Long userId = 99L;
+			String userAgent = "test-agent";
+			String ipAddress = "127.0.0.1";
 			User user = TestUtils.createUser(userId);
 
 			AuthServiceDto.RefreshTokenInfo tokenInfo = AuthServiceDto.RefreshTokenInfo.builder()
-					                                            .token(oldToken)
+					                                            .token("stored-refresh-token")
 					                                            .userId(userId)
 					                                            .issuedAt(LocalDateTime.now())
 					                                            .expiresAt(LocalDateTime.now().plusDays(7))
-					                                            .userAgent("test-agent")
-					                                            .ipAddress("127.0.0.1")
+					                                            .userAgent("old-agent")
+					                                            .ipAddress("old-ip")
 					                                            .build();
 
-			when(authService.extractUserId(oldToken)).thenReturn(userId);
 			when(authService.getRefreshTokenInfo(userId)).thenReturn(tokenInfo);
 			when(userService.findUser(userId)).thenReturn(user);
 			when(authService.createAccessToken(userId, Role.USER)).thenReturn("new-access");
 			when(authService.createRefreshToken(userId, Role.USER)).thenReturn("new-refresh");
 
-			AuthUseCaseDto.AuthTokens tokens = authUseCase.refresh(oldToken);
+			AuthUseCaseDto.AuthTokens tokens = authUseCase.refreshByUserId(userId, userAgent, ipAddress);
 
 			assertThat(tokens.accessToken()).isEqualTo("new-access");
-			assertThat(tokens.refreshToken()).isEqualTo("new-refresh");
 
-			verify(authService).validateToken(oldToken);
+			verify(authService).validateToken("stored-refresh-token");
 			verify(authService).invalidateRefreshToken(userId);
+			verify(authService).saveRefreshToken(userId, "new-refresh", userAgent, ipAddress);
 		}
 
 		@Test
-		@DisplayName("저장된 토큰과 다르면 탈취로 간주 후 예외 발생")
-		void tokenTheftDetected() {
-			String oldToken = "fake-token";
+		@DisplayName("저장된 RefreshToken이 없으면 예외 발생")
+		void noStoredRefreshToken() {
 			Long userId = 50L;
+			String userAgent = "test-agent";
+			String ipAddress = "127.0.0.1";
+
+			when(authService.getRefreshTokenInfo(userId))
+					.thenThrow(new InvalidTokenException(ErrorCode.INVALID_TOKEN));
+
+			assertThatThrownBy(() -> authUseCase.refreshByUserId(userId, userAgent, ipAddress))
+					.isInstanceOf(InvalidTokenException.class)
+					.hasMessage(ErrorCode.INVALID_TOKEN.getMessage());
+
+			verify(authService, never()).invalidateRefreshToken(userId);
+			verify(authService, never()).saveRefreshToken(any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("저장된 RefreshToken 검증 실패 시 예외 발생")
+		void storedRefreshTokenValidationFailed() {
+			Long userId = 99L;
+			String userAgent = "test-agent";
+			String ipAddress = "127.0.0.1";
 
 			AuthServiceDto.RefreshTokenInfo tokenInfo = AuthServiceDto.RefreshTokenInfo.builder()
-					                                            .token("stored-different-token")
+					                                            .token("invalid-refresh-token")
 					                                            .userId(userId)
 					                                            .issuedAt(LocalDateTime.now())
 					                                            .expiresAt(LocalDateTime.now().plusDays(7))
@@ -137,25 +156,45 @@ class AuthUseCaseTest {
 					                                            .ipAddress("127.0.0.1")
 					                                            .build();
 
-			when(authService.extractUserId(oldToken)).thenReturn(userId);
 			when(authService.getRefreshTokenInfo(userId)).thenReturn(tokenInfo);
+			doThrow(new InvalidTokenException(ErrorCode.EXPIRED_TOKEN))
+					.when(authService).validateToken("invalid-refresh-token");
 
-			assertThatThrownBy(() -> authUseCase.refresh(oldToken))
+			assertThatThrownBy(() -> authUseCase.refreshByUserId(userId, userAgent, ipAddress))
 					.isInstanceOf(InvalidTokenException.class)
-					.hasMessage(ErrorCode.TOKEN_THEFT_DETECTED.getMessage());
+					.hasMessage(ErrorCode.EXPIRED_TOKEN.getMessage());
 
-			verify(authService).revokeAllUserTokens(userId);
+			verify(authService, never()).invalidateRefreshToken(userId);
+			verify(authService, never()).saveRefreshToken(any(), any(), any(), any());
 		}
 
 		@Test
-		@DisplayName("토큰 유효성 검사 실패 시 예외 발생")
-		void refreshTokenInvalid() {
-			doThrow(new InvalidTokenException(ErrorCode.EXPIRED_TOKEN))
-					.when(authService).validateToken("expired");
+		@DisplayName("사용자 조회 실패 시 예외 발생")
+		void userNotFound() {
+			Long userId = 99L;
+			String userAgent = "test-agent";
+			String ipAddress = "127.0.0.1";
 
-			assertThatThrownBy(() -> authUseCase.refresh("expired"))
-					.isInstanceOf(InvalidTokenException.class)
-					.hasMessage(ErrorCode.EXPIRED_TOKEN.getMessage());
+			AuthServiceDto.RefreshTokenInfo tokenInfo = AuthServiceDto.RefreshTokenInfo.builder()
+					                                            .token("valid-refresh-token")
+					                                            .userId(userId)
+					                                            .issuedAt(LocalDateTime.now())
+					                                            .expiresAt(LocalDateTime.now().plusDays(7))
+					                                            .userAgent("test-agent")
+					                                            .ipAddress("127.0.0.1")
+					                                            .build();
+
+			when(authService.getRefreshTokenInfo(userId)).thenReturn(tokenInfo);
+			when(userService.findUser(userId))
+					.thenThrow(new RuntimeException("User not found"));
+
+			assertThatThrownBy(() -> authUseCase.refreshByUserId(userId, userAgent, ipAddress))
+					.isInstanceOf(RuntimeException.class)
+					.hasMessage("User not found");
+
+			verify(authService).validateToken("valid-refresh-token");
+			verify(authService).invalidateRefreshToken(userId);
+			verify(authService, never()).saveRefreshToken(any(), any(), any(), any());
 		}
 	}
 

@@ -14,7 +14,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -91,16 +90,5 @@ public class SecurityConfig {
 	@Bean
 	public CustomAccessDeniedHandler customAccessDeniedHandler() {
 		return new CustomAccessDeniedHandler();
-	}
-
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.ignoring().requestMatchers(
-				"/css/**",
-				"/js/**",
-				"/images/**",
-				"/uploads/**",
-				"/favicon.ico"
-		);
 	}
 }

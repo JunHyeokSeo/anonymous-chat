@@ -13,14 +13,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +35,7 @@ public class AuthController {
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@Operation(
 			summary = "토큰 재발급",
-			description = "Refresh Token을 사용하여 Access Token을 재발급합니다. (USER, ADMIN 권한 필요)",
+			description = "현재 사용자의 저장된 Refresh Token을 사용하여 Access Token을 재발급합니다.",
 			responses = {
 					@ApiResponse(
 							responseCode = "200",
@@ -48,34 +46,28 @@ public class AuthController {
 									examples = @ExampleObject(
 											name = "재발급 성공 예시",
 											value = """
-                        {
-                          "success": true,
-                          "data": {
-                            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                          },
-                          "error": null
-                        }
-                        """
+                    {
+                      "success": true,
+                      "data": {
+                        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      },
+                      "error": null
+                    }
+                    """
 									)
 							)
 					),
-					@ApiResponse(responseCode = "400", description = "유효하지 않은 요청"),
-					@ApiResponse(responseCode = "401", description = "인증 실패")
+					@ApiResponse(responseCode = "401", description = "인증 실패 또는 Refresh Token 없음")
 			}
 	)
 	public ResponseEntity<CommonResponse<AuthDto.AuthTokensResponse>> refresh(
-			@Valid @RequestBody AuthDto.RefreshRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal principal,
 			HttpServletRequest httpRequest
 	) {
-		var tokens = authUseCase.refresh(request.refreshToken());
-
-		// 새 RefreshToken 저장
-		Long userId = authUseCase.getUserIdFromToken(tokens.refreshToken());
 		String userAgent = httpRequestExtractor.extractUserAgent(httpRequest);
 		String ipAddress = httpRequestExtractor.extractClientIpAddress(httpRequest);
 
-		authUseCase.saveRefreshToken(userId, tokens.refreshToken(), userAgent, ipAddress);
+		var tokens = authUseCase.refreshByUserId(principal.userId(), userAgent, ipAddress);
 
 		return ResponseEntity
 				       .status(HttpStatus.OK)
@@ -110,12 +102,12 @@ public class AuthController {
 			}
 	)
 	public ResponseEntity<CommonResponse<Void>> logout(
-			@Parameter(hidden = true)
-			@AuthenticationPrincipal CustomPrincipal principal,
+			@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal principal,
 			HttpServletRequest httpRequest
 	) {
 		String accessToken = httpRequestExtractor.extractAccessToken(httpRequest);
 		authUseCase.logout(principal.userId(), accessToken);
+
 		return ResponseEntity
 				       .status(HttpStatus.OK)
 				       .body(CommonResponse.success(null));

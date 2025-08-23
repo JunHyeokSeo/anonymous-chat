@@ -18,8 +18,7 @@ public class AuthUseCaseDto {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@Builder
 	public record AuthTokens(
-			String accessToken,
-			@Nullable String refreshToken
+			String accessToken
 	) {}
 
 	@Builder

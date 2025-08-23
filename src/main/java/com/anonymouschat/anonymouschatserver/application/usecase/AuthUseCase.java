@@ -3,8 +3,6 @@ package com.anonymouschat.anonymouschatserver.application.usecase;
 import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
-import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
-import com.anonymouschat.anonymouschatserver.common.exception.auth.InvalidTokenException;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Role;
@@ -44,17 +42,10 @@ public class AuthUseCase {
 	}
 
 	@Transactional
-	public AuthUseCaseDto.AuthTokens refresh(String oldRefreshToken) {
-		authService.validateToken(oldRefreshToken);
-		Long userId = authService.extractUserId(oldRefreshToken);
-
+	public AuthUseCaseDto.AuthTokens refreshByUserId(Long userId, String userAgent, String ipAddress) {
 		var storedTokenInfo = authService.getRefreshTokenInfo(userId);
 
-		if (!storedTokenInfo.token().equals(oldRefreshToken)) {
-			log.warn("토큰 탈취 감지 - userId: {}", userId);
-			authService.revokeAllUserTokens(userId);
-			throw new InvalidTokenException(ErrorCode.TOKEN_THEFT_DETECTED);
-		}
+		authService.validateToken(storedTokenInfo.token());
 
 		authService.invalidateRefreshToken(userId);
 
@@ -62,9 +53,11 @@ public class AuthUseCase {
 		String newAccessToken = authService.createAccessToken(user.getId(), user.getRole());
 		String newRefreshToken = authService.createRefreshToken(user.getId(), user.getRole());
 
+		authService.saveRefreshToken(userId, newRefreshToken, userAgent, ipAddress);
+
+		// 클라이언트에는 AccessToken만 반환
 		return AuthUseCaseDto.AuthTokens.builder()
 				       .accessToken(newAccessToken)
-				       .refreshToken(newRefreshToken)
 				       .build();
 	}
 
