@@ -28,7 +28,7 @@ public class UserUseCase {
 	private final BlockService blockService;
 
 	@Transactional
-	public UserUseCaseDto.RegisterResponse register(UserUseCaseDto.RegisterRequest register, List<MultipartFile> images) throws IOException {
+	public UserUseCaseDto.RegisterResponse register(UserUseCaseDto.RegisterRequest register, List<MultipartFile> images) {
 		log.info("{}회원가입 요청 - nickname={}, gender={}, age={}", LogTag.USER, register.nickname(), register.gender(), register.age());
 		User user = userService.register(UserServiceDto.RegisterCommand.from(register), images);
 		log.info("{}회원가입 완료 - userId={}", LogTag.USER, user.getId());

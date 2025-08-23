@@ -74,6 +74,7 @@ public class UserController {
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		log.debug("principal.provider(): {}, principal.providerId(): {}", principal.provider(), principal.providerId());
+		System.out.println(userUseCase.getClass());
 
 		UserUseCaseDto.RegisterResponse registeredUserInfo = userUseCase.register(
 				UserUseCaseDto.RegisterRequest.from(request, principal.userId()),

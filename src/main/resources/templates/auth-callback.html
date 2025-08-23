@@ -2,24 +2,601 @@
 <html lang="ko">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>로그인 처리중</title>
-	<link rel="stylesheet" href="/css/common.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>로그인 처리 중... - 익명채팅</title>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+	<!-- Thymeleaf를 사용한 서버 데이터 주입 -->
+	<script th:if="${authData}" th:inline="javascript">
+        /*<![CDATA[*/
+        window.authData = {
+            accessToken: /*[[${authData.accessToken}]]*/ '',
+            refreshToken: /*[[${authData.refreshToken}]]*/ null,
+            isGuestUser: /*[[${authData.isGuestUser}]]*/ false,
+            userId: /*[[${authData.userId}]]*/ null,
+            userNickname: /*[[${authData.userNickname}]]*/ null
+        };
+        console.log('Server authData injected:', window.authData);
+        /*]]>*/
+	</script>
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .callback-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .callback-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            padding: 48px 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loading-container {
+            margin-bottom: 32px;
+        }
+
+        .loading-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+            animation: pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .loading-icon::after {
+            content: '🔐';
+            font-size: 32px;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg) translate(-50%, -50%); }
+            100% { transform: rotate(360deg) translate(-50%, -50%); }
+        }
+
+        .loading-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        /* 프로그레스 바 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(79, 70, 229, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed, #4f46e5);
+            background-size: 200% 100%;
+            border-radius: 3px;
+            animation: progress 3s ease-in-out, gradient 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes gradient {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* 단계 표시 */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            color: #4f46e5;
+            font-weight: 500;
+        }
+
+        .step.completed {
+            color: #10b981;
+        }
+
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step.pending .step-icon {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .step.active .step-icon {
+            background: #4f46e5;
+            color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        .step.completed .step-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 에러 상태 */
+        .error-state {
+            display: none;
+        }
+
+        .error-state.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .error-icon::after {
+            content: '⚠️';
+            font-size: 32px;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ef4444;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 428px) {
+            .callback-card {
+                padding: 40px 28px;
+                border-radius: 28px;
+                margin: 16px;
+            }
+
+            .loading-icon {
+                width: 72px;
+                height: 72px;
+            }
+
+            .loading-icon::after {
+                font-size: 28px;
+            }
+
+            .loading-title {
+                font-size: 1.3rem;
+            }
+
+            .loading-subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* 배경 파티클 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            width: 6px;
+            height: 6px;
+            top: 20%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            width: 8px;
+            height: 8px;
+            top: 60%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .particle:nth-child(3) {
+            width: 4px;
+            height: 4px;
+            bottom: 30%;
+            left: 60%;
+            animation-delay: 4s;
+        }
+
+        .particle:nth-child(4) {
+            width: 10px;
+            height: 10px;
+            top: 40%;
+            left: 80%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            33% { transform: translateY(-15px) translateX(10px); }
+            66% { transform: translateY(5px) translateX(-5px); }
+        }
+	</style>
 </head>
 <body>
-<div class="processing-container">
-	<div class="loading-spinner"></div>
-	<h1>로그인 처리중</h1>
-	<p>잠시만 기다려주세요...</p>
-	<div class="progress-steps">
-		<div class="step">인증 정보 확인</div>
-		<div class="step">토큰 처리중</div>
-		<div class="step">페이지 이동</div>
-	</div>
-	<div class="error-container" style="display:none;">
-		오류가 발생했습니다. 다시 시도해주세요.
+<!-- 배경 파티클 -->
+<div class="particles">
+	<div class="particle"></div>
+	<div class="particle"></div>
+	<div class="particle"></div>
+	<div class="particle"></div>
+</div>
+
+<div class="callback-container">
+	<div class="callback-card">
+		<!-- 로딩 상태 -->
+		<div id="loadingState" class="loading-state">
+			<div class="loading-container">
+				<div class="loading-icon"></div>
+				<h1 class="loading-title">로그인 처리 중</h1>
+				<p class="loading-subtitle">잠시만 기다려주세요.<br>안전하게 인증을 진행하고 있습니다.</p>
+			</div>
+
+			<div class="progress-container">
+				<div class="progress-bar"></div>
+			</div>
+
+			<div class="steps-container">
+				<div class="step" id="step1">
+					<div class="step-icon">1</div>
+					<span>인증 정보 확인</span>
+				</div>
+				<div class="step" id="step2">
+					<div class="step-icon">2</div>
+					<span>사용자 정보 조회</span>
+				</div>
+				<div class="step" id="step3">
+					<div class="step-icon">3</div>
+					<span>토큰 생성</span>
+				</div>
+				<div class="step" id="step4">
+					<div class="step-icon">4</div>
+					<span>로그인 완료</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- 에러 상태 -->
+		<div id="errorState" class="error-state">
+			<div class="error-icon"></div>
+			<h1 class="error-title">로그인 실패</h1>
+			<p class="error-message" id="errorMessage">
+				인증 처리 중 오류가 발생했습니다.<br>
+				잠시 후 다시 시도해주세요.
+			</p>
+			<button class="retry-btn" onclick="retryLogin()">다시 시도</button>
+		</div>
 	</div>
 </div>
-<script src="/js/common.js"></script>
+
+<script>
+    class AuthCallback {
+        constructor() {
+            this.currentStep = 0;
+            this.steps = ['step1', 'step2', 'step3', 'step4'];
+            this.authData = null;
+            this.init();
+        }
+
+        init() {
+            // URL에서 에러 파라미터 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+
+            if (error) {
+                this.showError(this.getErrorMessage(error));
+                return;
+            }
+
+            // 서버에서 전달된 authData 확인
+            this.authData = window.authData;
+
+            if (!this.authData) {
+                this.showError('인증 데이터를 찾을 수 없습니다. 다시 로그인해주세요.');
+                return;
+            }
+
+            // 인증 처리 시작
+            this.processAuthentication();
+        }
+
+        async processAuthentication() {
+            try {
+                // 1단계: 인증 정보 확인
+                this.updateStep(0);
+                await this.delay(100);
+
+                // 2단계: 사용자 정보 조회
+                this.updateStep(1);
+                await this.delay(100);
+
+                // 3단계: 토큰 생성 및 저장
+                this.updateStep(2);
+
+                // 토큰 저장
+                if (this.authData.accessToken) {
+                    sessionStorage.setItem('accessToken', this.authData.accessToken);
+                    console.log('Access Token 저장 완료');
+                }
+
+                if (this.authData.refreshToken) {
+                    console.log('Refresh Token은 서버에서 관리됩니다.');
+                }
+
+                await this.delay(100);
+
+                // 4단계: 로그인 완료
+                this.updateStep(3);
+                await this.delay(100);
+
+                // 성공 처리
+                this.handleSuccess();
+
+            } catch (error) {
+                console.error('Auth callback error:', error);
+                this.showError('인증 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        updateStep(stepIndex) {
+            // 이전 단계들을 완료 상태로 변경
+            for (let i = 0; i < stepIndex; i++) {
+                const step = document.getElementById(this.steps[i]);
+                step.classList.remove('active', 'pending');
+                step.classList.add('completed');
+                step.querySelector('.step-icon').innerHTML = '✓';
+            }
+
+            // 현재 단계를 활성 상태로 변경
+            if (stepIndex < this.steps.length) {
+                const currentStep = document.getElementById(this.steps[stepIndex]);
+                currentStep.classList.remove('pending');
+                currentStep.classList.add('active');
+            }
+
+            // 마지막 단계 완료 처리
+            if (stepIndex === this.steps.length) {
+                const lastStep = document.getElementById(this.steps[stepIndex - 1]);
+                lastStep.classList.remove('active');
+                lastStep.classList.add('completed');
+                lastStep.querySelector('.step-icon').innerHTML = '✓';
+            }
+        }
+
+        handleSuccess() {
+            // 사용자 정보 로그 출력 (개발용)
+            console.log('인증 완료:', {
+                userId: this.authData.userId,
+                userNickname: this.authData.userNickname,
+                isGuestUser: this.authData.isGuestUser
+            });
+
+            // 잠시 성공 상태 표시 후 리다이렉트
+            setTimeout(() => {
+                if (this.authData.isGuestUser) {
+                    console.log('신규 사용자 - 회원가입 페이지로 이동');
+                    window.location.href = '/register';
+                } else {
+                    console.log('기존 사용자 - 홈 화면으로 이동');
+                    window.location.href = '/';
+                }
+            }, 1200);
+        }
+
+        showError(message) {
+            document.getElementById('errorMessage').innerHTML = message;
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').classList.add('show');
+        }
+
+        getErrorMessage(error) {
+            const messages = {
+                'invalid_code': '인증 코드가 유효하지 않습니다.<br>다시 로그인해주세요.',
+                'processing_failed': '인증 처리 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.',
+                'expired': '인증 세션이 만료되었습니다.<br>다시 로그인해주세요.',
+                'network_error': '네트워크 오류가 발생했습니다.<br>인터넷 연결을 확인해주세요.'
+            };
+
+            return messages[error] || '알 수 없는 오류가 발생했습니다.<br>다시 시도해주세요.';
+        }
+
+        delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    }
+
+    // 재시도 함수
+    function retryLogin() {
+        window.location.href = '/login';
+    }
+
+    // 페이지 로드 시 인증 콜백 처리 시작
+    document.addEventListener('DOMContentLoaded', function() {
+        // 서버에서 전달된 authData를 전역 변수로 설정
+        // Thymeleaf 템플릿에서 전달받은 데이터를 JavaScript 변수로 변환
+        try {
+            // authData가 모델에 있다면 전역 변수로 설정
+            if (typeof authData !== 'undefined') {
+                window.authData = authData;
+                console.log('AuthData received:', window.authData);
+            } else {
+                console.log('AuthData not found in template');
+                window.authData = null;
+            }
+        } catch (e) {
+            console.error('Error processing authData:', e);
+            window.authData = null;
+        }
+
+        new AuthCallback();
+    });
+
+    // 뒤로가기 방지
+    window.addEventListener('popstate', function(e) {
+        e.preventDefault();
+        window.location.href = '/login';
+    });
+
+    // 페이지 새로고침 방지 (개발 시에는 주석 처리)
+    // window.addEventListener('beforeunload', function(e) {
+    //     e.preventDefault();
+    //     e.returnValue = '';
+    // });
+</script>
 </body>
 </html>

@@ -2,32 +2,811 @@
 <html lang="ko">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>익명 채팅 - 프로필 설정</title>
-	<link rel="stylesheet" href="/css/common.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>회원가입 - 익명채팅</title>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .register-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 40px;
+        }
+
+        .register-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 100%;
+            animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .welcome-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+            animation: bounce 2s infinite;
+        }
+
+        .welcome-icon::after {
+            content: '👋';
+            font-size: 28px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+            40%, 43% { transform: translateY(-8px); }
+            70% { transform: translateY(-4px); }
+            90% { transform: translateY(-2px); }
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .form-container {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fff;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .char-count.warning {
+            color: #f59e0b;
+        }
+
+        .char-count.error {
+            color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* 프로필 이미지 업로드 */
+        .profile-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #e2e8f0;
+        }
+
+        .profile-preview:hover {
+            transform: scale(1.05);
+            border-color: #4f46e5;
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-placeholder {
+            color: #64748b;
+            font-size: 2rem;
+        }
+
+        .upload-button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 나이 슬라이더 */
+        .age-input-container {
+            position: relative;
+        }
+
+        .age-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .age-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .age-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .age-display {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4f46e5;
+            margin-top: 8px;
+        }
+
+        /* 성별 선택 */
+        .gender-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .gender-option {
+            position: relative;
+        }
+
+        .gender-option input {
+            display: none;
+        }
+
+        .gender-option label {
+            display: block;
+            padding: 12px 8px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gender-option input:checked + label {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: transparent;
+            transform: scale(1.02);
+        }
+
+        .gender-option label:hover {
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .submit-button {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-button.loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Toast 알림 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #374151;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: #10b981;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 428px) {
+            .register-container {
+                padding: 16px;
+                padding-top: 20px;
+            }
+
+            .register-card {
+                padding: 32px 24px;
+                border-radius: 28px;
+            }
+
+            .title {
+                font-size: 1.6rem;
+            }
+
+            .gender-options {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .welcome-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .welcome-icon::after {
+                font-size: 24px;
+            }
+        }
+
+        /* 접근성 개선 */
+        .form-input:focus + .form-label,
+        .form-select:focus + .form-label {
+            color: #4f46e5;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+	</style>
 </head>
 <body>
 <div class="register-container">
-	<h1>프로필 설정</h1>
-	<form id="registerForm">
-		<input type="file" id="profileImage" accept="image/*">
-		<input type="text" id="nickname" placeholder="닉네임" required>
-		<select id="gender" required>
-			<option value="">성별 선택</option>
-			<option value="MALE">남성</option>
-			<option value="FEMALE">여성</option>
-		</select>
-		<input type="number" id="age" placeholder="나이" min="13" max="100" required>
-		<select id="region" required>
-			<option value="">지역 선택</option>
-			<option value="SEOUL">서울</option>
-			<option value="BUSAN">부산</option>
-			<!-- ... -->
-		</select>
-		<textarea id="bio" placeholder="자기소개 (선택)" maxlength="200"></textarea>
-		<button type="submit">프로필 생성하기</button>
-	</form>
+	<div class="register-card">
+		<div class="header">
+			<div class="welcome-icon"></div>
+			<h1 class="title">환영합니다!</h1>
+			<p class="subtitle">익명채팅을 시작하기 위해<br>간단한 정보를 입력해주세요</p>
+		</div>
+
+		<form class="form-container" id="registerForm" enctype="multipart/form-data">
+			<!-- 프로필 이미지 -->
+			<div class="form-group">
+				<label class="form-label">프로필 사진 (선택)</label>
+				<div class="profile-upload">
+					<div class="profile-preview" onclick="triggerFileInput()">
+						<div class="profile-placeholder" id="profilePlaceholder">📷</div>
+						<img id="profileImage" style="display: none;" alt="프로필 이미지">
+					</div>
+					<button type="button" class="upload-button" onclick="triggerFileInput()">
+						사진 선택
+					</button>
+					<input type="file" id="profileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+				</div>
+			</div>
+
+			<!-- 닉네임 -->
+			<div class="form-group">
+				<label class="form-label" for="nickname">닉네임</label>
+				<input
+						type="text"
+						id="nickname"
+						name="nickname"
+						class="form-input"
+						placeholder="2~20자 사이로 입력해주세요"
+						maxlength="20"
+						required
+						oninput="validateNickname()"
+				>
+				<div class="error-message" id="nicknameError"></div>
+			</div>
+
+			<!-- 성별 -->
+			<div class="form-group">
+				<label class="form-label">성별</label>
+				<div class="gender-options">
+					<div class="gender-option">
+						<input type="radio" id="male" name="gender" value="MALE" required>
+						<label for="male">남성</label>
+					</div>
+					<div class="gender-option">
+						<input type="radio" id="female" name="gender" value="FEMALE" required>
+						<label for="female">여성</label>
+					</div>
+					<div class="gender-option">
+						<input type="radio" id="unknown" name="gender" value="UNKNOWN" required>
+						<label for="unknown">비공개</label>
+					</div>
+				</div>
+			</div>
+
+			<!-- 나이 -->
+			<div class="form-group">
+				<label class="form-label" for="age">나이</label>
+				<div class="age-input-container">
+					<input
+							type="range"
+							id="age"
+							name="age"
+							class="age-slider"
+							min="18"
+							max="100"
+							value="25"
+							oninput="updateAgeDisplay()"
+					>
+					<div class="age-display" id="ageDisplay">25세</div>
+				</div>
+			</div>
+
+			<!-- 지역 -->
+			<div class="form-group">
+				<label class="form-label" for="region">지역</label>
+				<select id="region" name="region" class="form-input form-select" required>
+					<option value="">지역을 선택해주세요</option>
+					<option value="SEOUL">서울특별시</option>
+					<option value="BUSAN">부산광역시</option>
+					<option value="DAEGU">대구광역시</option>
+					<option value="INCHEON">인천광역시</option>
+					<option value="GWANGJU">광주광역시</option>
+					<option value="DAEJEON">대전광역시</option>
+					<option value="ULSAN">울산광역시</option>
+					<option value="SEJONG">세종특별자치시</option>
+					<option value="GYEONGGI">경기도</option>
+					<option value="GANGWON">강원도</option>
+					<option value="CHUNGBUK">충청북도</option>
+					<option value="CHUNGNAM">충청남도</option>
+					<option value="JEONBUK">전라북도</option>
+					<option value="JEONNAM">전라남도</option>
+					<option value="GYEONGBUK">경상북도</option>
+					<option value="GYEONGNAM">경상남도</option>
+					<option value="JEJU">제주특별자치도</option>
+				</select>
+			</div>
+
+			<!-- 자기소개 -->
+			<div class="form-group">
+				<label class="form-label" for="bio">자기소개 (선택)</label>
+				<textarea
+						id="bio"
+						name="bio"
+						class="form-input form-textarea"
+						placeholder="간단한 자기소개를 입력해주세요"
+						maxlength="200"
+						oninput="updateCharCount()"
+				></textarea>
+				<div class="char-count" id="bioCharCount">0/200</div>
+			</div>
+
+			<button type="submit" class="submit-button" id="submitButton">
+				가입 완료하기
+			</button>
+		</form>
+	</div>
 </div>
-<script src="/js/common.js"></script>
+
+<!-- Toast 알림 -->
+<div id="toast" class="toast"></div>
+
+<script>
+    // 전역 상태 관리
+    const registerState = {
+        profileFile: null,
+        isSubmitting: false
+    };
+
+    // 유틸리티 함수들
+    const utils = {
+        showToast(message, type = 'info', duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        },
+
+        showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            const inputElement = document.getElementById(elementId.replace('Error', ''));
+
+            errorElement.textContent = message;
+            inputElement?.classList.add('error');
+        },
+
+        clearError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            const inputElement = document.getElementById(elementId.replace('Error', ''));
+
+            errorElement.textContent = '';
+            inputElement?.classList.remove('error');
+        }
+    };
+
+    // 프로필 이미지 관련 함수들
+    function triggerFileInput() {
+        document.getElementById('profileInput').click();
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 파일 크기 체크 (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            utils.showToast('이미지 파일은 5MB 이하로 선택해주세요.', 'error');
+            return;
+        }
+
+        // 파일 타입 체크
+        if (!file.type.startsWith('image/')) {
+            utils.showToast('이미지 파일만 선택할 수 있습니다.', 'error');
+            return;
+        }
+
+        registerState.profileFile = file;
+
+        // 미리보기 표시
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const placeholder = document.getElementById('profilePlaceholder');
+            const image = document.getElementById('profileImage');
+
+            placeholder.style.display = 'none';
+            image.src = e.target.result;
+            image.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 유효성 검사 함수들
+    function validateNickname() {
+        const nickname = document.getElementById('nickname').value;
+        const errorId = 'nicknameError';
+
+        utils.clearError(errorId);
+
+        if (nickname.length < 2) {
+            utils.showError(errorId, '닉네임은 2자 이상 입력해주세요.');
+            return false;
+        }
+
+        if (nickname.length > 20) {
+            utils.showError(errorId, '닉네임은 20자 이하로 입력해주세요.');
+            return false;
+        }
+
+        // 특수문자 검사 (한글, 영문, 숫자, 일부 특수문자만 허용)
+        const nicknameRegex = /^[가-힣a-zA-Z0-9._-]{2,20}$/;
+        if (!nicknameRegex.test(nickname)) {
+            utils.showError(errorId, '한글, 영문, 숫자, ._- 만 사용할 수 있습니다.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function updateAgeDisplay() {
+        const age = document.getElementById('age').value;
+        document.getElementById('ageDisplay').textContent = `${age}세`;
+    }
+
+    function updateCharCount() {
+        const bio = document.getElementById('bio').value;
+        const charCount = document.getElementById('bioCharCount');
+        const count = bio.length;
+
+        charCount.textContent = `${count}/200`;
+
+        if (count > 180) {
+            charCount.className = 'char-count warning';
+        } else if (count >= 200) {
+            charCount.className = 'char-count error';
+        } else {
+            charCount.className = 'char-count';
+        }
+    }
+
+    // 폼 제출 처리
+    async function handleSubmit(event) {
+        event.preventDefault();
+
+        if (registerState.isSubmitting) return;
+
+        // 유효성 검사
+        if (!validateNickname()) {
+            utils.showToast('입력 정보를 확인해주세요.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        const form = document.getElementById('registerForm');
+
+        // 필수 필드 체크
+        const requiredFields = ['nickname', 'gender', 'age', 'region'];
+        for (const field of requiredFields) {
+            const value = form[field].value;
+            if (!value) {
+                utils.showToast('모든 필수 항목을 입력해주세요.', 'error');
+                return;
+            }
+        }
+
+        registerState.isSubmitting = true;
+        const submitButton = document.getElementById('submitButton');
+        submitButton.classList.add('loading');
+        submitButton.textContent = '가입 처리 중...';
+
+        try {
+            // 폼 데이터 준비
+            const requestData = {
+                nickname: form.nickname.value,
+                gender: form.gender.value,
+                age: parseInt(form.age.value),
+                region: form.region.value,
+                bio: form.bio.value || ''
+            };
+
+            formData.append('request', new Blob([JSON.stringify(requestData)], {
+                type: 'application/json'
+            }));
+
+            // 프로필 이미지가 있으면 추가
+            if (registerState.profileFile) {
+                formData.append('images', registerState.profileFile);
+            }
+
+            // API 호출
+            const response = await fetch('/api/v1/users', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 성공 시 토큰 저장 및 홈으로 이동
+                if (result.data?.accessToken) {
+                    sessionStorage.setItem('accessToken', result.data.accessToken);
+                }
+
+                utils.showToast('회원가입이 완료되었습니다!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                throw new Error(result.error?.message || '회원가입 중 오류가 발생했습니다.');
+            }
+
+        } catch (error) {
+            console.error('Registration error:', error);
+            utils.showToast(error.message, 'error');
+        } finally {
+            registerState.isSubmitting = false;
+            submitButton.classList.remove('loading');
+            submitButton.textContent = '가입 완료하기';
+        }
+    }
+
+    // 이벤트 리스너 등록
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registerForm');
+        form.addEventListener('submit', handleSubmit);
+
+        // 초기 상태 설정
+        updateAgeDisplay();
+        updateCharCount();
+
+        // 접근 권한 확인
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+            utils.showToast('로그인이 필요합니다.', 'error');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        }
+    });
+
+    // 뒤로가기 방지 (회원가입 중)
+    window.addEventListener('beforeunload', function(e) {
+        if (registerState.isSubmitting) {
+            e.preventDefault();
+            e.returnValue = '회원가입을 진행 중입니다. 페이지를 떠나시겠습니까?';
+        }
+    });
+</script>
 </body>
 </html>
