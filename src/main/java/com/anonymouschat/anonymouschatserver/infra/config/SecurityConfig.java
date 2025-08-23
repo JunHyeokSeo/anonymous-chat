@@ -49,7 +49,7 @@ public class SecurityConfig {
 				// 인가 규칙
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers(
-								                               "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico",
+								                               "/uploads/**", "/favicon.ico",
 								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
 								                               "/actuator/health",
 								                               "/login", "/register", "/", "/chat/", "/profile", "/auth/callback"
