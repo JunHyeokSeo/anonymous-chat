@@ -49,10 +49,10 @@ public class SecurityConfig {
 				// 인가 규칙
 				.authorizeHttpRequests(auth -> auth
 						                               .requestMatchers(
-								                               "/uploads/**", "/favicon.ico",
+								                               "/uploads/**", "/css/**", "/js/**", "/favicon.ico",
 								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
 								                               "/actuator/health",
-								                               "/login", "/register", "/", "/chat/", "/profile", "/auth/callback"
+								                               "/login", "/register", "/", "/chat", "/chats", "/profile", "/auth/callback"
 						                               ).permitAll()
 						                               .requestMatchers("/api/**").authenticated() // API만 인증
 						                               .anyRequest().denyAll()

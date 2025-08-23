@@ -29,6 +29,11 @@ public class PageController {
 		return "chat";
 	}
 
+	@GetMapping("/chats")
+	public String chatPages() {
+		return "chats";
+	}
+
 	@GetMapping("/profile")
 	public String profilePage() {
 		return "profile";
