@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.file.FileUploadException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
 import com.anonymouschat.anonymouschatserver.common.util.ImageValidator;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ public class UserService {
 	private final FileStorage fileStorage;
 	private final ImageValidator imageValidator;
 
-	public User register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
+	public User register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) {
 		log.info("{}회원 등록 시작 - userId={}", LogTag.USER, command.userId());
 
 		User user = userRepository.findById(command.userId())
@@ -54,7 +56,12 @@ public class UserService {
 		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 		user.updateRole(Role.USER);
 
-		List<UserProfileImage> profileImages = convertToProfileImages(images);
+		List<UserProfileImage> profileImages;
+		try {
+			profileImages = convertToProfileImages(images);
+		} catch (IOException e) {
+			throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
+		}
 		profileImages.forEach(user::addProfileImage);
 
 		log.info("{}회원 등록 완료 - userId={}", LogTag.USER, user.getId());
@@ -70,7 +77,8 @@ public class UserService {
 		return UserServiceDto.ProfileResult.from(user, images);
 	}
 
-	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) throws IOException {
+	@Transactional(noRollbackFor = FileUploadException.class)
+	public void update(UserServiceDto.UpdateCommand command, List<MultipartFile> images) {
 		log.info("{}회원 정보 수정 시작 - userId={}", LogTag.USER, command.userId());
 
 		User user = findUser(command.userId());
@@ -78,12 +86,20 @@ public class UserService {
 		validateNicknameDuplication(command.nickname());
 		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 
-		deletePreviousImages(user.getId());
-		List<UserProfileImage> newImages = convertToProfileImages(images);
-		newImages.forEach(user::addProfileImage);
+		try {
+			deletePreviousImages(user.getId());
+
+			List<UserProfileImage> newImages = convertToProfileImages(images);
+			newImages.forEach(user::addProfileImage);
+
+		} catch (IOException e) {
+			log.error("{}프로필 이미지 업로드 실패 - userId={}, 에러={}", LogTag.IMAGE, command.userId(), e.getMessage(), e);
+			throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
+		}
 
 		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, command.userId());
 	}
+
 
 	public void withdraw(Long userId) {
 		log.info("{}회원 탈퇴 처리 시작 - userId={}", LogTag.USER, userId);

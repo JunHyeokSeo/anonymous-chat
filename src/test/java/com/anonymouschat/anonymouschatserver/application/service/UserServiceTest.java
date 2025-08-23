@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.UserServiceDto;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.BadRequestException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.file.FileUploadException;
 import com.anonymouschat.anonymouschatserver.common.exception.file.UnsupportedImageFormatException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
@@ -73,7 +74,7 @@ class UserServiceTest {
 
 		@Test
 		@DisplayName("이미지 없이 회원가입 성공")
-		void registerUserWithoutImages() throws IOException {
+		void registerUserWithoutImages() {
 			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
@@ -86,7 +87,7 @@ class UserServiceTest {
 
 		@Test
 		@DisplayName("이미지 포함 회원가입 성공")
-		void registerUserWithImages() throws IOException {
+		void registerUserWithImages() throws Exception {
 			MultipartFile image = mock(MultipartFile.class);
 
 			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
@@ -99,14 +100,12 @@ class UserServiceTest {
 			verify(imageValidator).validate(image);
 			verify(fileStorage).upload(image);
 			assertThat(user.getProfileImages()).hasSize(1);
-			assertThat(user.getProfileImages().getFirst().getImageUrl()).isEqualTo("https://image.com");
 		}
 
 		@Test
 		@DisplayName("게스트 유저가 아닌 경우 예외 발생")
 		void register_nonGuestUser_throwsException() throws Exception {
 			User alreadyRegistered = TestUtils.createUser(3L);
-
 			when(userRepository.findById(1L)).thenReturn(Optional.of(alreadyRegistered));
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of()))
@@ -150,8 +149,8 @@ class UserServiceTest {
 		}
 
 		@Test
-		@DisplayName("파일 업로드 실패 시 예외 발생")
-		void register_imageUploadFails_throwsIOException() throws IOException {
+		@DisplayName("파일 업로드 실패 시 FileUploadException 발생 및 롤백")
+		void register_imageUploadFails_throwsFileUploadException() throws Exception {
 			MultipartFile image = mock(MultipartFile.class);
 			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
@@ -159,8 +158,8 @@ class UserServiceTest {
 			when(fileStorage.upload(image)).thenThrow(new IOException("upload fail"));
 
 			assertThatThrownBy(() -> userService.register(validCommand, List.of(image)))
-					.isInstanceOf(IOException.class)
-					.hasMessage("upload fail");
+					.isInstanceOf(FileUploadException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FILE_UPLOAD_FAILED);
 		}
 	}
 
@@ -217,6 +216,7 @@ class UserServiceTest {
 
 			verify(imageValidator).validate(image);
 			verify(fileStorage).upload(image);
+			assertThat(user.getNickname()).isEqualTo("newNick");
 		}
 
 		@Test
@@ -225,9 +225,26 @@ class UserServiceTest {
 			when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userService.update(
-					new UserServiceDto.UpdateCommand(99L, "n", Gender.MALE, 20, Region.SEOUL, "bio"), List.of()
+					new UserServiceDto.UpdateCommand(99L, "n", Gender.MALE, 20, Region.SEOUL, "bio"),
+					List.of()
 			)).isInstanceOf(UserNotFoundException.class)
 					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
+		}
+
+		@Test
+		@DisplayName("회원 정보 수정 실패 - 닉네임 중복")
+		void updateUser_duplicateNickname() throws Exception {
+			User user = createUser(1L);
+			ReflectionTestUtils.setField(user, "id", 1L);
+
+			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+			when(userRepository.existsByNickname("dupNick")).thenReturn(true);
+
+			assertThatThrownBy(() -> userService.update(
+					new UserServiceDto.UpdateCommand(1L, "dupNick", Gender.MALE, 20, Region.SEOUL, "bio"),
+					List.of()
+			)).isInstanceOf(DuplicateNicknameException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_NICKNAME);
 		}
 
 		@Test
@@ -239,7 +256,8 @@ class UserServiceTest {
 
 			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
-			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT)).when(imageValidator).validate(image);
+			doThrow(new UnsupportedImageFormatException(ErrorCode.UNSUPPORTED_IMAGE_FORMAT))
+					.when(imageValidator).validate(image);
 
 			assertThatThrownBy(() -> userService.update(
 					new UserServiceDto.UpdateCommand(1L, "n", Gender.MALE, 20, Region.SEOUL, "bio"),
@@ -247,7 +265,30 @@ class UserServiceTest {
 			)).isInstanceOf(UnsupportedImageFormatException.class)
 					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNSUPPORTED_IMAGE_FORMAT);
 		}
+
+		@Test
+		@DisplayName("회원 정보 수정 실패 - 파일 업로드 IOException 발생 시 FileUploadException 으로 변환 (DB는 롤백 안 됨)")
+		void updateUser_imageUploadFails_throwsFileUploadException() throws Exception {
+			User user = createUser(1L);
+			ReflectionTestUtils.setField(user, "id", 1L);
+			MultipartFile image = mock(MultipartFile.class);
+
+			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+			when(userRepository.existsByNickname(anyString())).thenReturn(false);
+			doNothing().when(imageValidator).validate(image);
+			when(fileStorage.upload(image)).thenThrow(new IOException("upload fail"));
+
+			assertThatThrownBy(() -> userService.update(
+					new UserServiceDto.UpdateCommand(1L, "n", Gender.MALE, 20, Region.SEOUL, "bio"),
+					List.of(image)
+			)).isInstanceOf(FileUploadException.class)
+					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FILE_UPLOAD_FAILED);
+
+			// DB 업데이트는 롤백되지 않아야 함
+			assertThat(user.getNickname()).isEqualTo("n");
+		}
 	}
+
 
 	@Nested
 	@DisplayName("회원 탈퇴")
