@@ -5,7 +5,6 @@ import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.application.usecase.UserUseCase;
 import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
-import com.anonymouschat.anonymouschatserver.infra.security.TokenCookieManager;
 import com.anonymouschat.anonymouschatserver.presentation.CommonResponse;
 import com.anonymouschat.anonymouschatserver.presentation.controller.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +35,6 @@ public class UserController {
 
 	private final UserUseCase userUseCase;
 	private final AuthUseCase authUseCase;
-	private final TokenCookieManager tokenCookieManager;
 
 	@PostMapping
 	@PreAuthorize("hasRole('GUEST')")
@@ -72,8 +69,7 @@ public class UserController {
 	public ResponseEntity<CommonResponse<UserDto.RegisterResponse>> register(
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.RegisterRequest request,
-			@RequestPart(value = "images", required = false) List<MultipartFile> images,
-			HttpServletResponse response
+			@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		userUseCase.register(
 				UserUseCaseDto.RegisterRequest.from(request, principal.provider(), principal.providerId()),
@@ -81,9 +77,6 @@ public class UserController {
 		);
 
 		AuthUseCaseDto.AuthData authResult = authUseCase.login(principal.provider(), principal.providerId());
-
-		tokenCookieManager.clearRefreshToken(response);
-		tokenCookieManager.writeRefreshToken(response, authResult.refreshToken());
 
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)
