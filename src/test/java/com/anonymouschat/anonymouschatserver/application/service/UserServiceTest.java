@@ -77,11 +77,11 @@ class UserServiceTest {
 			when(userRepository.findById(1L)).thenReturn(Optional.of(guestUser));
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
-			Long id = userService.register(validCommand, List.of());
+			User user = userService.register(validCommand, List.of());
 
-			assertThat(id).isEqualTo(1L);
-			assertThat(guestUser.getNickname()).isEqualTo("nickname");
-			assertThat(guestUser.getRole()).isEqualTo(Role.USER);
+			assertThat(user.getId()).isEqualTo(1L);
+			assertThat(user.getNickname()).isEqualTo("nickname");
+			assertThat(user.getRole()).isEqualTo(Role.USER);
 		}
 
 		@Test
@@ -93,13 +93,13 @@ class UserServiceTest {
 			when(fileStorage.upload(image)).thenReturn("https://image.com");
 			when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
-			Long id = userService.register(validCommand, List.of(image));
+			User user = userService.register(validCommand, List.of(image));
 
-			assertThat(id).isEqualTo(1L);
+			assertThat(user.getId()).isEqualTo(1L);
 			verify(imageValidator).validate(image);
 			verify(fileStorage).upload(image);
-			assertThat(guestUser.getProfileImages()).hasSize(1);
-			assertThat(guestUser.getProfileImages().getFirst().getImageUrl()).isEqualTo("https://image.com");
+			assertThat(user.getProfileImages()).hasSize(1);
+			assertThat(user.getProfileImages().getFirst().getImageUrl()).isEqualTo("https://image.com");
 		}
 
 		@Test

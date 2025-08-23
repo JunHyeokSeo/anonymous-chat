@@ -75,12 +75,12 @@ public class UserController {
 	) throws IOException {
 		log.debug("principal.provider(): {}, principal.providerId(): {}", principal.provider(), principal.providerId());
 
-		userUseCase.register(
+		UserUseCaseDto.RegisterResponse registeredUserInfo = userUseCase.register(
 				UserUseCaseDto.RegisterRequest.from(request, principal.userId()),
 				images
 		);
 
-		AuthUseCaseDto.AuthData authResult = authUseCase.login(principal.provider(), principal.providerId());
+		AuthUseCaseDto.AuthData authResult = authUseCase.login(registeredUserInfo.provider(), registeredUserInfo.providerId());
 
 		return ResponseEntity
 				       .status(HttpStatus.CREATED)

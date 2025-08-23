@@ -10,8 +10,10 @@ import com.anonymouschat.anonymouschatserver.common.exception.BadRequestExceptio
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.DuplicateNicknameException;
 import com.anonymouschat.anonymouschatserver.common.exception.user.UserNotFoundException;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.testsupport.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 
@@ -64,13 +67,20 @@ class UserUseCaseTest {
 					                                         .bio("소개")
 					                                         .build();
 
-			given(userService.register(any(UserServiceDto.RegisterCommand.class), anyList())).willReturn(1L);
+			User user = TestUtils.guestUser();
+			ReflectionTestUtils.setField(user, "id", 1L);
+			user.updateProfile("닉네임", Gender.MALE, 25, Region.SEOUL, "소개");
+			user.updateRole(Role.USER);
+
+			given(userService.register(any(UserServiceDto.RegisterCommand.class), anyList())).willReturn(user);
 
 			// when
-			Long userId = userUseCase.register(request, Collections.emptyList());
+			UserUseCaseDto.RegisterResponse response = userUseCase.register(request, Collections.emptyList());
 
 			// then
-			assertThat(userId).isEqualTo(1L);
+			assertThat(response.userId()).isEqualTo(1L);
+			assertThat(response.nickname()).isEqualTo("닉네임");
+			assertThat(response.role()).isEqualTo(Role.USER);
 			then(userService).should().register(any(UserServiceDto.RegisterCommand.class), anyList());
 		}
 

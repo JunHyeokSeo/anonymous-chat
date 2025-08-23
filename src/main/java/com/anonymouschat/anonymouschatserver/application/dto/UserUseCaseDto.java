@@ -1,7 +1,10 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
+import com.anonymouschat.anonymouschatserver.domain.type.OAuthProvider;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
+import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.presentation.controller.dto.UserDto;
 import lombok.Builder;
 
@@ -26,6 +29,33 @@ public class UserUseCaseDto {
 					       .age(request.age())
 					       .region(request.region())
 					       .bio(request.bio() == null ? "" : request.bio())
+					       .build();
+		}
+	}
+
+	@Builder
+	public record RegisterResponse(
+			Long userId,
+			OAuthProvider provider,
+			String providerId,
+			String nickname,
+			Role role,
+			Gender gender,
+			int age,
+			Region region,
+			String bio
+	) {
+		public static RegisterResponse from(User user) {
+			return RegisterResponse.builder()
+					       .userId(user.getId())
+					       .provider(user.getProvider())
+					       .providerId(user.getProviderId())
+					       .nickname(user.getNickname())
+					       .role(user.getRole())
+					       .gender(user.getGender())
+					       .age(user.getAge())
+					       .region(user.getRegion())
+					       .bio(user.getBio())
 					       .build();
 		}
 	}

@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.application.service.BlockService;
 import com.anonymouschat.anonymouschatserver.application.service.UserSearchService;
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ public class UserUseCase {
 	private final BlockService blockService;
 
 	@Transactional
-	public Long register(UserUseCaseDto.RegisterRequest register, List<MultipartFile> images) throws IOException {
+	public UserUseCaseDto.RegisterResponse register(UserUseCaseDto.RegisterRequest register, List<MultipartFile> images) throws IOException {
 		log.info("{}회원가입 요청 - nickname={}, gender={}, age={}", LogTag.USER, register.nickname(), register.gender(), register.age());
-		Long userId = userService.register(UserServiceDto.RegisterCommand.from(register), images);
-		log.info("{}회원가입 완료 - userId={}", LogTag.USER, userId);
-		return userId;
+		User user = userService.register(UserServiceDto.RegisterCommand.from(register), images);
+		log.info("{}회원가입 완료 - userId={}", LogTag.USER, user.getId());
+		return UserUseCaseDto.RegisterResponse.from(user);
 	}
 
 	@Transactional(readOnly = true)

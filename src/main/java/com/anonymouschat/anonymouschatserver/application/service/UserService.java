@@ -38,7 +38,7 @@ public class UserService {
 	private final FileStorage fileStorage;
 	private final ImageValidator imageValidator;
 
-	public Long register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
+	public User register(UserServiceDto.RegisterCommand command, List<MultipartFile> images) throws IOException {
 		log.info("{}회원 등록 시작 - userId={}", LogTag.USER, command.userId());
 
 		User user = userRepository.findById(command.userId())
@@ -58,7 +58,7 @@ public class UserService {
 		profileImages.forEach(user::addProfileImage);
 
 		log.info("{}회원 등록 완료 - userId={}", LogTag.USER, user.getId());
-		return user.getId();
+		return user;
 	}
 
 	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
