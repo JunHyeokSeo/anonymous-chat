@@ -65,7 +65,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	}
 
 	private BooleanExpression genderEquals(Gender gender) {
-		return gender != null ? QUser.user.gender.eq(gender) : null;
+		return gender != null && !gender.equals(Gender.UNKNOWN) ? QUser.user.gender.eq(gender) : null;
 	}
 
 	private BooleanExpression ageBetween(Integer minAge, Integer maxAge) {
@@ -82,6 +82,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	}
 
 	private BooleanExpression regionEquals(Region region) {
-		return region != null ? QUser.user.region.eq(region) : null;
+		return region != null && !region.equals(Region.UNKNOWN)? QUser.user.region.eq(region) : null;
 	}
 }
