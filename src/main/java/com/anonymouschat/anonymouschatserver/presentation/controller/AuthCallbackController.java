@@ -91,8 +91,7 @@ public class AuthCallbackController {
 			AuthUseCaseDto.AuthData authData = authUseCase.handleOAuthCallback(code, userAgent, ipAddress);
 
 			model.addAttribute("authData", authData);
-			return "auth-callback";
-
+			return "pages/auth-callback";
 		} catch (InvalidTokenException e) {
 			log.warn("유효하지 않은 임시 코드 - code: {}", code);
 			return "redirect:/login?error=invalid_code";

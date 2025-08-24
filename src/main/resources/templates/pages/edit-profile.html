@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>프로필 수정 - 익명채팅</title>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .edit-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* 헤더 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(79, 70, 229, 0.1);
+            z-index: 100;
+            padding: 16px 20px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: #4f46e5;
+        }
+
+        .back-icon {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 메인 컨텐츠 */
+        .edit-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .edit-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-container {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fff;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .char-count.warning {
+            color: #f59e0b;
+        }
+
+        .char-count.error {
+            color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        /* 프로필 이미지 업로드 */
+        .profile-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .profile-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-placeholder {
+            color: #64748b;
+            font-size: 2.5rem;
+        }
+
+        .profile-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .profile-preview:hover .profile-overlay {
+            opacity: 1;
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .upload-button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .upload-button.secondary {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .upload-button.secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 나이 슬라이더 */
+        .age-input-container {
+            position: relative;
+        }
+
+        .age-display {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 12px;
+        }
+
+        .age-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .age-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .age-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* 성별 선택 */
+        .gender-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .gender-option {
+            position: relative;
+        }
+
+        .gender-option input {
+            display: none;
+        }
+
+        .gender-option label {
+            display: block;
+            padding: 12px 8px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gender-option input:checked + label {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: transparent;
+            transform: scale(1.02);
+        }
+
+        .gender-option label:hover {
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        /* 하단 버튼 */
+        .bottom-actions {
+            position: sticky;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(79, 70, 229, 0.1);
+            padding: 16px 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+
+        .cancel-btn {
+            flex: 1;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .save-btn-main {
+            flex: 2;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn-main:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .save-btn-main:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .save-btn-main.loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 로딩 상태 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .profile-images-upload {
+            margin-bottom: 24px;
+        }
+
+        .images-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .image-slot {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            border: 2px dashed #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-slot.add-button {
+            color: #94a3b8;
+            font-size: 1.5rem;
+        }
+
+        .image-slot.add-button:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        .image-slot.has-image {
+            border: 2px solid #4f46e5;
+            border-style: solid;
+        }
+
+        .image-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .representative-badge {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: #4f46e5;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 428px) {
+            .edit-content {
+                padding: 16px 12px;
+            }
+
+            .edit-card {
+                padding: 24px 20px;
+                border-radius: 28px;
+            }
+
+            .profile-preview {
+                width: 90px;
+                height: 90px;
+            }
+
+            .gender-options {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .bottom-actions {
+                padding: 12px 16px;
+            }
+        }
+	</style>
+</head>
+<body>
+<!-- 헤더 -->
+<header class="header">
+	<div class="header-content">
+		<div class="header-left">
+			<button class="back-btn" onclick="goBack()">
+				<svg class="back-icon" viewBox="0 0 24 24">
+					<path d="m15 18-6-6 6-6"/>
+				</svg>
+			</button>
+			<h1 class="header-title">프로필 수정</h1>
+		</div>
+		<button class="save-btn" id="headerSaveBtn" onclick="saveProfile()">
+			저장
+		</button>
+	</div>
+</header>
+
+<!-- 메인 컨텐츠 -->
+<div class="edit-container">
+	<div class="edit-content">
+		<div class="edit-card">
+			<form class="form-container" id="editForm" enctype="multipart/form-data">
+				<!-- 프로필 이미지 -->
+				<div class="profile-upload">
+					<div class="profile-images-upload">
+						<label class="form-label">프로필 사진 (최대 3장)</label>
+						<div class="images-grid" id="imagesGrid">
+							<!-- 이미지 슬롯들이 동적으로 추가됩니다 -->
+						</div>
+						<input type="file" id="imageInput" class="file-input" accept="image/*" onchange="handleImageSelect(event)" multiple>
+					</div>
+					<div class="upload-buttons">
+						<button type="button" class="upload-button" onclick="triggerFileInput()">
+							사진 선택
+						</button>
+						<button type="button" class="upload-button secondary" onclick="removeProfileImage()" id="removeBtn" style="display: none;">
+							제거
+						</button>
+					</div>
+					<input type="file" id="profileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+				</div>
+
+				<!-- 닉네임 -->
+				<div class="form-group">
+					<label class="form-label" for="nickname">닉네임</label>
+					<input
+							type="text"
+							id="nickname"
+							name="nickname"
+							class="form-input"
+							placeholder="2~20자 사이로 입력해주세요"
+							maxlength="20"
+							required
+							oninput="validateNickname()"
+					>
+					<div class="error-message" id="nicknameError"></div>
+				</div>
+
+				<!-- 성별 -->
+				<div class="form-group">
+					<label class="form-label">성별</label>
+					<div class="gender-options">
+						<div class="gender-option">
+							<input type="radio" id="male" name="gender" value="MALE" required>
+							<label for="male">남성</label>
+						</div>
+						<div class="gender-option">
+							<input type="radio" id="female" name="gender" value="FEMALE" required>
+							<label for="female">여성</label>
+						</div>
+						<div class="gender-option">
+							<input type="radio" id="unknown" name="gender" value="UNKNOWN" required>
+							<label for="unknown">비공개</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- 나이 -->
+				<div class="form-group">
+					<label class="form-label" for="age">나이</label>
+					<div class="age-input-container">
+						<div class="age-display" id="ageDisplay">25세</div>
+						<input
+								type="range"
+								id="age"
+								name="age"
+								class="age-slider"
+								min="18"
+								max="100"
+								value="25"
+								oninput="updateAgeDisplay()"
+						>
+					</div>
+				</div>
+
+				<!-- 지역 -->
+				<div class="form-group">
+					<label class="form-label" for="region">지역</label>
+					<select id="region" name="region" class="form-input form-select" required>
+						<option value="">지역을 선택해주세요</option>
+						<option value="SEOUL">서울특별시</option>
+						<option value="BUSAN">부산광역시</option>
+						<option value="DAEGU">대구광역시</option>
+						<option value="INCHEON">인천광역시</option>
+						<option value="GWANGJU">광주광역시</option>
+						<option value="DAEJEON">대전광역시</option>
+						<option value="ULSAN">울산광역시</option>
+						<option value="SEJONG">세종특별자치시</option>
+						<option value="GYEONGGI">경기도</option>
+						<option value="GANGWON">강원도</option>
+						<option value="CHUNGBUK">충청북도</option>
+						<option value="CHUNGNAM">충청남도</option>
+						<option value="JEONBUK">전라북도</option>
+						<option value="JEONNAM">전라남도</option>
+						<option value="GYEONGBUK">경상북도</option>
+						<option value="GYEONGNAM">경상남도</option>
+						<option value="JEJU">제주특별자치도</option>
+					</select>
+				</div>
+
+				<!-- 자기소개 -->
+				<div class="form-group">
+					<label class="form-label" for="bio">자기소개</label>
+					<textarea
+							id="bio"
+							name="bio"
+							class="form-input form-textarea"
+							placeholder="간단한 자기소개를 입력해주세요"
+							maxlength="200"
+							oninput="updateCharCount()"
+					></textarea>
+					<div class="char-count" id="bioCharCount">0/200</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- 하단 액션 버튼 -->
+<div class="bottom-actions">
+	<div class="action-buttons">
+		<button type="button" class="cancel-btn" onclick="goBack()">
+			취소
+		</button>
+		<button type="submit" class="save-btn-main" id="saveButton" onclick="saveProfile()">
+			저장하기
+		</button>
+	</div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div class="loading-overlay" id="loadingOverlay">
+	<div class="loading-content">
+		<div class="loading-spinner"></div>
+		<div class="loading-text">프로필을 저장하고 있습니다...</div>
+	</div>
+</div>
+
+<script>
+    // 전역 상태 관리
+    const editState = {
+        profileFile: null,
+        originalProfileImage: null,
+        isSubmitting: false,
+        hasChanges: false,
+        originalData: null
+    };
+
+    // 유틸리티 함수들
+    const utils = {
+        showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            const inputElement = document.getElementById(elementId.replace('Error', ''));
+
+            errorElement.textContent = message;
+            inputElement?.classList.add('error');
+        },
+
+        clearError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            const inputElement = document.getElementById(elementId.replace('Error', ''));
+
+            errorElement.textContent = '';
+            inputElement?.classList.remove('error');
+        },
+
+        showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        },
+
+        hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    };
+
+    // 프로필 이미지 관련 함수들
+    function triggerFileInput() {
+        document.getElementById('profileInput').click();
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 파일 크기 체크 (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('이미지 파일은 5MB 이하로 선택해주세요.');
+            return;
+        }
+
+        // 파일 타입 체크
+        if (!file.type.startsWith('image/')) {
+            alert('이미지 파일만 선택할 수 있습니다.');
+            return;
+        }
+
+        editState.profileFile = file;
+        editState.hasChanges = true;
+
+        // 미리보기 표시
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const placeholder = document.getElementById('profilePlaceholder');
+            const image = document.getElementById('profileImage');
+            const removeBtn = document.getElementById('removeBtn');
+
+            placeholder.style.display = 'none';
+            image.src = e.target.result;
+            image.style.display = 'block';
+            removeBtn.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeProfileImage() {
+        editState.profileFile = null;
+        editState.hasChanges = true;
+
+        const placeholder = document.getElementById('profilePlaceholder');
+        const image = document.getElementById('profileImage');
+        const removeBtn = document.getElementById('removeBtn');
+        const fileInput = document.getElementById('profileInput');
+
+        placeholder.style.display = 'block';
+        image.style.display = 'none';
+        image.src = '';
+        removeBtn.style.display = 'none';
+        fileInput.value = '';
+    }
+
+    // 유효성 검사 함수들
+    function validateNickname() {
+        const nickname = document.getElementById('nickname').value;
+        const errorId = 'nicknameError';
+
+        utils.clearError(errorId);
+
+        if (nickname.length < 2) {
+            utils.showError(errorId, '닉네임은 2자 이상 입력해주세요.');
+            return false;
+        }
+
+        if (nickname.length > 20) {
+            utils.showError(errorId, '닉네임은 20자 이하로 입력해주세요.');
+            return false;
+        }
+
+        const nicknameRegex = /^[가-힣a-zA-Z0-9._-]{2,20}$/;
+        if (!nicknameRegex.test(nickname)) {
+            utils.showError(errorId, '한글, 영문, 숫자, ._- 만 사용할 수 있습니다.');
+            return false;
+        }
+
+        editState.hasChanges = true;
+        return true;
+    }
+
+    function updateAgeDisplay() {
+        const age = document.getElementById('age').value;
+        document.getElementById('ageDisplay').textContent = `${age}세`;
+        editState.hasChanges = true;
+    }
+
+    function updateCharCount() {
+        const bio = document.getElementById('bio').value;
+        const charCount = document.getElementById('bioCharCount');
+        const count = bio.length;
+
+        charCount.textContent = `${count}/200`;
+
+        if (count > 180) {
+            charCount.className = 'char-count warning';
+        } else if (count >= 200) {
+            charCount.className = 'char-count error';
+        } else {
+            charCount.className = 'char-count';
+        }
+
+        editState.hasChanges = true;
+    }
+
+    // 이미지 그리드 렌더링
+    function renderImagesGrid() {
+        const grid = document.getElementById('imagesGrid');
+        grid.innerHTML = '';
+
+        // 기존 이미지들
+        editState.profileImages.forEach((image, index) => {
+            const slot = this.createImageSlot(image, index);
+            grid.appendChild(slot);
+        });
+
+        // 추가 버튼 (3개 미만일 때만)
+        if (editState.profileImages.length < 3) {
+            const addSlot = document.createElement('div');
+            addSlot.className = 'image-slot add-button';
+            addSlot.innerHTML = '+';
+            addSlot.onclick = () => document.getElementById('imageInput').click();
+            grid.appendChild(addSlot);
+        }
+    }
+
+    // 이미지 슬롯 생성
+    function createImageSlot(image, index) {
+        const slot = document.createElement('div');
+        slot.className = 'image-slot has-image';
+
+        slot.innerHTML = `
+        <img src="${image.url}" alt="프로필 이미지">
+        <button class="image-remove" onclick="removeImage(${index})">×</button>
+        ${image.isRepresentative ? '<div class="representative-badge">대표</div>' : ''}
+    `;
+
+        slot.onclick = (e) => {
+            if (!e.target.classList.contains('image-remove')) {
+                setRepresentativeImage(index);
+            }
+        };
+
+        return slot;
+    }
+
+    // 이미지 선택 처리
+    function handleImageSelect(event) {
+        const files = Array.from(event.target.files);
+
+        files.forEach(file => {
+            if (editState.profileImages.length >= 3) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editState.profileImages.push({
+                    file: file,
+                    url: e.target.result,
+                    isNew: true,
+                    isRepresentative: editState.profileImages.length === 0
+                });
+                renderImagesGrid();
+                editState.hasChanges = true;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        event.target.value = '';
+    }
+
+    // 이미지 제거
+    function removeImage(index) {
+        editState.profileImages.splice(index, 1);
+
+        // 대표 이미지가 삭제되면 첫 번째를 대표로
+        if (editState.profileImages.length > 0 &&
+            !editState.profileImages.some(img => img.isRepresentative)) {
+            editState.profileImages[0].isRepresentative = true;
+        }
+
+        renderImagesGrid();
+        editState.hasChanges = true;
+    }
+
+    // 대표 이미지 설정
+    function setRepresentativeImage(index) {
+        editState.profileImages.forEach((img, i) => {
+            img.isRepresentative = i === index;
+        });
+        renderImagesGrid();
+        editState.hasChanges = true;
+    }
+
+    // 프로필 로드
+    async function loadProfile() {
+        utils.showLoading();
+
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const response = await fetch('/api/v1/users/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const profile = result.data;
+                editState.originalData = { ...profile };
+
+                // 폼에 기존 데이터 채우기
+                document.getElementById('nickname').value = profile.nickname || '';
+                document.getElementById('age').value = profile.age || 25;
+                document.getElementById('region').value = profile.region || '';
+                document.getElementById('bio').value = profile.bio || '';
+
+                // 성별 선택
+                if (profile.gender) {
+                    const genderRadio = document.querySelector(`input[name="gender"][value="${profile.gender}"]`);
+                    if (genderRadio) genderRadio.checked = true;
+                }
+
+                // 프로필 이미지
+                editState.profileImages = [];
+                if (profile.profileImages && profile.profileImages.length > 0) {
+                    editState.profileImages = profile.profileImages.map(img => ({
+                        id: img.id,
+                        url: img.imageUrl,
+                        isRepresentative: img.isRepresentative,
+                        isNew: false
+                    }));
+                }
+                renderImagesGrid();
+
+                updateAgeDisplay();
+                updateCharCount();
+
+            } else {
+                alert('프로필 정보를 불러오는데 실패했습니다.');
+                goBack();
+            }
+
+        } catch (error) {
+            console.error('Load profile error:', error);
+            alert('네트워크 오류가 발생했습니다.');
+            goBack();
+        } finally {
+            utils.hideLoading();
+        }
+    }
+
+    // 프로필 저장
+    async function saveProfile() {
+        if (editState.isSubmitting) return;
+
+        // 유효성 검사
+        if (!validateNickname()) {
+            alert('입력 정보를 확인해주세요.');
+            return;
+        }
+
+        const form = document.getElementById('editForm');
+        const requiredFields = ['nickname', 'gender', 'age', 'region'];
+        for (const field of requiredFields) {
+            const value = form[field].value;
+            if (!value) {
+                alert('모든 필수 항목을 입력해주세요.');
+                return;
+            }
+        }
+
+        editState.isSubmitting = true;
+        const saveButton = document.getElementById('saveButton');
+        const headerSaveBtn = document.getElementById('headerSaveBtn');
+
+        saveButton.classList.add('loading');
+        saveButton.textContent = '저장 중...';
+        headerSaveBtn.disabled = true;
+        utils.showLoading();
+
+        try {
+            const formData = new FormData();
+            const requestData = {
+                nickname: form.nickname.value,
+                gender: form.gender.value,
+                age: parseInt(form.age.value),
+                region: form.region.value,
+                bio: form.bio.value || ''
+            };
+
+            formData.append('request', new Blob([JSON.stringify(requestData)], {
+                type: 'application/json'
+            }));
+
+            // 프로필 이미지 처리
+            editState.profileImages.forEach((image, index) => {
+                if (image.isNew && image.file) {
+                    formData.append('images', image.file);
+                }
+            });
+
+			// 이미지 메타데이터 추가
+            const imageMetadata = editState.profileImages.map((img, index) => ({
+                id: img.id || null,
+                isRepresentative: img.isRepresentative,
+                order: index
+            }));
+            formData.append('imageMetadata', JSON.stringify(imageMetadata));
+
+
+            const token = sessionStorage.getItem('accessToken');
+            const response = await fetch('/api/v1/users/me', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('프로필이 성공적으로 수정되었습니다.');
+                editState.hasChanges = false;
+                window.location.href = '/profile';
+            } else {
+                throw new Error(result.error?.message || '프로필 수정 중 오류가 발생했습니다.');
+            }
+
+        } catch (error) {
+            console.error('Save profile error:', error);
+            alert(error.message);
+        } finally {
+            editState.isSubmitting = false;
+            saveButton.classList.remove('loading');
+            saveButton.textContent = '저장하기';
+            headerSaveBtn.disabled = false;
+            utils.hideLoading();
+        }
+    }
+
+    // 뒤로가기
+    function goBack() {
+        if (editState.hasChanges) {
+            if (confirm('변경사항이 있습니다. 저장하지 않고 나가시겠습니까?')) {
+                window.location.href = '/profile';
+            }
+        } else {
+            window.location.href = '/profile';
+        }
+    }
+
+    // 변경사항 감지
+    function detectChanges() {
+        const form = document.getElementById('editForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                editState.hasChanges = true;
+            });
+
+            input.addEventListener('change', () => {
+                editState.hasChanges = true;
+            });
+        });
+    }
+
+    // 페이지 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        // 인증 확인
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        loadProfile();
+        detectChanges();
+    });
+
+    // 페이지 이탈 방지
+    window.addEventListener('beforeunload', function(e) {
+        if (editState.hasChanges && !editState.isSubmitting) {
+            e.preventDefault();
+            e.returnValue = '변경사항이 저장되지 않았습니다. 페이지를 떠나시겠습니까?';
+        }
+    });
+
+    // 뒤로가기 버튼 처리
+    window.addEventListener('popstate', function(e) {
+        if (editState.hasChanges) {
+            e.preventDefault();
+            if (confirm('변경사항이 있습니다. 저장하지 않고 나가시겠습니까?')) {
+                editState.hasChanges = false;
+                history.back();
+            } else {
+                history.pushState(null, null, window.location.pathname);
+            }
+        }
+    });
+
+    // 초기 히스토리 상태 설정
+    history.pushState(null, null, window.location.pathname);
+</script>
+</body>
+</html>

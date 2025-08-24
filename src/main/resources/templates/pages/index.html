@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>홈 - 익명채팅</title>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #f8faff 0%, #f1f5f9 100%);
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* 헤더 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(79, 70, 229, 0.1);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo::before {
+            content: '💬';
+            font-size: 1.2rem;
+        }
+
+        /* 필터 섹션 */
+        .filter-section {
+            background: white;
+            margin: 8px 16px;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(79, 70, 229, 0.06);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+            grid-template-columns: 1fr;
+        }
+
+        .filter-group {
+            min-width: 0;
+        }
+
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* 성별 필터 */
+        .gender-filter {
+            display: flex;
+            gap: 6px;
+        }
+
+        .gender-option {
+            flex: 1;
+        }
+
+        .gender-option input {
+            display: none;
+        }
+
+        .gender-option label {
+            display: block;
+            padding: 8px 6px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+        }
+
+        .gender-option input:checked + label {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .gender-option label:hover {
+            border-color: #4f46e5;
+        }
+
+        /* 지역 필터 */
+        .region-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            background: #f8fafc;
+            color: #374151;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            background-size: 14px;
+            padding-right: 28px;
+        }
+
+        .region-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* 나이 듀얼 슬라이더 */
+        .age-filter {
+            position: relative;
+        }
+
+        .age-display {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .age-values {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        .age-range-container {
+            position: relative;
+            height: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .age-slider {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: transparent;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            pointer-events: none;
+        }
+
+        .age-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+            pointer-events: all;
+            position: relative;
+        }
+
+        .age-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+            pointer-events: all;
+        }
+
+        .age-track-bg {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        .age-track {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        #minAge {
+            z-index: 3;
+        }
+
+        #maxAge {
+            z-index: 4;
+        }
+
+        /* 사용자 목록 */
+        .users-section {
+            padding: 0 16px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .user-count {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* 사용자 카드 */
+        .user-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(79, 70, 229, 0.06);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-card:hover::before {
+            opacity: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .user-nickname {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+
+        .user-age {
+            font-size: 0.8rem;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .user-region {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .user-last-active {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .empty-message {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* 하단 네비게이션 포함 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(79, 70, 229, 0.1);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+            padding: 8px 20px 20px 20px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 60px;
+        }
+
+        .nav-item.active {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.08);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #4f46e5;
+        }
+
+        .nav-icon {
+            width: 26px;
+            height: 26px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 428px) {
+            .filter-section {
+                margin: 6px 12px;
+                padding: 12px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+
+            .filter-row:last-child {
+                grid-template-columns: 1fr;
+            }
+
+            .gender-filter {
+                gap: 4px;
+            }
+
+            .gender-option label {
+                padding: 6px 4px;
+                font-size: 0.7rem;
+            }
+
+            .region-select {
+                padding: 6px 8px;
+                font-size: 0.7rem;
+                padding-right: 24px;
+                background-size: 12px;
+            }
+
+            .users-section {
+                padding: 0 12px;
+            }
+
+            .user-card {
+                padding: 14px;
+            }
+
+            .user-avatar {
+                width: 44px;
+                height: 44px;
+            }
+        }
+	</style>
+</head>
+<body>
+<!-- 헤더 -->
+<header class="header">
+	<div class="header-content">
+		<div class="logo">익명채팅</div>
+	</div>
+</header>
+
+<!-- 필터 섹션 -->
+<section class="filter-section">
+	<!-- 성별 및 지역 -->
+	<div class="filter-row">
+		<div class="filter-group">
+			<label class="filter-label">성별</label>
+			<div class="gender-filter">
+				<div class="gender-option">
+					<input type="radio" id="all-gender" name="gender" value="" checked>
+					<label for="all-gender">전체</label>
+				</div>
+				<div class="gender-option">
+					<input type="radio" id="male" name="gender" value="MALE">
+					<label for="male">남성</label>
+				</div>
+				<div class="gender-option">
+					<input type="radio" id="female" name="gender" value="FEMALE">
+					<label for="female">여성</label>
+				</div>
+			</div>
+		</div>
+		<div class="filter-group">
+			<label class="filter-label">지역</label>
+			<select class="region-select" id="regionFilter">
+				<option value="">전체 지역</option>
+				<option value="SEOUL">서울특별시</option>
+				<option value="BUSAN">부산광역시</option>
+				<option value="DAEGU">대구광역시</option>
+				<option value="INCHEON">인천광역시</option>
+				<option value="GWANGJU">광주광역시</option>
+				<option value="DAEJEON">대전광역시</option>
+				<option value="ULSAN">울산광역시</option>
+				<option value="SEJONG">세종특별자치시</option>
+				<option value="GYEONGGI">경기도</option>
+				<option value="GANGWON">강원도</option>
+				<option value="CHUNGBUK">충청북도</option>
+				<option value="CHUNGNAM">충청남도</option>
+				<option value="JEONBUK">전라북도</option>
+				<option value="JEONNAM">전라남도</option>
+				<option value="GYEONGBUK">경상북도</option>
+				<option value="GYEONGNAM">경상남도</option>
+				<option value="JEJU">제주특별자치도</option>
+			</select>
+		</div>
+	</div>
+
+	<!-- 나이 범위 -->
+	<div class="filter-row">
+		<div class="filter-group">
+			<label class="filter-label">나이</label>
+			<div class="age-filter">
+				<div class="age-display">
+					<span class="age-values" id="ageDisplay">18세 - 100세</span>
+				</div>
+				<div class="age-range-container">
+					<div class="age-track-bg"></div>
+					<div class="age-track" id="ageTrack"></div>
+					<input type="range" id="minAge" class="age-slider" min="18" max="100" value="18">
+					<input type="range" id="maxAge" class="age-slider" min="18" max="100" value="100">
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- 사용자 목록 섹션 -->
+<section class="users-section">
+	<div class="section-header">
+		<h2 class="section-title">새로운 사람들</h2>
+		<span class="user-count" id="userCount">0명</span>
+	</div>
+
+	<!-- 로딩 상태 -->
+	<div class="loading" id="loadingState">
+		<div class="loading-spinner"></div>
+		<div class="loading-text">사용자를 검색하고 있습니다...</div>
+	</div>
+
+	<!-- 사용자 목록 -->
+	<div class="users-grid" id="usersGrid" style="display: none;">
+		<!-- 사용자 카드들이 여기에 동적으로 추가됩니다 -->
+	</div>
+
+	<!-- 빈 상태 -->
+	<div class="empty-state" id="emptyState" style="display: none;">
+		<div class="empty-icon">🔍</div>
+		<div class="empty-title">검색 결과가 없습니다</div>
+		<div class="empty-message">다른 조건으로 검색해보세요</div>
+	</div>
+</section>
+
+<!-- 하단 네비게이션 -->
+<nav class="bottom-nav">
+	<div class="nav-container">
+		<a href="/" class="nav-item active">
+			<svg class="nav-icon" viewBox="0 0 24 24">
+				<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+				<polyline points="9,22 9,12 15,12 15,22"/>
+			</svg>
+		</a>
+		<a href="/chat-list" class="nav-item">
+			<svg class="nav-icon" viewBox="0 0 24 24">
+				<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+			</svg>
+		</a>
+		<a href="/profile" class="nav-item">
+			<svg class="nav-icon" viewBox="0 0 24 24">
+				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+				<circle cx="12" cy="7" r="4"/>
+			</svg>
+		</a>
+	</div>
+</nav>
+
+<script>
+    class HomePageManager {
+        constructor() {
+            this.searchTimeout = null;
+            this.currentPage = 0;
+            this.isLoading = false;
+            this.hasMore = true;
+            this.currentUsers = [];
+            this.filters = {
+                gender: '',
+                region: '',
+                minAge: 18,
+                maxAge: 100
+            };
+
+            this.init();
+        }
+
+        init() {
+            this.setupDualSlider();
+            this.setupFilters();
+            this.loadUsers();
+            this.setupInfiniteScroll();
+        }
+
+        // 듀얼 슬라이더 설정
+        setupDualSlider() {
+            const minSlider = document.getElementById('minAge');
+            const maxSlider = document.getElementById('maxAge');
+            const ageDisplay = document.getElementById('ageDisplay');
+            const ageTrack = document.getElementById('ageTrack');
+
+            const updateSlider = () => {
+                const min = parseInt(minSlider.value);
+                const max = parseInt(maxSlider.value);
+
+                // 최소값이 최대값보다 크면 조정
+                if (min >= max) {
+                    if (minSlider === document.activeElement) {
+                        maxSlider.value = min + 1;
+                    } else {
+                        minSlider.value = max - 1;
+                    }
+                }
+
+                const minVal = parseInt(minSlider.value);
+                const maxVal = parseInt(maxSlider.value);
+
+                // 시각적 트랙 업데이트
+                const minPercent = ((minVal - 18) / (100 - 18)) * 100;
+                const maxPercent = ((maxVal - 18) / (100 - 18)) * 100;
+
+                ageTrack.style.left = minPercent + '%';
+                ageTrack.style.width = (maxPercent - minPercent) + '%';
+
+                // 디스플레이 업데이트
+                ageDisplay.textContent = `${minVal}세 - ${maxVal}세`;
+
+                // 필터 업데이트
+                this.filters.minAge = minVal;
+                this.filters.maxAge = maxVal;
+
+                // 검색 디바운싱
+                this.debounceSearch();
+            };
+
+            minSlider.addEventListener('input', updateSlider);
+            maxSlider.addEventListener('input', updateSlider);
+
+            // 초기 상태 설정
+            updateSlider();
+        }
+
+        // 필터 이벤트 설정
+        setupFilters() {
+            // 성별 필터
+            const genderInputs = document.querySelectorAll('input[name="gender"]');
+            genderInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    this.filters.gender = input.value;
+                    this.debounceSearch();
+                });
+            });
+
+            // 지역 필터
+            const regionSelect = document.getElementById('regionFilter');
+            regionSelect.addEventListener('change', () => {
+                this.filters.region = regionSelect.value;
+                this.debounceSearch();
+            });
+        }
+
+        // 검색 디바운싱
+        debounceSearch() {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.resetAndSearch();
+            }, 500); // 500ms 지연
+        }
+
+        // 검색 리셋 및 새로 검색
+        resetAndSearch() {
+            this.currentPage = 0;
+            this.hasMore = true;
+            this.currentUsers = [];
+            this.loadUsers(true);
+        }
+
+        // 사용자 목록 로드
+        async loadUsers(reset = false) {
+            if (this.isLoading || (!this.hasMore && !reset)) return;
+
+            this.isLoading = true;
+            this.showLoading(reset);
+
+            try {
+                const response = await this.fetchUsers();
+
+                if (response.success) {
+                    const users = response.data.content || [];
+                    const hasNext = response.data.hasNext || false;
+
+                    if (reset) {
+                        this.currentUsers = users;
+                    } else {
+                        this.currentUsers.push(...users);
+                    }
+
+                    this.hasMore = hasNext;
+                    this.currentPage++;
+
+                    this.renderUsers();
+                    this.updateUserCount();
+                } else {
+                    console.error('API Error:', response.error);
+                    this.showError('사용자 목록을 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                this.showError('네트워크 오류가 발생했습니다.');
+            } finally {
+                this.isLoading = false;
+                this.hideLoading();
+            }
+        }
+
+        // API 호출
+        async fetchUsers() {
+            const params = new URLSearchParams({
+                page: this.currentPage,
+                size: 20
+            });
+
+            // 필터 조건 추가
+            if (this.filters.gender) params.append('gender', this.filters.gender);
+            if (this.filters.region) params.append('region', this.filters.region);
+            if (this.filters.minAge) params.append('minAge', this.filters.minAge);
+            if (this.filters.maxAge) params.append('maxAge', this.filters.maxAge);
+
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const response = await fetch(`/api/v1/users?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return await response.json();
+        }
+
+        // 사용자 목록 렌더링
+        renderUsers() {
+            const usersGrid = document.getElementById('usersGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (this.currentUsers.length === 0) {
+                usersGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            usersGrid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            // 기존 내용 클리어 (리셋인 경우)
+            if (this.currentPage === 1) {
+                usersGrid.innerHTML = '';
+            }
+
+            // 새로운 사용자 카드 추가
+            const newUsers = this.currentUsers.slice(
+                this.currentPage === 1 ? 0 : (this.currentPage - 1) * 20
+            );
+
+            newUsers.forEach(user => {
+                const userCard = this.createUserCard(user);
+                usersGrid.appendChild(userCard);
+            });
+        }
+
+        // 사용자 카드 생성
+        createUserCard(user) {
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.onclick = () => this.openUserProfile(user.userId);
+
+            const lastActiveText = this.formatLastActive(user.lastActiveAt);
+            const isOnline = this.isUserOnline(user.lastActiveAt);
+
+            card.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            ${user.profileImageUrl ?
+                `<img src="${user.profileImageUrl}" alt="${user.nickname}">` :
+                '👤'
+            }
+                        </div>
+                        <div class="user-details">
+                            <div class="user-header">
+                                <span class="user-nickname">${user.nickname}</span>
+                                <span class="user-age">${user.age}세</span>
+                            </div>
+                            <div class="user-meta">
+                                <div class="user-region">
+                                    📍 ${this.getRegionName(user.region)}
+                                </div>
+                                <div class="user-last-active">
+                                    ${isOnline ? '<div class="online-indicator"></div>' : ''}
+                                    ${lastActiveText}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+            return card;
+        }
+
+        // 사용자 프로필 열기
+        openUserProfile(userId) {
+            window.location.href = `/user/${userId}`;
+        }
+
+        // 마지막 활동 시간 포맷
+        formatLastActive(lastActiveAt) {
+            const now = new Date();
+            const lastActive = new Date(lastActiveAt);
+            const diffMinutes = Math.floor((now - lastActive) / (1000 * 60));
+
+            if (diffMinutes < 5) return '방금 전';
+            if (diffMinutes < 60) return `${diffMinutes}분 전`;
+
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours}시간 전`;
+
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays < 7) return `${diffDays}일 전`;
+
+            return `${Math.floor(diffDays / 7)}주 전`;
+        }
+
+        // 온라인 상태 확인
+        isUserOnline(lastActiveAt) {
+            const now = new Date();
+            const lastActive = new Date(lastActiveAt);
+            const diffMinutes = Math.floor((now - lastActive) / (1000 * 60));
+            return diffMinutes < 5; // 5분 이내면 온라인
+        }
+
+        // 지역 이름 가져오기
+        getRegionName(region) {
+            const regionMap = {
+                'SEOUL': '서울',
+                'BUSAN': '부산',
+                'DAEGU': '대구',
+                'INCHEON': '인천',
+                'GWANGJU': '광주',
+                'DAEJEON': '대전',
+                'ULSAN': '울산',
+                'SEJONG': '세종',
+                'GYEONGGI': '경기',
+                'GANGWON': '강원',
+                'CHUNGBUK': '충북',
+                'CHUNGNAM': '충남',
+                'JEONBUK': '전북',
+                'JEONNAM': '전남',
+                'GYEONGBUK': '경북',
+                'GYEONGNAM': '경남',
+                'JEJU': '제주'
+            };
+            return regionMap[region] || region;
+        }
+
+        // 사용자 수 업데이트
+        updateUserCount() {
+            const userCount = document.getElementById('userCount');
+            userCount.textContent = `${this.currentUsers.length}명`;
+        }
+
+        // 로딩 상태 표시
+        showLoading(reset = false) {
+            const loadingState = document.getElementById('loadingState');
+            const usersGrid = document.getElementById('usersGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (reset) {
+                loadingState.style.display = 'block';
+                usersGrid.style.display = 'none';
+                emptyState.style.display = 'none';
+            }
+        }
+
+        // 로딩 상태 숨기기
+        hideLoading() {
+            const loadingState = document.getElementById('loadingState');
+            loadingState.style.display = 'none';
+        }
+
+        // 에러 표시
+        showError(message) {
+            console.error(message);
+            // 실제 구현에서는 toast 알림 등으로 처리
+        }
+
+        // 무한 스크롤 설정
+        setupInfiniteScroll() {
+            let isScrolling = false;
+
+            window.addEventListener('scroll', () => {
+                if (isScrolling) return;
+                isScrolling = true;
+
+                setTimeout(() => {
+                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) {
+                        if (this.hasMore && !this.isLoading) {
+                            this.loadUsers();
+                        }
+                    }
+                    isScrolling = false;
+                }, 100);
+            });
+        }
+    }
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        // 인증 확인
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        new HomePageManager();
+    });
+</script>
+</body>
+</html>
