@@ -38,8 +38,8 @@ class LocalFileStorageTest {
 		String imageUrl = fileStorage.upload(mockFile);
 
 		// then
-		assertThat(imageUrl).startsWith("/images/");
-		String filename = imageUrl.replace("/images/", "");
+		assertThat(imageUrl).startsWith("/uploads/");
+		String filename = imageUrl.replace("/uploads/", "");
 		File savedFile = tempDir.resolve(filename).toFile();
 		assertThat(savedFile.exists()).isTrue();
 	}
@@ -52,7 +52,7 @@ class LocalFileStorageTest {
 				"file", "test.jpg", "image/jpeg", "data".getBytes()
 		);
 		String imageUrl = fileStorage.upload(mockFile);
-		String filename = imageUrl.replace("/images/", "");
+		String filename = imageUrl.replace("/uploads/", "");
 		File targetFile = tempDir.resolve(filename).toFile();
 		assertThat(targetFile.exists()).isTrue();
 
@@ -66,7 +66,7 @@ class LocalFileStorageTest {
 	@Test
 	@DisplayName("파일 삭제: 존재하지 않는 파일을 삭제해도 예외가 발생하지 않아야 한다")
 	void delete_NonExistentFile_ShouldDoNothing() {
-		fileStorage.delete("/images/nonexistent.jpg");
+		fileStorage.delete("/uploads/nonexistent.jpg");
 	}
 
 	@Test

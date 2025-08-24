@@ -38,7 +38,7 @@ public class LocalFileStorage implements FileStorage{
 		File targetFile = new File(uploadDir + File.separator + filename);
 		file.transferTo(targetFile);
 
-		return "/images/" + filename;
+		return "/uploads/" + filename;
 	}
 
 	@Override
