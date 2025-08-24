@@ -27,7 +27,7 @@ public class ChatRoomService {
 		long a = initiator.getId(), b = recipient.getId();
 		long left = Math.min(a, b), right = Math.max(a, b);
 
-		Optional<ChatRoom> existing = chatRoomRepository.findActiveByPair(left, right);
+		Optional<ChatRoom> existing = chatRoomRepository.findLatestValidChatRoomByPair(left, right);
 		if (existing.isPresent()) {
 			ChatRoom chatRoom = existing.get();
 			log.info("{}기존 활성 채팅방 반환 - roomId={}, initiatorId={}, recipientId={}",
@@ -44,7 +44,7 @@ public class ChatRoomService {
 		} catch (DataIntegrityViolationException e) {
 			log.warn("{}채팅방 생성 중 동시성 충돌 - initiatorId={}, recipientId={}",
 					LogTag.CHAT, initiator.getId(), recipient.getId());
-			return chatRoomRepository.findActiveByPair(left, right)
+			return chatRoomRepository.findLatestValidChatRoomByPair(left, right)
 					       .orElseThrow(() -> new InternalServerException(ErrorCode.CHAT_ROOM_CONCURRENCY_ERROR));
 		}
 	}

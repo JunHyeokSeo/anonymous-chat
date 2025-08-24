@@ -64,7 +64,7 @@ class ChatRoomServiceTest {
         @DisplayName("활성 채팅방이 존재하면 그 채팅방을 반환한다")
         void it_returns_existing_active_chat_room() {
             // given
-            when(chatRoomRepository.findActiveByPair(1L, 2L)).thenReturn(Optional.of(chatRoom));
+            when(chatRoomRepository.findLatestValidChatRoomByPair(1L, 2L)).thenReturn(Optional.of(chatRoom));
 
             // when
             ChatRoom result = chatRoomService.createOrFind(initiator, recipient);
@@ -79,7 +79,7 @@ class ChatRoomServiceTest {
         @DisplayName("활성 채팅방이 없으면 새로 생성하여 반환한다")
         void it_creates_new_chat_room_if_not_exist() {
             // given
-            when(chatRoomRepository.findActiveByPair(1L, 2L)).thenReturn(Optional.empty());
+            when(chatRoomRepository.findLatestValidChatRoomByPair(1L, 2L)).thenReturn(Optional.empty());
             when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(chatRoom);
 
             // when
@@ -94,7 +94,7 @@ class ChatRoomServiceTest {
         @DisplayName("동시성 문제로 저장 실패 시, 다시 조회하여 반환한다")
         void it_handles_concurrency_issue() {
             // given
-            when(chatRoomRepository.findActiveByPair(1L, 2L))
+            when(chatRoomRepository.findLatestValidChatRoomByPair(1L, 2L))
                     .thenReturn(Optional.empty())
                     .thenReturn(Optional.of(chatRoom));
             when(chatRoomRepository.save(any(ChatRoom.class)))
@@ -106,7 +106,7 @@ class ChatRoomServiceTest {
             // then
             assertThat(result).isEqualTo(chatRoom);
             verify(chatRoomRepository).save(any(ChatRoom.class));
-            verify(chatRoomRepository, times(2)).findActiveByPair(1L, 2L);
+            verify(chatRoomRepository, times(2)).findLatestValidChatRoomByPair(1L, 2L);
         }
     }
 

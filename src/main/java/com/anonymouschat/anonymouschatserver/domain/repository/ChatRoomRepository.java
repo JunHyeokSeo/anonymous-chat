@@ -11,9 +11,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
 
 	@Query("""
         select cr from ChatRoom cr
-        where cr.pairLeftId = :left and cr.pairRightId = :right and cr.isActive = true
+        where cr.pairLeftId = :left and cr.pairRightId = :right and (cr.isActive = true or (cr.isActive = false and cr.exit.user1Exited = false or cr.exit.user2Exited = false)) order by cr.updatedAt desc limit 1
         """)
-	Optional<ChatRoom> findActiveByPair(@Param("left") long left, @Param("right") long right);
+	Optional<ChatRoom> findLatestValidChatRoomByPair(@Param("left") long left, @Param("right") long right);
 
 	@Query("""
         select (count(cr) > 0)
