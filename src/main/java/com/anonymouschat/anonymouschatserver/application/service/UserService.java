@@ -83,7 +83,11 @@ public class UserService {
 
 		User user = findUser(command.userId());
 
-		validateNicknameDuplication(command.nickname());
+		//nickName 변경 됐을 때만 중복 검사
+		if (!command.nickname().equals(user.getNickname())) {
+			validateNicknameDuplication(command.nickname());
+		}
+
 		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 
 		try {
