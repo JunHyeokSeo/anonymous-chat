@@ -101,7 +101,9 @@ public class ChatRoomController {
                               "opponentAge": 25,
                               "opponentRegion": "서울",
                               "opponentProfileImageUrl": "https://example.com/profile.png",
-                              "lastMessageTime": "2025-08-19T15:30:00"
+                              "lastMessageTime": "2025-08-19T15:30:00",
+                              "lastMessageContent": "안녕하세요!",
+                              "unreadCount": 10
                             }
                           ],
                           "error": null

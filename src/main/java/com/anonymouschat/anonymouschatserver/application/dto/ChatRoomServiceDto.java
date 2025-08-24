@@ -12,7 +12,9 @@ public class ChatRoomServiceDto {
 			Integer opponentAge,
 			String opponentRegion,
 			String opponentProfileImageUrl,
-			LocalDateTime lastMessageTime
+			LocalDateTime lastMessageTime,
+			String lastMessageContent,
+			Long unreadCnt
 	) {
 		@QueryProjection
 		public SummaryResult {}

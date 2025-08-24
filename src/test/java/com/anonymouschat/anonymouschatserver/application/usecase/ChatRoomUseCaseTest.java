@@ -81,7 +81,7 @@ class ChatRoomUseCaseTest {
 		@Test
 		@DisplayName("정상적으로 활성 채팅방 목록을 조회한다")
 		void success() {
-			ChatRoomServiceDto.SummaryResult result = new ChatRoomServiceDto.SummaryResult(chatRoom.getId(), user2.getId(), user2.getNickname(), 10, "BUSAN", "file://Image.url", LocalDateTime.now());
+			ChatRoomServiceDto.SummaryResult result = new ChatRoomServiceDto.SummaryResult(chatRoom.getId(), user2.getId(), user2.getNickname(), 10, "BUSAN", "file://Image.url", LocalDateTime.now(), "lastMessageContent", 10L);
 
 			given(chatRoomService.getMyActiveChatRooms(user1.getId())).willReturn(List.of(result));
 

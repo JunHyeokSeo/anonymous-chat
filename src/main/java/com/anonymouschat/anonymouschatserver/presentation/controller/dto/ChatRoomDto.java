@@ -43,7 +43,13 @@ public class ChatRoomDto {
 			String opponentProfileImageUrl,
 
 			@Schema(description = "마지막 메시지 전송 시각", example = "2025-08-19T15:30:00")
-			LocalDateTime lastMessageTime
+			LocalDateTime lastMessageTime,
+
+			@Schema(description = "마지막 메시지 내용", example = "안녕하세요!")
+			String laseMessageContent,
+
+			@Schema(description = "안 읽은 메시지 수", example = "10")
+			Long unreadCount
 	) {
 		public static SummaryResponse from(ChatRoomUseCaseDto.SummaryResponse response) {
 			return new SummaryResponse(
@@ -53,7 +59,9 @@ public class ChatRoomDto {
 					response.opponentAge(),
 					response.opponentRegion(),
 					response.opponentProfileImageUrl(),
-					response.lastMessageTime()
+					response.lastMessageTime(),
+					response.lastMessageContent(),
+					response.unreadCnt()
 			);
 		}
 	}

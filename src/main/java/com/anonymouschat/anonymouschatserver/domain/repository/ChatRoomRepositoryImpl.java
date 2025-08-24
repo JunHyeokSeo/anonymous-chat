@@ -3,10 +3,12 @@ package com.anonymouschat.anonymouschatserver.domain.repository;
 import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.application.dto.QChatRoomServiceDto_SummaryResult;
 import com.anonymouschat.anonymouschatserver.domain.entity.QChatRoom;
+import com.anonymouschat.anonymouschatserver.domain.entity.QMessage;
 import com.anonymouschat.anonymouschatserver.domain.entity.QUserProfileImage;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -31,7 +33,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom{
 						       selectOpponentAge(cr, userId),
 						       selectOpponentRegion(cr, userId),
 						       selectOpponentProfileImageUrl(img),
-						       cr.updatedAt
+						       cr.updatedAt,
+						       selectLastMessageContent(cr),
+						       selectUnreadCount(cr, userId)
 				       ))
 				       .from(cr)
 				       .leftJoin(img).on(
@@ -78,5 +82,27 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom{
 
 	private Expression<String> selectOpponentProfileImageUrl(QUserProfileImage img) {
 		return img.imageUrl;
+	}
+
+	private Expression<Long> selectUnreadCount(QChatRoom cr, Long userId) {
+		QMessage msg = QMessage.message;
+		return JPAExpressions
+				       .select(msg.count())
+				       .from(msg)
+				       .where(
+						       msg.chatRoom.id.eq(cr.id),
+						       msg.sender.id.ne(userId),
+						       msg.isRead.isFalse()
+				       );
+	}
+
+	private Expression<String> selectLastMessageContent(QChatRoom cr) {
+		QMessage msg = QMessage.message;
+		return JPAExpressions
+				       .select(msg.content)
+				       .from(msg)
+				       .where(msg.chatRoom.id.eq(cr.id))
+				       .orderBy(msg.sentAt.desc())
+				       .limit(1);
 	}
 }

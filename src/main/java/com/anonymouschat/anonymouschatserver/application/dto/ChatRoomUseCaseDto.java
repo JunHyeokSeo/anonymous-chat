@@ -15,7 +15,9 @@ public class ChatRoomUseCaseDto {
 			int opponentAge,
 			String opponentRegion,
 			String opponentProfileImageUrl,
-			LocalDateTime lastMessageTime
+			LocalDateTime lastMessageTime,
+			String lastMessageContent,
+			Long unreadCnt
 	) {
 		public static SummaryResponse from(ChatRoomServiceDto.SummaryResult result) {
 			return SummaryResponse.builder()
@@ -26,6 +28,8 @@ public class ChatRoomUseCaseDto {
 					       .opponentRegion(result.opponentRegion())
 					       .opponentProfileImageUrl(result.opponentProfileImageUrl())
 					       .lastMessageTime(result.lastMessageTime())
+					       .lastMessageContent(result.lastMessageContent())
+					       .unreadCnt(result.unreadCnt())
 					       .build();
 		}
 
@@ -42,6 +46,8 @@ public class ChatRoomUseCaseDto {
 							                                .map(UserProfileImage::getImageUrl)
 							                                .orElse(null))
 					       .lastMessageTime(lastMessageTime)
+					       .lastMessageContent("")
+					       .unreadCnt(0L)
 					       .build();
 		}
 	}

@@ -167,7 +167,7 @@ class ChatRoomServiceTest {
         @DisplayName("사용자의 활성 채팅방 목록을 반환한다")
         void it_returns_active_chat_room_list() {
             // given
-            List<ChatRoomServiceDto.SummaryResult> summaries = List.of(new ChatRoomServiceDto.SummaryResult(1L, 2L, "nickname", 20, "region", "url", LocalDateTime.now()));
+            List<ChatRoomServiceDto.SummaryResult> summaries = List.of(new ChatRoomServiceDto.SummaryResult(1L, 2L, "nickname", 20, "region", "url", LocalDateTime.now(), "lastMessageContent", 10L));
             when(chatRoomRepository.findActiveChatRoomsByUser(1L)).thenReturn(summaries);
 
             // when
