@@ -1,5 +1,6 @@
 package com.anonymouschat.anonymouschatserver.presentation.controller.dto;
 
+import com.anonymouschat.anonymouschatserver.application.dto.UserProfileImageDto;
 import com.anonymouschat.anonymouschatserver.application.dto.UserUseCaseDto;
 import com.anonymouschat.anonymouschatserver.common.validation.ValidAgeRange;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class UserDto {
 
@@ -69,7 +71,7 @@ public class UserDto {
 			String bio
 	) {}
 
-	@Schema(description = "내 프로필 응답 DTO")
+	@Schema(description = "프로필 응답 DTO")
 	public record ProfileResponse(
 			@Schema(description = "유저 ID", example = "101")
 			Long id,
@@ -95,8 +97,29 @@ public class UserDto {
 			@Schema(description = "마지막 활동 시각", example = "2025-08-19T09:00:00")
 			LocalDateTime lastActiveAt,
 
-			@Schema(description = "유저 프로필 대표 이미지", example = "/uploads/image.png")
-			String profileImageUrl
+			@Schema(
+					description = "유저 프로필 이미지 리스트",
+					example = """
+									[
+											{
+													"id": 1,
+													"imageUrl": "https://cdn.anonymouschat.com/profile/1.png",
+													"isRepresentative": true
+											},
+											{
+													"id": 2,
+													"imageUrl": "https://cdn.anonymouschat.com/profile/2.png",
+													"isRepresentative": false
+											},
+											{
+													"id": 3,
+													"imageUrl": "https://cdn.anonymouschat.com/profile/3.png",
+													"isRepresentative": false
+											}
+									]
+							"""
+			)
+			List<UserProfileImageDto> profileImages
 	) {
 		public static ProfileResponse from(UserUseCaseDto.ProfileResponse response) {
 			return new ProfileResponse(
@@ -108,7 +131,7 @@ public class UserDto {
 					response.bio(),
 					response.createdAt(),
 					response.lastActiveAt(),
-					response.profileImages().getFirst().imageUrl()
+					response.profileImages()
 			);
 		}
 	}

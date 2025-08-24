@@ -165,6 +165,7 @@ public class UserService {
 						           .imageUrl(url)
 						           .isRepresentative(i == 0)
 						           .build());
+				log.debug("{}프로필 이미지 업로드 성공 - index={}, 파일명={}", LogTag.IMAGE, i, image.getOriginalFilename());
 			} catch (IOException e) {
 				log.error("{}프로필 이미지 업로드 실패 - index={}, 파일명={}, 에러={}", LogTag.IMAGE, i, image.getOriginalFilename(), e.getMessage(), e);
 				throw e;

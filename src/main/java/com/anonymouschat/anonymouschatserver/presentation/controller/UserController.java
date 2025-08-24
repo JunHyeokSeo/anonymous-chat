@@ -105,28 +105,45 @@ public class UserController {
 									examples = @ExampleObject(
 											name = "내 프로필 조회 성공 예시",
 											value = """
-                        {
-                          "success": true,
-                          "data": {
-                            "id": 101,
-                            "nickname": "홍길동",
-                            "gender": "MALE",
-                            "age": 27,
-                            "region": "SEOUL",
-                            "bio": "안녕하세요! 백엔드 개발자입니다.",
-                            "createdAt": "2025-08-18T10:15:30",
-                            "lastActiveAt": "2025-08-19T09:00:00"
-                          },
-                          "error": null
-                        }
-                        """
+															{
+																	"success": true,
+																	"data": {
+																			"id": 101,
+																			"nickname": "홍길동",
+																			"gender": "MALE",
+																			"age": 27,
+																			"region": "SEOUL",
+																			"bio": "안녕하세요! 백엔드 개발자입니다.",
+																			"createdAt": "2025-08-18T10:15:30",
+																			"lastActiveAt": "2025-08-19T09:00:00",
+																			"profileImages":    [
+																										{
+																												"id": 1,
+																												"imageUrl": "https://cdn.anonymouschat.com/profile/1.png",
+																												"isRepresentative": true
+																										},
+																										{
+																												"id": 2,
+																												"imageUrl": "https://cdn.anonymouschat.com/profile/2.png",
+																												"isRepresentative": false
+																										},
+																										{
+																												"id": 3,
+																												"imageUrl": "https://cdn.anonymouschat.com/profile/3.png",
+																												"isRepresentative": false
+																										}
+																							]
+																	},
+																	"error": null
+															}
+													"""
 									)
 							)
 					),
 					@ApiResponse(responseCode = "401", description = "인증 실패")
 			}
 	)
-	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getProfile(
+	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getMyProfile(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		UserUseCaseDto.ProfileResponse profile = userUseCase.getProfile(principal.userId());
@@ -165,7 +182,7 @@ public class UserController {
 			@AuthenticationPrincipal CustomPrincipal principal,
 			@Valid @RequestPart("request") UserDto.UpdateRequest request,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images
-	) throws IOException {
+	) {
 		userUseCase.update(UserUseCaseDto.UpdateRequest.from(request, principal.userId()), images);
 		return ResponseEntity.ok(CommonResponse.success(null));
 	}
@@ -202,6 +219,66 @@ public class UserController {
 	) {
 		userUseCase.withdraw(principal.userId());
 		return ResponseEntity.ok(CommonResponse.success(null));
+	}
+
+	@GetMapping("/{userId}")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
+	@Operation(
+			summary = "사용자 프로필 조회",
+			description = "특정 사용자의 프로필을 조회합니다. (User, Admin 허용)",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "조회 성공",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = CommonResponse.class),
+									examples = @ExampleObject(
+											name = "사용자 프로필 조회 성공 예시",
+											value = """
+													{
+															"success": true,
+															"data": {
+																	"id": 101,
+																	"nickname": "홍길동",
+																	"gender": "MALE",
+																	"age": 27,
+																	"region": "SEOUL",
+																	"bio": "안녕하세요! 백엔드 개발자입니다.",
+																	"createdAt": "2025-08-18T10:15:30",
+																	"lastActiveAt": "2025-08-19T09:00:00",
+																	"profileImages":    [
+																									{
+																											"id": 1,
+																											"imageUrl": "https://cdn.anonymouschat.com/profile/1.png",
+																											"isRepresentative": true
+																									},
+																									{
+																											"id": 2,
+																											"imageUrl": "https://cdn.anonymouschat.com/profile/2.png",
+																											"isRepresentative": false
+																									},
+																									{
+																											"id": 3,
+																											"imageUrl": "https://cdn.anonymouschat.com/profile/3.png",
+																											"isRepresentative": false
+																									}
+																						]
+															},
+															"error": null
+													}
+													"""
+									)
+							)
+					),
+					@ApiResponse(responseCode = "401", description = "인증 실패")
+			}
+	)
+	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getUserProfile(
+			@PathVariable Long userId
+	) {
+		UserUseCaseDto.ProfileResponse profile = userUseCase.getProfile(userId);
+		return ResponseEntity.ok(CommonResponse.success(UserDto.ProfileResponse.from(profile)));
 	}
 
 	@GetMapping

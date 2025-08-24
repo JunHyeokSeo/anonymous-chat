@@ -83,7 +83,10 @@ public class User {
 	}
 
 	public void addProfileImage(UserProfileImage image) {
-		if (profileImages.size() >= 3) {
+		if (profileImages
+				    .stream()
+				    .filter(img -> !img.isDeleted())
+				    .count() > 3) {
 			throw new BadRequestException(ErrorCode.PROFILE_IMAGE_LIMIT_EXCEEDED);
 		}
 

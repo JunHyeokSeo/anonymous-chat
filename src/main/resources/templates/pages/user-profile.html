@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>프로필 - 익명채팅</title>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #f8faff 0%, #f1f5f9 100%);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(79, 70, 229, 0.1);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .back-icon {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .menu-btn:hover {
+            background: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: currentColor;
+            stroke-width: 2;
+        }
+
+        /* 드롭다운 메뉴 */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.1);
+            min-width: 120px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: #f8fafc;
+        }
+
+        .menu-item.danger {
+            color: #ef4444;
+        }
+
+        .menu-item.danger:hover {
+            background: #fef2f2;
+        }
+
+        /* 메인 컨테이너 */
+        .profile-container {
+            max-width: 428px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 로딩 상태 */
+        .loading-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* 프로필 콘텐츠 */
+        .profile-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 이미지 슬라이더 */
+        .image-slider-section {
+            width: 100%;
+            position: relative;
+        }
+
+        .image-slider {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .slide-track {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .slide-item {
+            min-width: 100%;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .slide-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #94a3b8;
+            font-size: 4rem;
+        }
+
+        /* 슬라이더 버튼 */
+        .slide-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+        }
+
+        .image-slider:hover .slide-btn {
+            opacity: 1;
+        }
+
+        .slide-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slide-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .prev-btn {
+            left: 12px;
+        }
+
+        .next-btn {
+            right: 12px;
+        }
+
+        /* 슬라이더 인디케이터 */
+        .slide-indicators {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        /* 프로필 정보 섹션 - 일체감 개선 */
+        .profile-info-section {
+            width: 100%;
+            margin-top: -20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 32px 24px 24px 24px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 70, 229, 0.06);
+            border-bottom: none;
+            margin: 0;
+        }
+
+        .profile-basic {
+            margin-bottom: 16px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .meta-icon {
+            font-size: 1rem;
+        }
+
+        .profile-bio {
+            color: #374151;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        /* 액션 버튼들 */
+        .action-buttons-section {
+            width: 100%;
+            background: white;
+            padding: 0 24px 24px 24px;
+            border: 1px solid rgba(79, 70, 229, 0.06);
+            border-top: none;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .action-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border-color: #e2e8f0;
+        }
+
+        .action-btn.secondary:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .action-btn.disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* 추가 정보 섹션 */
+        .additional-info-section {
+            width: 100%;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(79, 70, 229, 0.06);
+        }
+
+        .info-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .interest-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .interest-tag {
+            background: #f1f5f9;
+            color: #4f46e5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* 에러 상태 */
+        .error-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .retry-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        /* 이미지 확대 모달 */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: none;
+        }
+
+        .image-modal.show {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
+        }
+
+        .modal-close-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .modal-slide-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-slide-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-slide-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .modal-prev {
+            left: 20px;
+        }
+
+        .modal-next {
+            right: 20px;
+        }
+
+        .modal-indicators {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .modal-indicators .indicator {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-indicators .indicator.active {
+            background: white;
+        }
+
+        /* 확인 모달 */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .confirm-modal.show {
+            display: flex;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .confirm-content {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: modalSlideUp 0.3s ease;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .confirm-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .confirm-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .confirm-message {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            background: #dc2626;
+        }
+
+        .confirm-btn.primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .confirm-btn.primary:hover {
+            background: #4338ca;
+        }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 428px) {
+            .image-slider {
+                height: 350px;
+            }
+
+            .profile-card {
+                padding: 24px 20px 20px 20px;
+            }
+
+            .action-buttons-section {
+                padding: 0 20px 20px 20px;
+            }
+
+            .profile-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+            .modal-slide-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+        }
+
+        /* 터치 스와이프 지원 */
+        .image-slider {
+            touch-action: pan-y;
+        }
+
+        .slide-track {
+            touch-action: pan-y;
+        }
+
+        /* 접근성 개선 */
+        .slide-btn:focus,
+        .action-btn:focus,
+        .confirm-btn:focus {
+            outline: 2px solid #4f46e5;
+            outline-offset: 2px;
+        }
+
+        /* 애니메이션 성능 최적화 */
+        .slide-track,
+        .action-btn,
+        .confirm-content {
+            will-change: transform;
+        }
+	</style>
+</head>
+<body>
+<!-- 헤더 -->
+<header class="header">
+	<div class="header-content">
+		<div class="header-left">
+			<button class="back-btn" onclick="goBack()">
+				<svg class="back-icon" viewBox="0 0 24 24">
+					<path d="m15 18-6-6 6-6"/>
+				</svg>
+			</button>
+			<h1 class="header-title">프로필</h1>
+		</div>
+		<div class="header-right">
+			<button class="menu-btn" onclick="toggleMenu()">
+				<svg class="menu-icon" viewBox="0 0 24 24">
+					<circle cx="12" cy="12" r="1"/>
+					<circle cx="12" cy="5" r="1"/>
+					<circle cx="12" cy="19" r="1"/>
+				</svg>
+			</button>
+		</div>
+	</div>
+
+	<!-- 드롭다운 메뉴 -->
+	<div class="dropdown-menu" id="dropdownMenu">
+		<div class="menu-item" onclick="reportUser()">
+			신고하기
+		</div>
+		<div class="menu-item danger" onclick="blockUser()">
+			차단하기
+		</div>
+	</div>
+</header>
+
+<!-- 메인 컨텐츠 -->
+<main class="profile-container">
+	<!-- 로딩 상태 -->
+	<div class="loading-state" id="loadingState">
+		<div class="loading-spinner"></div>
+		<div class="loading-text">프로필을 불러오고 있습니다...</div>
+	</div>
+
+	<!-- 프로필 콘텐츠 -->
+	<div class="profile-content" id="profileContent" style="display: none;">
+		<!-- 프로필 이미지 슬라이더 -->
+		<section class="image-slider-section">
+			<div class="image-slider" id="imageSlider">
+				<div class="slide-track" id="slideTrack">
+					<!-- 이미지들이 동적으로 추가됩니다 -->
+				</div>
+
+				<!-- 네비게이션 버튼 -->
+				<button class="slide-btn prev-btn" id="prevBtn" onclick="previousSlide()">
+					<svg viewBox="0 0 24 24">
+						<path d="m15 18-6-6 6-6"/>
+					</svg>
+				</button>
+				<button class="slide-btn next-btn" id="nextBtn" onclick="nextSlide()">
+					<svg viewBox="0 0 24 24">
+						<path d="m9 18 6-6-6-6"/>
+					</svg>
+				</button>
+
+				<!-- 인디케이터 -->
+				<div class="slide-indicators" id="slideIndicators">
+					<!-- 인디케이터들이 동적으로 추가됩니다 -->
+				</div>
+			</div>
+		</section>
+
+		<!-- 프로필 정보 -->
+		<section class="profile-info-section">
+			<div class="profile-card">
+				<div class="profile-basic">
+					<h2 class="profile-name" id="profileName">로딩 중...</h2>
+					<div class="profile-meta">
+						<div class="meta-item">
+							<span class="meta-icon">🎂</span>
+							<span class="meta-text" id="profileAge">25세</span>
+						</div>
+						<div class="meta-item">
+							<span class="meta-icon">📍</span>
+							<span class="meta-text" id="profileRegion">서울</span>
+						</div>
+						<div class="meta-item" id="lastActiveItem">
+							<span class="meta-icon">⏰</span>
+							<span class="meta-text" id="lastActive">방금 전</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="profile-bio" id="profileBio">
+					안녕하세요! 반갑습니다.
+				</div>
+			</div>
+		</section>
+
+		<!-- 액션 버튼들 -->
+		<section class="action-buttons-section">
+			<div class="action-buttons">
+				<button class="action-btn primary" onclick="startChat()" id="chatBtn">
+					<svg class="btn-icon" viewBox="0 0 24 24">
+						<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+					</svg>
+					<span>대화하기</span>
+				</button>
+
+				<button class="action-btn secondary" onclick="blockUser()" id="blockBtn">
+					<svg class="btn-icon" viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="10"/>
+						<path d="m4.9 4.9 14.2 14.2"/>
+					</svg>
+					<span>차단하기</span>
+				</button>
+			</div>
+		</section>
+
+		<!-- 추가 정보 (선택적) -->
+		<section class="additional-info-section" style="display: none;">
+			<div class="info-card">
+				<h3 class="info-title">관심사</h3>
+				<div class="interest-tags" id="interestTags">
+					<!-- 관심사 태그들이 동적으로 추가됩니다 -->
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- 에러 상태 -->
+	<div class="error-state" id="errorState" style="display: none;">
+		<div class="error-icon">😞</div>
+		<div class="error-title">프로필을 불러올 수 없습니다</div>
+		<div class="error-message">
+			네트워크 오류가 발생했거나<br>
+			존재하지 않는 사용자입니다.
+		</div>
+		<button class="retry-btn" onclick="loadProfile()">다시 시도</button>
+	</div>
+</main>
+
+<!-- 이미지 확대 모달 -->
+<div class="image-modal" id="imageModal">
+	<div class="modal-overlay" onclick="closeImageModal()"></div>
+	<div class="modal-content">
+		<button class="modal-close-btn" onclick="closeImageModal()">
+			<svg viewBox="0 0 24 24">
+				<line x1="18" y1="6" x2="6" y2="18"/>
+				<line x1="6" y1="6" x2="18" y2="18"/>
+			</svg>
+		</button>
+		<img class="modal-image" id="modalImage" src="" alt="프로필 이미지">
+
+		<!-- 모달 내 슬라이더 버튼 -->
+		<button class="modal-slide-btn modal-prev" onclick="modalPreviousSlide()">
+			<svg viewBox="0 0 24 24">
+				<path d="m15 18-6-6 6-6"/>
+			</svg>
+		</button>
+		<button class="modal-slide-btn modal-next" onclick="modalNextSlide()">
+			<svg viewBox="0 0 24 24">
+				<path d="m9 18 6-6-6-6"/>
+			</svg>
+		</button>
+
+		<!-- 모달 인디케이터 -->
+		<div class="modal-indicators" id="modalIndicators">
+			<!-- 인디케이터들이 동적으로 추가됩니다 -->
+		</div>
+	</div>
+</div>
+
+<!-- 확인 모달들 -->
+<!-- 차단 확인 모달 -->
+<div class="confirm-modal" id="blockModal">
+	<div class="modal-backdrop" onclick="hideModal('blockModal')"></div>
+	<div class="confirm-content">
+		<div class="confirm-icon">🚫</div>
+		<div class="confirm-title">사용자 차단</div>
+		<div class="confirm-message">
+			<span id="blockUserName">이 사용자</span>를 차단하시겠습니까?<br>
+			차단된 사용자와는 더 이상 대화할 수 없습니다.
+		</div>
+		<div class="confirm-buttons">
+			<button class="confirm-btn cancel" onclick="hideModal('blockModal')">
+				취소
+			</button>
+			<button class="confirm-btn danger" onclick="confirmBlock()">
+				차단하기
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 신고 확인 모달 -->
+<div class="confirm-modal" id="reportModal">
+	<div class="modal-backdrop" onclick="hideModal('reportModal')"></div>
+	<div class="confirm-content">
+		<div class="confirm-icon">🚨</div>
+		<div class="confirm-title">사용자 신고</div>
+		<div class="confirm-message">
+			부적절한 행동이나 내용에 대해<br>
+			신고하시겠습니까?
+		</div>
+		<div class="confirm-buttons">
+			<button class="confirm-btn cancel" onclick="hideModal('reportModal')">
+				취소
+			</button>
+			<button class="confirm-btn primary" onclick="confirmReport()">
+				신고하기
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 토스트 알림 -->
+<div class="toast" id="toast"></div>
+<script>
+    // 전역 상태 관리
+    const profileState = {
+        userId: null,
+        userProfile: null,
+        currentImageIndex: 0,
+        images: [],
+        isLoading: true,
+        isBlocked: false
+    };
+
+    // 이미지 슬라이더 관리 클래스
+    class ImageSlider {
+        constructor(containerId, images) {
+            this.container = document.getElementById(containerId);
+            this.track = document.getElementById('slideTrack');
+            this.indicators = document.getElementById('slideIndicators');
+            this.images = images || [];
+            this.currentIndex = 0;
+            this.touchStartX = 0;
+            this.touchEndX = 0;
+            this.isTransitioning = false;
+
+            this.init();
+        }
+
+        init() {
+            this.renderSlides();
+            this.renderIndicators();
+            this.updateSlider();
+            this.setupTouchEvents();
+            this.updateNavigationButtons();
+        }
+
+        renderSlides() {
+            this.track.innerHTML = '';
+
+            if (this.images.length === 0) {
+                // 기본 플레이스홀더
+                const slide = document.createElement('div');
+                slide.className = 'slide-item';
+                slide.innerHTML = '<div class="slide-placeholder">👤</div>';
+                this.track.appendChild(slide);
+                return;
+            }
+
+            this.images.forEach((imageUrl, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide-item';
+                slide.onclick = () => this.openImageModal(index);
+
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = `프로필 이미지 ${index + 1}`;
+                img.onerror = () => {
+                    slide.innerHTML = '<div class="slide-placeholder">📷</div>';
+                };
+
+                slide.appendChild(img);
+                this.track.appendChild(slide);
+            });
+        }
+
+        renderIndicators() {
+            this.indicators.innerHTML = '';
+
+            // 이미지가 1개 이하면 인디케이터 표시 안 함
+            if (this.images.length <= 1) return;
+
+            // 실제 이미지 개수만큼만 인디케이터 생성
+            this.images.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.className = 'indicator';
+                indicator.onclick = () => this.goToSlide(index);
+                this.indicators.appendChild(indicator);
+            });
+        }
+
+        updateSlider() {
+            if (this.images.length <= 1) return;
+
+            const translateX = -this.currentIndex * 100;
+            this.track.style.transform = `translateX(${translateX}%)`;
+
+            // 인디케이터 업데이트
+            const indicators = this.indicators.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === this.currentIndex);
+            });
+
+            this.updateNavigationButtons();
+        }
+
+        updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            // 이미지가 1개 이하면 네비게이션 버튼 숨김
+            if (!prevBtn || !nextBtn || this.images.length <= 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                return;
+            }
+
+            prevBtn.style.display = this.currentIndex === 0 ? 'none' : 'flex';
+            nextBtn.style.display = this.currentIndex === this.images.length - 1 ? 'none' : 'flex';
+        }
+
+        goToSlide(index) {
+            if (this.isTransitioning || index < 0 || index >= this.images.length) return;
+
+            this.isTransitioning = true;
+            this.currentIndex = index;
+            profileState.currentImageIndex = index;
+            this.updateSlider();
+
+            setTimeout(() => {
+                this.isTransitioning = false;
+            }, 300);
+        }
+
+        nextSlide() {
+            if (this.currentIndex < this.images.length - 1) {
+                this.goToSlide(this.currentIndex + 1);
+            }
+        }
+
+        previousSlide() {
+            if (this.currentIndex > 0) {
+                this.goToSlide(this.currentIndex - 1);
+            }
+        }
+
+        setupTouchEvents() {
+            this.container.addEventListener('touchstart', (e) => {
+                this.touchStartX = e.touches[0].clientX;
+            }, { passive: true });
+
+            this.container.addEventListener('touchend', (e) => {
+                this.touchEndX = e.changedTouches[0].clientX;
+                this.handleSwipe();
+            }, { passive: true });
+        }
+
+        handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeLength = this.touchEndX - this.touchStartX;
+
+            if (Math.abs(swipeLength) < swipeThreshold) return;
+
+            if (swipeLength > 0) {
+                this.previousSlide();
+            } else {
+                this.nextSlide();
+            }
+        }
+
+        openImageModal(index) {
+            if (this.images.length === 0) return;
+            openImageModal(index);
+        }
+    }
+
+    // 이미지 모달 관리 클래스
+    class ImageModal {
+        constructor() {
+            this.modal = document.getElementById('imageModal');
+            this.modalImage = document.getElementById('modalImage');
+            this.modalIndicators = document.getElementById('modalIndicators');
+            this.currentIndex = 0;
+            this.images = [];
+        }
+
+        open(images, startIndex = 0) {
+            this.images = images;
+            this.currentIndex = startIndex;
+            this.renderModalIndicators();
+            this.updateModalImage();
+            this.modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        close() {
+            this.modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        renderModalIndicators() {
+            this.modalIndicators.innerHTML = '';
+
+            if (this.images.length <= 1) return;
+
+            this.images.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.className = 'indicator';
+                indicator.onclick = () => this.goToImage(index);
+                this.modalIndicators.appendChild(indicator);
+            });
+        }
+
+        updateModalImage() {
+            this.modalImage.src = this.images[this.currentIndex];
+
+            // 인디케이터 업데이트
+            const indicators = this.modalIndicators.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === this.currentIndex);
+            });
+
+            // 네비게이션 버튼 표시/숨김
+            const prevBtn = this.modal.querySelector('.modal-prev');
+            const nextBtn = this.modal.querySelector('.modal-next');
+
+            if (prevBtn && nextBtn) {
+                prevBtn.style.display = this.currentIndex === 0 ? 'none' : 'flex';
+                nextBtn.style.display = this.currentIndex === this.images.length - 1 ? 'none' : 'flex';
+            }
+        }
+
+        goToImage(index) {
+            if (index >= 0 && index < this.images.length) {
+                this.currentIndex = index;
+                this.updateModalImage();
+            }
+        }
+
+        nextImage() {
+            this.goToImage(this.currentIndex + 1);
+        }
+
+        previousImage() {
+            this.goToImage(this.currentIndex - 1);
+        }
+    }
+
+    // 전역 인스턴스
+    let imageSlider;
+    let imageModal;
+
+    // 초기화 함수
+    async function initializeUserProfile() {
+        try {
+            // URL에서 userId 추출
+            const pathParts = window.location.pathname.split('/');
+            const userId = parseInt(pathParts[pathParts.length - 1]);
+
+            if (!userId || isNaN(userId)) {
+                throw new Error('유효하지 않은 사용자 ID입니다.');
+            }
+
+            profileState.userId = userId;
+
+            // 프로필 로드
+            await loadProfile();
+
+            // 이미지 슬라이더 초기화
+            initializeImageSlider();
+
+            // 이미지 모달 초기화
+            imageModal = new ImageModal();
+
+        } catch (error) {
+            console.error('Profile initialization failed:', error);
+            showError('프로필을 불러올 수 없습니다.');
+        }
+    }
+
+    // 프로필 로드
+    async function loadProfile() {
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            showLoading();
+
+            // URL 수정: /api/v1/users/{userId}
+            const response = await fetch(`/api/v1/users/${profileState.userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                profileState.userProfile = result.data;
+                renderProfile();
+            } else {
+                throw new Error(result.error?.message || '프로필 로드 실패');
+            }
+
+        } catch (error) {
+            console.error('Load profile error:', error);
+            showError(error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // 프로필 렌더링
+    function renderProfile() {
+        const profile = profileState.userProfile;
+
+        // 기본 정보
+        document.getElementById('profileName').textContent = profile.nickname;
+        document.getElementById('profileAge').textContent = `${profile.age}세`;
+        document.getElementById('profileRegion').textContent = getRegionName(profile.region);
+        document.getElementById('profileBio').textContent = profile.bio || '자기소개가 없습니다.';
+
+        // 마지막 활동 시간
+        if (profile.lastActiveAt) {
+            const lastActiveText = formatLastActive(profile.lastActiveAt);
+            document.getElementById('lastActive').textContent = lastActiveText;
+        }
+
+        // 이미지 설정 - API 응답 구조에 맞게 수정
+        profileState.images = [];
+        if (profile.profileImages && profile.profileImages.length > 0) {
+            // imageUrl만 추출하여 배열로 만듦
+            profileState.images = profile.profileImages.map(img => img.imageUrl);
+        }
+
+        // 차단된 사용자 체크 (API 응답에 포함될 경우)
+        profileState.isBlocked = profile.isBlocked || false;
+        updateActionButtons();
+
+        // 모달 이름 설정
+        document.getElementById('blockUserName').textContent = profile.nickname;
+
+        showProfile();
+    }
+
+    // 이미지 슬라이더 초기화
+    function initializeImageSlider() {
+        imageSlider = new ImageSlider('imageSlider', profileState.images);
+    }
+
+    // UI 상태 관리
+    function showLoading() {
+        document.getElementById('loadingState').style.display = 'flex';
+        document.getElementById('profileContent').style.display = 'none';
+        document.getElementById('errorState').style.display = 'none';
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingState').style.display = 'none';
+    }
+
+    function showProfile() {
+        document.getElementById('profileContent').style.display = 'flex';
+        document.getElementById('errorState').style.display = 'none';
+        hideLoading();
+    }
+
+    function showError(message) {
+        document.getElementById('errorState').style.display = 'flex';
+        document.getElementById('profileContent').style.display = 'none';
+        hideLoading();
+
+        const errorMessage = document.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.textContent = message;
+        }
+    }
+
+    // 액션 버튼 업데이트
+    function updateActionButtons() {
+        const chatBtn = document.getElementById('chatBtn');
+        const blockBtn = document.getElementById('blockBtn');
+
+        if (profileState.isBlocked) {
+            chatBtn.textContent = '차단된 사용자';
+            chatBtn.disabled = true;
+            chatBtn.classList.remove('primary');
+            chatBtn.classList.add('disabled');
+
+            blockBtn.querySelector('span').textContent = '차단 해제';
+        }
+    }
+
+    // 슬라이더 컨트롤 함수들
+    function nextSlide() {
+        if (imageSlider) {
+            imageSlider.nextSlide();
+        }
+    }
+
+    function previousSlide() {
+        if (imageSlider) {
+            imageSlider.previousSlide();
+        }
+    }
+
+    // 모달 함수들
+    function openImageModal(index = 0) {
+        if (profileState.images.length > 0 && imageModal) {
+            imageModal.open(profileState.images, index);
+        }
+    }
+
+    function closeImageModal() {
+        if (imageModal) {
+            imageModal.close();
+        }
+    }
+
+    function modalNextSlide() {
+        if (imageModal) {
+            imageModal.nextImage();
+        }
+    }
+
+    function modalPreviousSlide() {
+        if (imageModal) {
+            imageModal.previousImage();
+        }
+    }
+
+    // 액션 함수들
+    async function startChat() {
+        if (profileState.isBlocked) {
+            showToast('차단된 사용자와는 대화할 수 없습니다.');
+            return;
+        }
+
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            const response = await fetch('/api/v1/chat-rooms', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    recipientId: profileState.userId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = `/chat/${result.data.roomId}`;
+            } else {
+                throw new Error(result.error?.message || '채팅방 생성 실패');
+            }
+
+        } catch (error) {
+            console.error('Start chat error:', error);
+            showToast('채팅방을 생성할 수 없습니다.');
+        }
+    }
+
+    function blockUser() {
+        hideMenu();
+        showModal('blockModal');
+    }
+
+    function reportUser() {
+        hideMenu();
+        showModal('reportModal');
+    }
+
+    async function confirmBlock() {
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            const endpoint = profileState.isBlocked
+                ? '/api/v1/blocks' // 차단 해제
+                : '/api/v1/blocks'; // 차단
+
+            const method = profileState.isBlocked ? 'DELETE' : 'POST';
+
+            const response = await fetch(endpoint, {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    blockedUserId: profileState.userId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const message = profileState.isBlocked ? '차단을 해제했습니다.' : '사용자를 차단했습니다.';
+                showToast(message);
+
+                profileState.isBlocked = !profileState.isBlocked;
+                updateActionButtons();
+
+                hideModal('blockModal');
+
+                if (!profileState.isBlocked) {
+                    // 차단 해제한 경우는 그대로 유지
+                } else {
+                    // 차단한 경우 이전 페이지로 이동
+                    setTimeout(() => {
+                        goBack();
+                    }, 1500);
+                }
+            } else {
+                throw new Error(result.error?.message || '처리 중 오류가 발생했습니다.');
+            }
+
+        } catch (error) {
+            console.error('Block action error:', error);
+            showToast(error.message);
+        }
+    }
+
+    function confirmReport() {
+        showToast('신고가 접수되었습니다. 검토 후 조치하겠습니다.');
+        hideModal('reportModal');
+    }
+
+    // 메뉴 관리
+    function toggleMenu() {
+        const menu = document.getElementById('dropdownMenu');
+        menu.classList.toggle('show');
+    }
+
+    function hideMenu() {
+        const menu = document.getElementById('dropdownMenu');
+        menu.classList.remove('show');
+    }
+
+    // 모달 관리
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.add('show');
+    }
+
+    function hideModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    // 유틸리티 함수들
+    function goBack() {
+        if (document.referrer && document.referrer.includes(window.location.origin)) {
+            window.history.back();
+        } else {
+            window.location.href = '/';
+        }
+    }
+
+    function showToast(message, duration = 3000) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, duration);
+    }
+
+    function getRegionName(region) {
+        const regionMap = {
+            'SEOUL': '서울',
+            'BUSAN': '부산',
+            'DAEGU': '대구',
+            'INCHEON': '인천',
+            'GWANGJU': '광주',
+            'DAEJEON': '대전',
+            'ULSAN': '울산',
+            'SEJONG': '세종',
+            'GYEONGGI': '경기',
+            'GANGWON': '강원',
+            'CHUNGBUK': '충북',
+            'CHUNGNAM': '충남',
+            'JEONBUK': '전북',
+            'JEONNAM': '전남',
+            'GYEONGBUK': '경북',
+            'GYEONGNAM': '경남',
+            'JEJU': '제주'
+        };
+        return regionMap[region] || region;
+    }
+
+    function formatLastActive(lastActiveAt) {
+        const now = new Date();
+        const lastActive = new Date(lastActiveAt);
+        const diffMinutes = Math.floor((now - lastActive) / (1000 * 60));
+
+        if (diffMinutes < 5) return '방금 전';
+        if (diffMinutes < 60) return `${diffMinutes}분 전`;
+
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `${diffHours}시간 전`;
+
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) return `${diffDays}일 전`;
+
+        return `${Math.floor(diffDays / 7)}주 전`;
+    }
+
+    // 이벤트 리스너 설정
+    function setupEventListeners() {
+        // 외부 클릭으로 메뉴 닫기
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.header-right') && !e.target.closest('.dropdown-menu')) {
+                hideMenu();
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeImageModal();
+                hideModal('blockModal');
+                hideModal('reportModal');
+            }
+        });
+
+        // 키보드 네비게이션
+        document.addEventListener('keydown', (e) => {
+            if (imageModal.modal.classList.contains('show')) {
+                if (e.key === 'ArrowLeft') {
+                    modalPreviousSlide();
+                } else if (e.key === 'ArrowRight') {
+                    modalNextSlide();
+                }
+            } else {
+                if (e.key === 'ArrowLeft') {
+                    previousSlide();
+                } else if (e.key === 'ArrowRight') {
+                    nextSlide();
+                }
+            }
+        });
+    }
+
+    // 페이지 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        // 인증 확인
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        setupEventListeners();
+        initializeUserProfile();
+    });
+</script>
+</body>
+</html>
