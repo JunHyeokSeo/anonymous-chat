@@ -68,7 +68,7 @@ class ChatMessageHandlerTest {
 		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, content);
 
 		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
-		when(broadcaster.broadcast(eq(roomId), any(ChatOutboundMessage.class))).thenReturn(2);
+		when(broadcaster.broadcastExcept(eq(roomId), any(ChatOutboundMessage.class), eq(senderId))).thenReturn(1);
 		when(messageUseCase.sendMessage(any())).thenReturn(1000L);
 
 		// when
@@ -76,7 +76,7 @@ class ChatMessageHandlerTest {
 
 		// then
 		// 브로드캐스트 메시지 검증
-		verify(broadcaster).broadcast(eq(roomId), outboundMessageCaptor.capture());
+		verify(broadcaster).broadcastExcept(eq(roomId), outboundMessageCaptor.capture(), eq(senderId));
 		ChatOutboundMessage outbound = outboundMessageCaptor.getValue();
 		assertThat(outbound.roomId()).isEqualTo(roomId);
 		assertThat(outbound.senderId()).isEqualTo(senderId);
@@ -157,7 +157,7 @@ class ChatMessageHandlerTest {
 		var inbound = new ChatInboundMessage(roomId, MessageType.CHAT, "안녕하세요");
 
 		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
-		doThrow(new RuntimeException("브로드캐스트 실패")).when(broadcaster).broadcast(anyLong(), any());
+		doThrow(new RuntimeException("브로드캐스트 실패")).when(broadcaster).broadcastExcept(anyLong(), any(), eq(senderId));
 
 		handler.handle(session, inbound);
 
@@ -190,13 +190,13 @@ class ChatMessageHandlerTest {
 		Instant before = Instant.now();
 
 		when(guard.ensureParticipant(session, roomId, senderId)).thenReturn(true);
-		when(broadcaster.broadcast(eq(roomId), any(ChatOutboundMessage.class))).thenReturn(1);
+		when(broadcaster.broadcastExcept(eq(roomId), any(ChatOutboundMessage.class), eq(senderId))).thenReturn(1);
 
 		handler.handle(session, inbound);
 
 		Instant after = Instant.now();
 
-		verify(broadcaster).broadcast(eq(roomId), outboundMessageCaptor.capture());
+		verify(broadcaster).broadcastExcept(eq(roomId), outboundMessageCaptor.capture(), eq(senderId));
 		ChatOutboundMessage message = outboundMessageCaptor.getValue();
 		assertThat(message.timestamp())
 				.isAfter(before.minusSeconds(1))
