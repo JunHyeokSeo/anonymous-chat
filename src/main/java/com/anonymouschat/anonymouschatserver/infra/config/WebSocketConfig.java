@@ -27,7 +27,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		registry.addHandler(chatWebSocketHandler, "/ws/chat")
 				.addInterceptors(jwtHandshakeInterceptor)
-				.setAllowedOrigins("*") //todo: 특정 Origin만 허용 하도록 변경 예정
-				.withSockJS();
+				.setAllowedOriginPatterns("*");
 	}
 }

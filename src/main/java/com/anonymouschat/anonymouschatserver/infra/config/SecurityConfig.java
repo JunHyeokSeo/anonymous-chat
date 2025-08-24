@@ -51,7 +51,7 @@ public class SecurityConfig {
 						                               .requestMatchers(
 								                               "/uploads/**", "/css/**", "/js/**", "/favicon.ico",
 								                               "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
-								                               "/actuator/health",
+								                               "/actuator/health", "/ws/**", //ws는 JwtHandshakeInterceptor 에서 검증
 								                               "/login", "/register", "/", "/chat/**", "/chat-list", "/profile/**", "/auth/callback", "/user/**"
 						                               ).permitAll()
 						                               .requestMatchers("/api/**").authenticated() // API만 인증

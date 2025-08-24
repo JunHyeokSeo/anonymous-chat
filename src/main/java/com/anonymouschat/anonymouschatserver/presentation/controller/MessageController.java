@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,51 +28,6 @@ import java.util.List;
 public class MessageController {
 
 	private final MessageUseCase messageUseCase;
-
-	/**
-	 * 메시지 전송 (ROLE_USER, ROLE_ADMIN 허용)
-	 */
-	@PostMapping
-	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	@Operation(
-			summary = "메시지 전송",
-			description = "특정 채팅방에 메시지를 전송합니다. (USER, ADMIN 권한 필요)",
-			responses = {
-					@ApiResponse(
-							responseCode = "201",
-							description = "메시지 전송 성공",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = CommonResponse.class),
-									examples = @ExampleObject(
-											name = "메시지 전송 성공 예시",
-											value = """
-                        {
-                          "success": true,
-                          "data": {
-                            "messageId": 2001
-                          },
-                          "error": null
-                        }
-                        """
-									)
-							)
-					),
-					@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-					@ApiResponse(responseCode = "401", description = "인증 실패")
-			}
-	)
-	public ResponseEntity<CommonResponse<MessageDto.SendMessageResponse>> sendMessage(
-			@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal principal,
-			@Valid @RequestBody MessageDto.SendMessageRequest request
-	) {
-		Long messageId = messageUseCase.sendMessage(
-				MessageDto.SendMessageRequest.from(request, principal.userId())
-		);
-		return ResponseEntity
-				       .status(HttpStatus.CREATED)
-				       .body(CommonResponse.success(MessageDto.SendMessageResponse.from(messageId)));
-	}
 
 	/**
 	 * 채팅방 메시지 조회 (ROLE_USER, ROLE_ADMIN 허용)

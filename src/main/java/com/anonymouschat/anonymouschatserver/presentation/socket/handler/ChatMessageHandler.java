@@ -71,7 +71,7 @@ public class ChatMessageHandler implements MessageHandler {
 					                               .timestamp(timestamp)
 					                               .build();
 
-			int delivered = broadcaster.broadcast(roomId, outbound);
+			int delivered = broadcaster.broadcastExcept(roomId, outbound, senderId);
 
 			log.info("{}message broadcasted: roomId={} senderId={} delivered={}",
 					LogTag.WS_CHAT, roomId, senderId, delivered);
