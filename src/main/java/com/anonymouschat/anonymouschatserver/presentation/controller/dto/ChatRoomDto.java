@@ -46,7 +46,7 @@ public class ChatRoomDto {
 			LocalDateTime lastMessageTime,
 
 			@Schema(description = "마지막 메시지 내용", example = "안녕하세요!")
-			String laseMessageContent,
+			String lastMessageContent,
 
 			@Schema(description = "안 읽은 메시지 수", example = "10")
 			Long unreadCount
