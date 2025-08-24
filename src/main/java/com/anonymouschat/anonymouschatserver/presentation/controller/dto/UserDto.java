@@ -93,7 +93,10 @@ public class UserDto {
 			LocalDateTime createdAt,
 
 			@Schema(description = "마지막 활동 시각", example = "2025-08-19T09:00:00")
-			LocalDateTime lastActiveAt
+			LocalDateTime lastActiveAt,
+
+			@Schema(description = "유저 프로필 대표 이미지", example = "/uploads/image.png")
+			String profileImageUrl
 	) {
 		public static ProfileResponse from(UserUseCaseDto.ProfileResponse response) {
 			return new ProfileResponse(
@@ -104,7 +107,8 @@ public class UserDto {
 					response.region(),
 					response.bio(),
 					response.createdAt(),
-					response.lastActiveAt()
+					response.lastActiveAt(),
+					response.profileImages().getFirst().imageUrl()
 			);
 		}
 	}

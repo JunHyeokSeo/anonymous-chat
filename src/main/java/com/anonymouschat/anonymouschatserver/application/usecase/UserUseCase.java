@@ -15,7 +15,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @UseCase
@@ -36,12 +35,12 @@ public class UserUseCase {
 	}
 
 	@Transactional(readOnly = true)
-	public UserUseCaseDto.ProfileResponse getMyProfile(Long userId) {
-		return UserUseCaseDto.ProfileResponse.from(userService.getMyProfile(userId));
+	public UserUseCaseDto.ProfileResponse getProfile(Long userId) {
+		return UserUseCaseDto.ProfileResponse.from(userService.getProfile(userId));
 	}
 
 	@Transactional
-	public void update(UserUseCaseDto.UpdateRequest update, List<MultipartFile> images) throws IOException {
+	public void update(UserUseCaseDto.UpdateRequest update, List<MultipartFile> images) {
 		log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, update.id());
 		userService.update(UserServiceDto.UpdateCommand.from(update), images);
 		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, update.id());

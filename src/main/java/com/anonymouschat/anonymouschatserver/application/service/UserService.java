@@ -68,7 +68,7 @@ public class UserService {
 		return user;
 	}
 
-	public UserServiceDto.ProfileResult getMyProfile(Long userId) {
+	public UserServiceDto.ProfileResult getProfile(Long userId) {
 		User user = findUser(userId);
 		List<UserProfileImage> images = userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(
 				user.getId(),
@@ -92,10 +92,8 @@ public class UserService {
 
 		try {
 			deletePreviousImages(user.getId());
-
 			List<UserProfileImage> newImages = convertToProfileImages(images);
 			newImages.forEach(user::addProfileImage);
-
 		} catch (IOException e) {
 			log.error("{}프로필 이미지 업로드 실패 - userId={}, 에러={}", LogTag.IMAGE, command.userId(), e.getMessage(), e);
 			throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);

@@ -143,8 +143,8 @@ class UserUseCaseTest {
 	}
 
 	@Nested
-	@DisplayName("내 프로필 조회(getMyProfile)")
-	class GetMyProfile {
+	@DisplayName("내 프로필 조회(getProfile)")
+	class getProfile {
 		@Test
 		@DisplayName("정상적으로 프로필을 조회한다")
 		void success() throws Exception {
@@ -158,10 +158,10 @@ class UserUseCaseTest {
 					                                             .bio("소개")
 					                                             .profileImages(Collections.emptyList())
 					                                             .build();
-			given(userService.getMyProfile(1L)).willReturn(profileResult);
+			given(userService.getProfile(1L)).willReturn(profileResult);
 
 			// when
-			var response = userUseCase.getMyProfile(1L);
+			var response = userUseCase.getProfile(1L);
 
 			// then
 			assertThat(response.nickname()).isEqualTo("테스트");
@@ -170,9 +170,9 @@ class UserUseCaseTest {
 		@Test
 		@DisplayName("존재하지 않는 유저는 예외 발생")
 		void notFound() {
-			given(userService.getMyProfile(anyLong())).willThrow(new UserNotFoundException(ErrorCode.USER_NOT_FOUND));
+			given(userService.getProfile(anyLong())).willThrow(new UserNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-			assertThatThrownBy(() -> userUseCase.getMyProfile(99L))
+			assertThatThrownBy(() -> userUseCase.getProfile(99L))
 					.isInstanceOf(UserNotFoundException.class);
 		}
 	}

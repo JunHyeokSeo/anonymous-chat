@@ -126,10 +126,10 @@ public class UserController {
 					@ApiResponse(responseCode = "401", description = "인증 실패")
 			}
 	)
-	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getMyProfile(
+	public ResponseEntity<CommonResponse<UserDto.ProfileResponse>> getProfile(
 			@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		UserUseCaseDto.ProfileResponse profile = userUseCase.getMyProfile(principal.userId());
+		UserUseCaseDto.ProfileResponse profile = userUseCase.getProfile(principal.userId());
 		return ResponseEntity.ok(CommonResponse.success(UserDto.ProfileResponse.from(profile)));
 	}
 

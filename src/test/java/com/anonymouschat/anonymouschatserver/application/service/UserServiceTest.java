@@ -169,7 +169,7 @@ class UserServiceTest {
 
 		@Test
 		@DisplayName("정상적으로 프로필 조회")
-		void getMyProfile_success() throws Exception {
+		void getProfile_success() throws Exception {
 			User user = createUser(1L);
 			List<UserProfileImage> images = List.of(new UserProfileImage("url", true));
 			ReflectionTestUtils.setField(user, "id", 1L);
@@ -177,7 +177,7 @@ class UserServiceTest {
 			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 			when(userProfileImageRepository.findAllByUserIdAndDeletedIsFalse(any(), any())).thenReturn(images);
 
-			UserServiceDto.ProfileResult result = userService.getMyProfile(1L);
+			UserServiceDto.ProfileResult result = userService.getProfile(1L);
 
 			assertThat(result.nickname()).isEqualTo(user.getNickname());
 			assertThat(result.profileImages()).hasSize(1);
@@ -185,10 +185,10 @@ class UserServiceTest {
 
 		@Test
 		@DisplayName("존재하지 않는 유저로 조회 시 실패")
-		void getMyProfile_userNotFound() {
+		void getProfile_userNotFound() {
 			when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> userService.getMyProfile(999L))
+			assertThatThrownBy(() -> userService.getProfile(999L))
 					.isInstanceOf(UserNotFoundException.class)
 					.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
