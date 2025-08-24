@@ -7,6 +7,7 @@ import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.annotation.UseCase;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,21 @@ public class ChatRoomUseCase {
 		User initiator = userService.findUser(initiatorId);
 		User recipient = userService.findUser(recipientId);
 		return chatRoomService.createOrFind(initiator, recipient).getId();
+	}
+
+	@Transactional(readOnly = true)
+	public ChatRoomUseCaseDto.SummaryResponse getChatRoom(Long chatRoomId, Long userId) {
+		ChatRoom room = chatRoomService.findChatRoomById(chatRoomId);
+		User opponent = room.getUser1().getId().equals(userId) ? room.getUser1() : room.getUser2();
+		return ChatRoomUseCaseDto.SummaryResponse.builder()
+				       .roomId(room.getId())
+				       .opponentId(opponent.getId())
+				       .opponentNickname(opponent.getNickname())
+				       .opponentAge(opponent.getAge())
+				       .opponentRegion(opponent.getRegion().name())
+				       .opponentProfileImageUrl(opponent.getProfileImages().stream().filter(UserProfileImage::isRepresentative).findFirst().map(UserProfileImage::getImageUrl).orElse(null))
+				       .lastMessageTime(room.getUpdatedAt())
+				       .build();
 	}
 
 	@Transactional(readOnly = true)

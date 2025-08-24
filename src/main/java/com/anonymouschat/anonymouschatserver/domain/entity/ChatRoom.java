@@ -54,9 +54,11 @@ public class ChatRoom {
 	private ChatRoomExit exit;
 
 	@Column(name = "created_at", nullable = false)
+	@Getter
 	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at", nullable = false)
+	@Getter
 	private LocalDateTime updatedAt;
 
 	@PrePersist

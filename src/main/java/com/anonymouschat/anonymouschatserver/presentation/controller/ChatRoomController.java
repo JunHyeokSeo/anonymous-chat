@@ -164,4 +164,52 @@ public class ChatRoomController {
 				       .status(HttpStatus.NO_CONTENT)
 				       .body(CommonResponse.success(null));
 	}
+
+	@GetMapping("/{roomId}")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
+	@Operation(
+			summary = "채팅방 단건 조회",
+			description = "roomId를 사용하여 채팅방을 조회합니다. (USER, ADMIN 권한 필요)",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "채팅방 조회 성공",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = CommonResponse.class),
+									examples = @ExampleObject(
+											name = "채팅방 조회 성공 예시",
+											value = """
+                        {
+                          "success": true,
+                          "data": {
+                            "roomId": 1001,
+                            "opponentId": 42,
+                            "opponentNickname": "밍글유저",
+                            "opponentAge": 25,
+                            "opponentRegion": "서울",
+                            "opponentProfileImageUrl": "https://example.com/profile.png",
+                            "lastMessageTime": "2025-08-19T15:30:00"
+                          },
+                          "error": null
+                        }
+                        """
+									)
+							)
+					),
+					@ApiResponse(responseCode = "401", description = "인증 실패"),
+					@ApiResponse(responseCode = "404", description = "해당 채팅방 없음")
+			}
+	)
+	public ResponseEntity<CommonResponse<ChatRoomDto.SummaryResponse>> getChatRoom(
+			@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal principal,
+			@Parameter(description = "채팅방 ID", example = "1001")
+			@PathVariable Long roomId
+	) {
+		ChatRoomUseCaseDto.SummaryResponse response = chatRoomUseCase.getChatRoom(roomId, principal.userId());
+
+		return ResponseEntity
+				       .status(HttpStatus.OK)
+				       .body(CommonResponse.success(ChatRoomDto.SummaryResponse.from(response)));
+	}
 }
