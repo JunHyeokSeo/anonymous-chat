@@ -37,23 +37,26 @@ public class LoggingFilter extends OncePerRequestFilter {
 	protected boolean shouldNotFilter(HttpServletRequest request) {
 		String uri = request.getRequestURI();
 
-		// PageController 뷰 경로
-		if (uri.equals("/login")
-				    || uri.equals("/register")
-				    || uri.equals("/")
-				    || uri.startsWith("/chat/")
-				    || uri.equals("/chats")
-				    || uri.equals("/profile")
-				    || uri.equals("/auth/callback")) {
+		// PageController 경로
+		if (uri.equals("/")
+				    || uri.startsWith("/login")
+				    || uri.startsWith("/register")
+				    || uri.startsWith("/chat")
+				    || uri.startsWith("/chat-list")
+				    || uri.startsWith("/profile")
+				    || uri.startsWith("/user")
+				    || uri.startsWith("/auth/callback")) {
 			return true;
 		}
 
-		// 정적 자원 (CSS, JS, 이미지, 파비콘 등)
+		// 정적 리소스
 		return uri.endsWith(".html")
 				       || uri.startsWith("/css")
 				       || uri.startsWith("/js")
 				       || uri.startsWith("/images")
-				       || uri.startsWith("/favicon");
+				       || uri.startsWith("/favicon")
+				       || uri.startsWith("/webjars")
+				       || uri.startsWith("/static");
 	}
 
 	@Override
@@ -92,14 +95,20 @@ public class LoggingFilter extends OncePerRequestFilter {
 
 	private void logResponse(ContentCachingResponseWrapper response) {
 		int status = response.getStatus();
+		String contentType = response.getContentType();
 
 		if (isProd()) {
 			log.info("RESPONSE: status=[{}]", status);
 		} else {
-			String body = maskSensitive(getStringValue(response.getContentAsByteArray()));
-			log.info("RESPONSE: status=[{}], body={}", status, body);
+			if (contentType != null && contentType.contains("application/json")) {
+				String body = maskSensitive(getStringValue(response.getContentAsByteArray()));
+				log.info("RESPONSE: status=[{}], body={}", status, body);
+			} else {
+				log.info("RESPONSE: status=[{}], body=[non-JSON omitted] ", status);
+			}
 		}
 	}
+
 
 	private String getPrincipalInfo() {
 		var authentication = SecurityContextHolder.getContext().getAuthentication();
