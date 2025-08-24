@@ -33,7 +33,7 @@ public class ChatRoomUseCase {
 
 		room.validateUsable();
 
-		User opponent = room.getUser1().getId().equals(userId) ? room.getUser1() : room.getUser2();
+		User opponent = !room.getUser1().getId().equals(userId) ? room.getUser1() : room.getUser2();
 
 		return ChatRoomUseCaseDto.SummaryResponse.from(room.getId(), room.getUpdatedAt(), opponent);
 	}
