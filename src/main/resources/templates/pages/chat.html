@@ -1270,8 +1270,13 @@
 
     // 채팅방 정보 로드
     async function loadChatRoomInfo() {
-        // 실제 구현에서는 API 호출
-        // 여기서는 시뮬레이션
+        const response = await fetch(`/api/v1/messages?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
         chatState.opponentInfo = {
             id: 123,
             nickname: '익명사용자',
@@ -1307,7 +1312,8 @@
             const result = await response.json();
 
             if (result.success) {
-                const newMessages = result.data || [];
+                const userId = result.data.userId;
+                const newMessages = result.data.messageList || [];
 
                 if (reset) {
                     chatState.messages = newMessages;
@@ -1323,10 +1329,10 @@
                     chatState.lastMessageId = newMessages[0].messageId;
                 }
 
+                sessionStorage.setItem("userId", userId);
             } else {
                 throw new Error(result.error?.message || '메시지 로드 실패');
             }
-
         } catch (error) {
             console.error('Load messages error:', error);
             showToast('메시지를 불러오는데 실패했습니다.');
@@ -1722,9 +1728,7 @@
     }
 
     function getCurrentUserId() {
-        // JWT 토큰에서 사용자 ID 추출 또는 별도 저장소에서 가져오기
-        // 여기서는 시뮬레이션
-        return 456;
+        return sessionStorage.getItem("userId");
     }
 
     function updateMessageReadStatus(lastReadMessageId) {

@@ -3,42 +3,12 @@ package com.anonymouschat.anonymouschatserver.presentation.controller.dto;
 import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MessageDto {
-
-	@Schema(description = "메시지 전송 요청 DTO")
-	public record SendMessageRequest(
-			@Schema(description = "채팅방 ID", example = "1001")
-			@NotNull(message = "채팅방 ID는 필수입니다.")
-			Long roomId,
-
-			@Schema(description = "메시지 내용", example = "안녕하세요!")
-			@NotBlank(message = "메시지 내용은 비어 있을 수 없습니다.")
-			String content
-	) {
-		public static MessageUseCaseDto.SendMessageRequest from(SendMessageRequest request, Long senderId) {
-			return new MessageUseCaseDto.SendMessageRequest(
-					request.roomId(),
-					senderId,
-					request.content()
-			);
-		}
-	}
-
-	@Schema(description = "메시지 전송 응답 DTO")
-	public record SendMessageResponse(
-			@Schema(description = "생성된 메시지 ID", example = "2001")
-			Long messageId
-	) {
-		public static SendMessageResponse from(Long messageId) {
-			return new SendMessageResponse(messageId);
-		}
-	}
-
 	@Schema(description = "메시지 조회 요청 DTO")
 	public record GetMessagesRequest(
 			@Schema(description = "채팅방 ID", example = "1001")
@@ -62,6 +32,24 @@ public class MessageDto {
 		}
 	}
 
+	@Schema(description = "유저와 메시지 목록 응답 DTO")
+	public record MessagesWithUserResponse(
+			@Schema(description = "유저 ID", example = "101")
+			Long userId,
+
+			@Schema(description = "메시지 목록")
+			List<MessageResponse> messageList
+	) {
+		public static MessagesWithUserResponse from(Long userId, List<MessageUseCaseDto.MessageResponse> responses) {
+			return new MessagesWithUserResponse(
+					userId,
+					responses.stream()
+							.map(MessageResponse::from)
+							.toList()
+			);
+		}
+	}
+
 	@Schema(description = "메시지 단일 응답 DTO")
 	public record MessageResponse(
 			@Schema(description = "메시지 ID", example = "2001")
@@ -77,10 +65,7 @@ public class MessageDto {
 			String content,
 
 			@Schema(description = "메시지 전송 시각", example = "2025-08-19T13:24:00")
-			LocalDateTime sentAt,
-
-			@Schema(description = "내가 보낸 메시지 여부", example = "true")
-			boolean isMine
+			LocalDateTime sentAt
 	) {
 		public static MessageResponse from(MessageUseCaseDto.MessageResponse response) {
 			return new MessageResponse(
@@ -88,8 +73,7 @@ public class MessageDto {
 					response.roomId(),
 					response.senderId(),
 					response.content(),
-					response.sentAt(),
-					response.isMine()
+					response.sentAt()
 			);
 		}
 	}

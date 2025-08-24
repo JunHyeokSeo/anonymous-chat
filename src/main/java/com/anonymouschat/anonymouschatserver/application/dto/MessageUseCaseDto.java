@@ -11,18 +11,15 @@ public class MessageUseCaseDto {
 			Long roomId,
 			Long senderId,
 			String content,
-			LocalDateTime sentAt,
-			boolean isMine
+			LocalDateTime sentAt
 	) {
-		public static MessageResponse from(Message message, Long userId) {
-			boolean isMine = message.isSentBy(userId);
+		public static MessageResponse from(Message message) {
 			return MessageResponse.builder()
 					       .messageId(message.getId())
 					       .roomId(message.getChatRoom().getId())
 					       .senderId(message.getSender().getId())
 					       .content(message.getContent())
 					       .sentAt(message.getSentAt())
-					       .isMine(isMine)
 					       .build();
 		}
 	}

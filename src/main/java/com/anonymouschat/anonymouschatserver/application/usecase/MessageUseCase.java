@@ -50,7 +50,7 @@ public class MessageUseCase {
 		List<Message> messages = messageService.getMessages(chatRoom, lastExitedAt, request.lastMessageId(), request.limit());
 
 		return messages.stream()
-				       .map(m -> MessageUseCaseDto.MessageResponse.from(m, request.userId()))
+				       .map(MessageUseCaseDto.MessageResponse::from)
 				       .toList();
 	}
 
