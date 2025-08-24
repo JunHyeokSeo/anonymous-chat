@@ -1,6 +1,7 @@
 package com.anonymouschat.anonymouschatserver.domain.entity;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
+import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
 import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -117,6 +118,13 @@ public class ChatRoom {
 
 	public boolean isArchived() {
 		return !this.isActive && this.exit.bothExited(); // 과거 대화 완전 종료된 방
+	}
+
+	// 대화가 종료된 방은 사용되어서는 안 된다.
+	public void validateUsable() {
+		if (this.isArchived()) {
+			throw new ConflictException(ErrorCode.CHAT_ROOM_CLOSED);
+		}
 	}
 
 	@Builder

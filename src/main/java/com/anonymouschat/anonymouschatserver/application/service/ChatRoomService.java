@@ -85,7 +85,7 @@ public class ChatRoomService {
 		return chatRoomRepository.existsByIdAndParticipantId(roomId, userId);
 	}
 
-	public ChatRoom findChatRoomById(Long roomId) {
+	private ChatRoom findChatRoomById(Long roomId) {
 		return chatRoomRepository.findById(roomId)
 				       .orElseThrow(() -> new NotFoundException(ErrorCode.CHATROOM_NOT_FOUND));
 	}

@@ -1,5 +1,7 @@
 package com.anonymouschat.anonymouschatserver.application.dto;
 
+import com.anonymouschat.anonymouschatserver.domain.entity.User;
+import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,22 @@ public class ChatRoomUseCaseDto {
 					       .opponentRegion(result.opponentRegion())
 					       .opponentProfileImageUrl(result.opponentProfileImageUrl())
 					       .lastMessageTime(result.lastMessageTime())
+					       .build();
+		}
+
+		public static SummaryResponse from(Long roomId, LocalDateTime lastMessageTime, User opponent) {
+			return SummaryResponse.builder()
+					       .roomId(roomId)
+					       .opponentId(opponent.getId())
+					       .opponentNickname(opponent.getNickname())
+					       .opponentAge(opponent.getAge())
+					       .opponentRegion(opponent.getRegion().name())
+					       .opponentProfileImageUrl(opponent.getProfileImages().stream()
+							                                .filter(UserProfileImage::isRepresentative)
+							                                .findFirst()
+							                                .map(UserProfileImage::getImageUrl)
+							                                .orElse(null))
+					       .lastMessageTime(lastMessageTime)
 					       .build();
 		}
 	}

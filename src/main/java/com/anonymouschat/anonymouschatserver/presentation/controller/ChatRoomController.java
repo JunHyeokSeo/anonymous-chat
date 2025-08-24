@@ -206,7 +206,7 @@ public class ChatRoomController {
 			@Parameter(description = "채팅방 ID", example = "1001")
 			@PathVariable Long roomId
 	) {
-		ChatRoomUseCaseDto.SummaryResponse response = chatRoomUseCase.getChatRoom(roomId, principal.userId());
+		ChatRoomUseCaseDto.SummaryResponse response = chatRoomUseCase.getChatRoom(principal.userId(), roomId);
 
 		return ResponseEntity
 				       .status(HttpStatus.OK)
