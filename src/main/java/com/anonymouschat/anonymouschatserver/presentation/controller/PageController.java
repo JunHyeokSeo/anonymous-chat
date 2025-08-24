@@ -10,43 +10,43 @@ public class PageController {
 
 	@GetMapping("/login")
 	public String loginPage() {
-		return "pages/login";
+		return "/pages/login";
 	}
 
 	@GetMapping("/register")
 	public String registerPage() {
-		return "pages/register";
+		return "/pages/register";
 	}
 
 	@GetMapping("/")
 	public String mainPage() {
-		return "pages/index";
+		return "/pages/index";
 	}
 
 	@GetMapping("/chat/{roomId}")
 	public String chatPage(@PathVariable Long roomId, Model model) {
 		model.addAttribute("roomId", roomId);
-		return "pages/chat";
+		return "/pages/chat";
 	}
 
 	@GetMapping("/chat-list")
 	public String chatPages() {
-		return "pages/chat-list";
+		return "/pages/chat-list";
 	}
 
 	@GetMapping("/profile")
 	public String profilePage() {
-		return "pages/profile";
+		return "/pages/profile";
 	}
 
 	@GetMapping("/profile/edit")
 	public String editProfilePage() {
-		return "pages/edit-profile";
+		return "/pages/edit-profile";
 	}
 
 	@GetMapping("/user/{userId}")
 	public String userProfilePage(@PathVariable Long userId, Model model) {
 		model.addAttribute("userId", userId);
-		return "pages/user-profile";
+		return "/pages/user-profile";
 	}
 }
