@@ -47,43 +47,45 @@ public class MessageController {
 									examples = @ExampleObject(
 											name = "메시지 조회 성공 예시",
 											value = """
-														{
-															"success": true,
-															"data": {
-																"userId": 101,   # 새로 추가된 필드
-																"messageList": [
-																					{
-																						"messageId": 2001,
-																						"roomId": 1001,
-																						"senderId": 3001,
-																						"content": "안녕하세요! 반갑습니다 :)",
-																						"sentAt": "2025-08-19T13:24:00"
-																					},
-																					{
-																						"messageId": 2002,
-																						"roomId": 1001,
-																						"senderId": 3002,
-																						"content": "네, 반갑습니다!",
-																						"sentAt": "2025-08-19T13:25:00"
-																					}
-																				]
-																},
-																"error": null
-														}
-													"""
+                        {
+                          "success": true,
+                          "data": [
+                            {
+                              "messageId": 2001,
+                              "roomId": 1001,
+                              "senderId": 3001,
+                              "content": "안녕하세요! 반갑습니다 :)",
+                              "sentAt": "2025-08-19T13:24:00",
+                              "isMine": true
+                            },
+                            {
+                              "messageId": 2002,
+                              "roomId": 1001,
+                              "senderId": 3002,
+                              "content": "네, 반갑습니다!",
+                              "sentAt": "2025-08-19T13:25:00",
+                              "isMine": false
+                            }
+                          ],
+                          "error": null
+                        }
+                        """
 									)
 							)
 					),
 					@ApiResponse(responseCode = "401", description = "인증 실패")
 			}
 	)
-	public ResponseEntity<CommonResponse<MessageDto.MessagesWithUserResponse>> getMessages(
+	public ResponseEntity<CommonResponse<List<MessageDto.MessageResponse>>> getMessages(
 			@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal principal,
 			@Valid MessageDto.GetMessagesRequest request
 	) {
-		List<MessageUseCaseDto.MessageResponse> responses = messageUseCase.getMessages(MessageDto.GetMessagesRequest.from(request, principal.userId()));
+		List<MessageUseCaseDto.MessageResponse> responses =
+				messageUseCase.getMessages(MessageDto.GetMessagesRequest.from(request, principal.userId()));
 
-		return ResponseEntity.ok(CommonResponse.success(MessageDto.MessagesWithUserResponse.from(principal.userId(), responses)));
+		List<MessageDto.MessageResponse> dtoResponses = responses.stream().map(MessageDto.MessageResponse::from).toList();
+
+		return ResponseEntity.ok(CommonResponse.success(dtoResponses));
 	}
 
 	/**

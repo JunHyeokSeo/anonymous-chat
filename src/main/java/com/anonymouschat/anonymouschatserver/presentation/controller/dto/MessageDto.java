@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class MessageDto {
 	@Schema(description = "메시지 조회 요청 DTO")
@@ -28,24 +27,6 @@ public class MessageDto {
 					userId,
 					request.lastMessageId(),
 					request.limit()
-			);
-		}
-	}
-
-	@Schema(description = "유저와 메시지 목록 응답 DTO")
-	public record MessagesWithUserResponse(
-			@Schema(description = "유저 ID", example = "101")
-			Long userId,
-
-			@Schema(description = "메시지 목록")
-			List<MessageResponse> messageList
-	) {
-		public static MessagesWithUserResponse from(Long userId, List<MessageUseCaseDto.MessageResponse> responses) {
-			return new MessagesWithUserResponse(
-					userId,
-					responses.stream()
-							.map(MessageResponse::from)
-							.toList()
 			);
 		}
 	}
