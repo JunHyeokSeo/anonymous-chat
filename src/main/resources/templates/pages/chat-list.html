@@ -595,11 +595,10 @@
 
             emptyState.style.display = 'none';
 
-            // 기존 채팅 아이템들 제거 (로딩, 빈 상태 제외)
             const existingItems = chatList.querySelectorAll('.chat-item-wrapper, .chat-item');
             existingItems.forEach(item => item.remove());
 
-            // 채팅방을 최근 메시지 시간 순으로 정렬
+            // 서버에서 이미 updatedAt 기준 내림차순 정렬해 주지만, 클라이언트에서도 한번 더 보장
             this.chatRooms.sort((a, b) =>
                 new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
             );
@@ -614,78 +613,47 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'chat-item-wrapper';
 
-            const isUnread = this.hasUnreadMessages(room);
+            const isUnread = room.unreadCount > 0;
             const isOnline = this.isUserOnline(room.lastMessageTime);
             const timeText = this.formatTime(room.lastMessageTime);
 
             wrapper.innerHTML = `
-                    <div class="chat-item ${isUnread ? 'unread' : ''}" onclick="openChatRoom(${room.roomId})">
-                        <div class="chat-header">
-                            <div class="chat-avatar">
-                                ${room.opponentProfileImageUrl ?
+                <div class="chat-item ${isUnread ? 'unread' : ''}" onclick="openChatRoom(${room.roomId})">
+                    <div class="chat-header">
+                        <div class="chat-avatar">
+                            ${room.opponentProfileImageUrl ?
                 `<img src="${room.opponentProfileImageUrl}" alt="${room.opponentNickname}">` :
                 '👤'
             }
-                                ${isOnline ? '<div class="online-dot"></div>' : ''}
+                            ${isOnline ? '<div class="online-dot"></div>' : ''}
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-user">
+                                <span class="chat-nickname">${room.opponentNickname}</span>
+                                <span class="chat-time">${timeText}</span>
                             </div>
-                            <div class="chat-info">
-                                <div class="chat-user">
-                                    <span class="chat-nickname">${room.opponentNickname}</span>
-                                    <span class="chat-time">${timeText}</span>
-                                </div>
-                                <div class="chat-preview">
-                                    <span class="chat-last-message">${this.getLastMessagePreview(room)}</span>
-                                    ${this.getUnreadCount(room) > 0 ?
-                `<span class="chat-unread-count">${this.getUnreadCount(room)}</span>` :
+                            <div class="chat-preview">
+                                <span class="chat-last-message">${room.lastMessageContent || ''}</span>
+                                ${room.unreadCount > 0 ?
+                `<span class="chat-unread-count">${room.unreadCount}</span>` :
                 ''
             }
-                                </div>
-                                <div class="chat-meta">
-                                    <span class="chat-age">${room.opponentAge}세</span>
-                                    <span class="chat-region">📍 ${this.getRegionName(room.opponentRegion)}</span>
-                                </div>
+                            </div>
+                            <div class="chat-meta">
+                                <span class="chat-age">${room.opponentAge}세</span>
+                                <span class="chat-region">📍 ${this.getRegionName(room.opponentRegion)}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="chat-actions">
-                        <button class="action-btn" onclick="leaveChatRoom(${room.roomId})" title="채팅방 나가기">
-                            🚪
-                        </button>
-                    </div>
-                `;
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn" onclick="leaveChatRoom(${room.roomId})" title="채팅방 나가기">
+                        🚪
+                    </button>
+                </div>
+            `;
 
             return wrapper;
-        }
-
-        hasUnreadMessages(room) {
-            // 실제로는 서버에서 읽지 않은 메시지 수를 제공해야 함
-            // 여기서는 시뮬레이션
-            return Math.random() > 0.6;
-        }
-
-        getUnreadCount(room) {
-            // 실제로는 서버에서 읽지 않은 메시지 수를 제공
-            if (this.hasUnreadMessages(room)) {
-                return Math.floor(Math.random() * 5) + 1;
-            }
-            return 0;
-        }
-
-        getLastMessagePreview(room) {
-            // 실제로는 서버에서 마지막 메시지를 제공
-            const messages = [
-                '안녕하세요! 반갑습니다 😊',
-                '오늘 날씨가 정말 좋네요',
-                '네, 맞습니다!',
-                '어디 살고 계세요?',
-                '취미가 뭔가요?',
-                '사진 잘 찍으시네요',
-                '시간 되실 때 연락주세요',
-                '좋은 하루 보내세요!',
-                '감사합니다 ^^',
-                '또 이야기해요'
-            ];
-            return messages[Math.floor(Math.random() * messages.length)];
         }
 
         isUserOnline(lastMessageTime) {
@@ -696,16 +664,15 @@
         }
 
         formatTime(timeString) {
+            if (!timeString) return '';
             const messageTime = new Date(timeString);
             const now = new Date();
             const diffMinutes = Math.floor((now - messageTime) / (1000 * 60));
 
             if (diffMinutes < 1) return '방금';
             if (diffMinutes < 60) return `${diffMinutes}분`;
-
             const diffHours = Math.floor(diffMinutes / 60);
             if (diffHours < 24) return `${diffHours}시간`;
-
             const diffDays = Math.floor(diffHours / 24);
             if (diffDays < 7) return `${diffDays}일`;
 
@@ -740,7 +707,7 @@
 
         updateBadges() {
             const totalUnread = this.chatRooms.reduce((total, room) =>
-                total + this.getUnreadCount(room), 0
+                total + (room.unreadCount || 0), 0
             );
 
             const headerBadge = document.getElementById('totalUnreadBadge');
@@ -759,13 +726,11 @@
         }
 
         showLoading() {
-            const loadingState = document.getElementById('loadingState');
-            loadingState.style.display = 'block';
+            document.getElementById('loadingState').style.display = 'block';
         }
 
         hideLoading() {
-            const loadingState = document.getElementById('loadingState');
-            loadingState.style.display = 'none';
+            document.getElementById('loadingState').style.display = 'none';
         }
 
         showError(message) {
@@ -774,7 +739,6 @@
         }
     }
 
-    // 전역 함수들
     function openChatRoom(roomId) {
         window.location.href = `/chat/${roomId}`;
     }
@@ -794,13 +758,11 @@
                 }
             });
 
-            const result = await response.json();
-
-            if (result.success) {
-                // 채팅방 목록 새로고침
+            if (response.status === 204) {
                 chatListManager.loadChatRooms();
             } else {
-                alert('채팅방 나가기에 실패했습니다.');
+                const result = await response.json();
+                alert(result.error?.message || '채팅방 나가기에 실패했습니다.');
             }
         } catch (error) {
             console.error('Leave chat room error:', error);

@@ -98,11 +98,19 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom{
 
 	private Expression<String> selectLastMessageContent(QChatRoom cr) {
 		QMessage msg = QMessage.message;
+		QMessage subMsg = new QMessage("subMsg");
+
 		return JPAExpressions
 				       .select(msg.content)
 				       .from(msg)
-				       .where(msg.chatRoom.id.eq(cr.id))
-				       .orderBy(msg.sentAt.desc())
-				       .limit(1);
+				       .where(
+						       msg.chatRoom.id.eq(cr.id),
+						       msg.sentAt.eq(
+								       JPAExpressions
+										       .select(subMsg.sentAt.max())
+										       .from(subMsg)
+										       .where(subMsg.chatRoom.id.eq(cr.id))
+						       )
+				       );
 	}
 }
