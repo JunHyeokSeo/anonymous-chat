@@ -41,9 +41,9 @@ public class UserUseCase {
 
 	@Transactional
 	public void update(UserUseCaseDto.UpdateRequest update, List<MultipartFile> images) {
-		log.info("{}회원 정보 수정 요청 - userId={}", LogTag.USER, update.id());
+		log.info("{}회원 정보 수정 요청 - userId={}, images={}", LogTag.USER, update.id(), images);
 		userService.update(UserServiceDto.UpdateCommand.from(update), images);
-		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, update.id());
+		log.info("{}회원 정보 수정 완료 - userId={}, images={}", LogTag.USER, update.id(), images);
 	}
 
 	@Transactional

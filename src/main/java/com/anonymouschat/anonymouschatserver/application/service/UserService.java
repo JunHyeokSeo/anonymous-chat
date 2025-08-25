@@ -90,13 +90,16 @@ public class UserService {
 
 		user.updateProfile(command.nickname(), command.gender(), command.age(), command.region(), command.bio());
 
-		try {
-			deletePreviousImages(user.getId());
-			List<UserProfileImage> newImages = convertToProfileImages(images);
-			newImages.forEach(user::addProfileImage);
-		} catch (IOException e) {
-			log.error("{}프로필 이미지 업로드 실패 - userId={}, 에러={}", LogTag.IMAGE, command.userId(), e.getMessage(), e);
-			throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
+		//images == null 이면 `이미지 변경 없음` 상태
+		if (images != null) {
+			try {
+				deletePreviousImages(user.getId());
+				List<UserProfileImage> newImages = convertToProfileImages(images);
+				newImages.forEach(user::addProfileImage);
+			} catch (IOException e) {
+				log.error("{}프로필 이미지 업로드 실패 - userId={}, 에러={}", LogTag.IMAGE, command.userId(), e.getMessage(), e);
+				throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
+			}
 		}
 
 		log.info("{}회원 정보 수정 완료 - userId={}", LogTag.USER, command.userId());
@@ -149,6 +152,7 @@ public class UserService {
 		for (UserProfileImage image : images) {
 			fileStorage.delete(image.getImageUrl());
 			image.softDelete();
+			log.info("기존 프로필 이미지 삭제 완료 - userId={}, imageUrl={}", userId, image.getImageUrl());
 		}
 	}
 

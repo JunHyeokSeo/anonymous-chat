@@ -220,6 +220,24 @@ class UserServiceTest {
 		}
 
 		@Test
+		@DisplayName("회원 정보 수정 성공 - 이미지 없이")
+		void updateUser_success_without_images() throws Exception {
+			User user = createUser(1L);
+			UserServiceDto.UpdateCommand update = new UserServiceDto.UpdateCommand(
+					1L, "newNick", Gender.MALE, 30, Region.SEOUL, "bio"
+			);
+
+			when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+			when(userRepository.existsByNickname(anyString())).thenReturn(false);
+
+			userService.update(update, null);
+
+			verify(imageValidator, never()).validate(any());
+			verify(fileStorage, never()).upload(any());
+			assertThat(user.getNickname()).isEqualTo("newNick");
+		}
+
+		@Test
 		@DisplayName("회원 정보 수정 실패 - 존재하지 않는 사용자")
 		void updateUser_userNotFound() {
 			when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
