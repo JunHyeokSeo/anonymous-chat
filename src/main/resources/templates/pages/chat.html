@@ -1058,6 +1058,10 @@
                 this.reconnectAttempts = 0;
                 this.updateConnectionStatus('connected');
                 this.sendEnterMessage();
+
+                if (chatState.messages.length > 0) {
+                    this.markAsRead();
+                }
             };
 
             ws.onmessage = (event) => {
@@ -1119,7 +1123,9 @@
 
             // 상대방 메시지면 읽음 처리
             if (message.senderId !== getCurrentUserId()) {
-                this.markAsRead();
+                setTimeout(() => {
+                    this.markAsRead();
+                }, 100);
                 if (!chatState.isAtBottom) {
                     showNewMessageAlert();
                 }
@@ -1180,6 +1186,11 @@
         }
 
         markAsRead() {
+            if (!chatState.isConnected || !chatState.websocket || chatState.websocket.readyState !== WebSocket.OPEN) {
+                console.warn('WebSocket not ready, skip read message');
+                return;
+            }
+
             this.sendMessage(MESSAGE_TYPE.READ);
         }
 
@@ -1292,7 +1303,6 @@
 
             if (result.success && result.data) {
                 chatState.currentUserId = result.data.id;
-                await loadChatRoomInfo();
             } else {
                 throw new Error('사용자 정보를 불러올 수 없습니다.');
             }
@@ -1382,7 +1392,7 @@
                     chatState.messages = newMessages;
                     renderAllMessages();
                 } else {
-                    chatState.messages.unshift(...newMessages.reverse());
+                    chatState.messages = [...newMessages, ...chatState.messages];
                     prependMessages(newMessages);
                 }
 
@@ -1392,6 +1402,9 @@
                     chatState.lastMessageId = newMessages[0].messageId;
                 }
 
+                if (chatState.messages.length > 0) {
+                    wsManager.markAsRead();
+                }
             } else {
                 throw new Error(result.error?.message || '메시지 로드 실패');
             }
@@ -1472,7 +1485,7 @@
         const messagesList = document.getElementById('messagesList');
         const fragment = document.createDocumentFragment();
 
-        messages.reverse().forEach(message => {
+        messages.forEach(message => {
             const messageElement = createMessageElement(message);
             fragment.appendChild(messageElement);
         });
@@ -1482,8 +1495,10 @@
 
     function createMessageElement(message) {
         const div = document.createElement('div');
-        const currentUserId = getCurrentUserId();
-        const isSent = message.senderId === currentUserId;
+        const currentUserId = Number(getCurrentUserId());
+        const senderId = Number(message.senderId);
+
+        const isSent = senderId === currentUserId;
 
         div.className = `message-item ${isSent ? 'sent' : 'received'}`;
 
@@ -1491,14 +1506,14 @@
         const readStatus = message.isRead ? 'read' : '';
 
         div.innerHTML = `
-           <div class="message-bubble">
-               <div class="message-content">${escapeHtml(message.content)}</div>
-               <div class="message-meta">
-                   <span class="message-time">${time}</span>
-                   ${isSent ? `<span class="message-status ${readStatus}">${message.isRead ? '읽음' : '전송됨'}</span>` : ''}
-               </div>
+       <div class="message-bubble">
+           <div class="message-content">${escapeHtml(message.content)}</div>
+           <div class="message-meta">
+               <span class="message-time">${time}</span>
+               ${isSent ? `<span class="message-status ${readStatus}">${message.isRead ? '읽음' : '전송됨'}</span>` : ''}
            </div>
-       `;
+       </div>
+   `;
 
         return div;
     }
@@ -1853,9 +1868,10 @@
     }
 
     function updateMessageReadStatus(lastReadMessageId) {
-        // 읽음 상태 업데이트 로직
+        // 읽음 상태 업데이트 (서버에서 내려온 messageId 기준)
         chatState.messages.forEach(message => {
-            if (message.id <= lastReadMessageId && message.senderId === getCurrentUserId()) {
+            const msgId = message.messageId ?? message.id; // 서버 messageId 우선, 없으면 로컬 id 사용
+            if (msgId && msgId <= lastReadMessageId && Number(message.senderId) === Number(getCurrentUserId())) {
                 message.isRead = true;
             }
         });
