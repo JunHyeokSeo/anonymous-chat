@@ -8,7 +8,8 @@ import com.anonymouschat.anonymouschatserver.domain.type.Role;
 import com.anonymouschat.anonymouschatserver.presentation.controller.dto.UserDto;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 
 public class UserUseCaseDto {
@@ -89,8 +90,8 @@ public class UserUseCaseDto {
 			int age,
 			Region region,
 			String bio,
-			LocalDateTime createdAt,
-			LocalDateTime lastActiveAt,
+			Instant createdAt,
+			Instant lastActiveAt,
 			List<UserProfileImageDto> profileImages
 	) {
 		public static ProfileResponse from(UserServiceDto.ProfileResult result) {
@@ -101,8 +102,8 @@ public class UserUseCaseDto {
 					       .age(result.age())
 					       .region(result.region())
 					       .bio(result.bio())
-					       .createdAt(result.createdAt())
-					       .lastActiveAt(result.lastActiveAt())
+					       .createdAt(result.createdAt().toInstant(ZoneOffset.UTC))
+					       .lastActiveAt(result.lastActiveAt().toInstant(ZoneOffset.UTC))
 					       .profileImages(result.profileImages())
 					       .build();
 		}
@@ -135,7 +136,7 @@ public class UserUseCaseDto {
 			int age,
 			Region region,
 			String profileImageUrl,
-			LocalDateTime lastActiveAt
+			Instant lastActiveAt
 	) {
 		public static SearchResponse from(UserServiceDto.SearchResult result) {
 			return SearchResponse.builder()
@@ -145,7 +146,7 @@ public class UserUseCaseDto {
 					       .age(result.age())
 					       .region(result.region())
 					       .profileImageUrl(result.profileImageUrl())
-					       .lastActiveAt(result.lastActiveAt())
+					       .lastActiveAt(result.lastActiveAt().toInstant(ZoneOffset.UTC))
 					       .build();
 		}
 	}

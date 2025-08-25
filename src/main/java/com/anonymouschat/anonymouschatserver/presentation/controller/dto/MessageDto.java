@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class MessageDto {
 	@Schema(description = "메시지 조회 요청 DTO")
@@ -46,7 +46,7 @@ public class MessageDto {
 			String content,
 
 			@Schema(description = "메시지 전송 시각", example = "2025-08-19T13:24:00")
-			LocalDateTime sentAt
+			Instant sentAt
 	) {
 		public static MessageResponse from(MessageUseCaseDto.MessageResponse response) {
 			return new MessageResponse(

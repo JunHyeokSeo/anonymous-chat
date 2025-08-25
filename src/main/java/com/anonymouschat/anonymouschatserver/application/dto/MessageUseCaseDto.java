@@ -3,7 +3,9 @@ package com.anonymouschat.anonymouschatserver.application.dto;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 public class MessageUseCaseDto {
 	@Builder
 	public record MessageResponse(
@@ -11,7 +13,7 @@ public class MessageUseCaseDto {
 			Long roomId,
 			Long senderId,
 			String content,
-			LocalDateTime sentAt
+			Instant sentAt
 	) {
 		public static MessageResponse from(Message message) {
 			return MessageResponse.builder()
@@ -19,7 +21,7 @@ public class MessageUseCaseDto {
 					       .roomId(message.getChatRoom().getId())
 					       .senderId(message.getSender().getId())
 					       .content(message.getContent())
-					       .sentAt(message.getSentAt())
+					       .sentAt(message.getSentAt().toInstant(ZoneOffset.UTC))
 					       .build();
 		}
 	}

@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public class UserDto {
@@ -92,10 +92,10 @@ public class UserDto {
 			String bio,
 
 			@Schema(description = "가입일", example = "2025-08-18T10:15:30")
-			LocalDateTime createdAt,
+			Instant createdAt,
 
 			@Schema(description = "마지막 활동 시각", example = "2025-08-19T09:00:00")
-			LocalDateTime lastActiveAt,
+			Instant lastActiveAt,
 
 			@Schema(
 					description = "유저 프로필 이미지 리스트",
@@ -187,7 +187,7 @@ public class UserDto {
 			String profileImageUrl,
 
 			@Schema(description = "마지막 활동 시각", example = "2025-08-18T22:00:00")
-			LocalDateTime lastActiveAt
+			Instant lastActiveAt
 	) {
 		public static SearchResponse from(UserUseCaseDto.SearchResponse response) {
 			return new SearchResponse(
