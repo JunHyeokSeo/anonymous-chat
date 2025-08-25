@@ -772,61 +772,6 @@
         }
     };
 
-    // 프로필 이미지 관련 함수들
-    function triggerFileInput() {
-        document.getElementById('profileInput').click();
-    }
-
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // 파일 크기 체크 (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('이미지 파일은 5MB 이하로 선택해주세요.');
-            return;
-        }
-
-        // 파일 타입 체크
-        if (!file.type.startsWith('image/')) {
-            alert('이미지 파일만 선택할 수 있습니다.');
-            return;
-        }
-
-        editState.profileFile = file;
-        editState.hasChanges = true;
-
-        // 미리보기 표시
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const placeholder = document.getElementById('profilePlaceholder');
-            const image = document.getElementById('profileImage');
-            const removeBtn = document.getElementById('removeBtn');
-
-            placeholder.style.display = 'none';
-            image.src = e.target.result;
-            image.style.display = 'block';
-            removeBtn.style.display = 'inline-block';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function removeProfileImage() {
-        editState.profileFile = null;
-        editState.hasChanges = true;
-
-        const placeholder = document.getElementById('profilePlaceholder');
-        const image = document.getElementById('profileImage');
-        const removeBtn = document.getElementById('removeBtn');
-        const fileInput = document.getElementById('profileInput');
-
-        placeholder.style.display = 'block';
-        image.style.display = 'none';
-        image.src = '';
-        removeBtn.style.display = 'none';
-        fileInput.value = '';
-    }
-
     // 유효성 검사 함수들
     function validateNickname() {
         const nickname = document.getElementById('nickname').value;
@@ -905,10 +850,10 @@
         slot.className = 'image-slot has-image';
 
         slot.innerHTML = `
-        <img src="${image.url}" alt="프로필 이미지">
-        <button class="image-remove" onclick="removeImage(${index})">×</button>
-        ${image.isRepresentative ? '<div class="representative-badge">대표</div>' : ''}
-    `;
+           <img src="${image.url}" alt="프로필 이미지">
+           <button class="image-remove" onclick="removeImage(${index})">×</button>
+           ${image.isRepresentative ? '<div class="representative-badge">대표</div>' : ''}
+       `;
 
         slot.onclick = (e) => {
             if (!e.target.classList.contains('image-remove')) {
@@ -926,13 +871,26 @@
         files.forEach(file => {
             if (editState.profileImages.length >= 3) return;
 
+            // 파일 크기 체크 (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('이미지 파일은 5MB 이하로 선택해주세요.');
+                return;
+            }
+
+            // 파일 타입 체크
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 선택할 수 있습니다.');
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 editState.profileImages.push({
                     file: file,
                     url: e.target.result,
                     isNew: true,
-                    isRepresentative: editState.profileImages.length === 0
+                    isRepresentative: editState.profileImages.length === 0,
+                    toDelete: false
                 });
                 renderImagesGrid();
                 editState.hasChanges = true;
@@ -977,7 +935,13 @@
         editState.hasChanges = true;
     }
 
+    // 이미지 변경 감지
     function hasImageChanges() {
+        // originalImages가 초기화되지 않은 경우 (이미지가 없었던 경우)
+        if (!editState.originalImages) {
+            return editState.profileImages.length > 0;
+        }
+
         // 1. 개수 변화
         if (editState.profileImages.length !== editState.originalImages.length) {
             return true;
@@ -1053,17 +1017,17 @@
 
                 // 프로필 이미지
                 editState.profileImages = [];
-                editState.originalImages = []; // 추가
+                editState.originalImages = [];
                 if (profile.profileImages && profile.profileImages.length > 0) {
                     const imageData = profile.profileImages.map(img => ({
                         id: img.id,
                         url: img.imageUrl,
                         isRepresentative: img.isRepresentative,
                         isNew: false,
-                        toDelete: false // 추가
+                        toDelete: false
                     }));
                     editState.profileImages = [...imageData];
-                    editState.originalImages = JSON.parse(JSON.stringify(imageData)); // 깊은 복사
+                    editState.originalImages = JSON.parse(JSON.stringify(imageData));
                 }
                 renderImagesGrid();
 
@@ -1145,7 +1109,7 @@
                 }));
                 formData.append('imageMetadata', JSON.stringify(imageMetadata));
             }
-			// 변경이 없으면 이미지 관련 필드는 전송하지 않음
+            // 변경이 없으면 이미지 관련 필드는 전송하지 않음
 
             const token = sessionStorage.getItem('accessToken');
             const response = await fetch('/api/v1/users/me', {
