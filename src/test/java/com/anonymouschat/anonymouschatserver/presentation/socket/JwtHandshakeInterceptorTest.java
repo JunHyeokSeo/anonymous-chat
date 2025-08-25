@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.infra.security.CustomPrincipal;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtTokenResolver;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtValidator;
+import com.anonymouschat.anonymouschatserver.presentation.interceptor.JwtHandshakeInterceptor;
 import com.anonymouschat.testsupport.security.PrincipalStub;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

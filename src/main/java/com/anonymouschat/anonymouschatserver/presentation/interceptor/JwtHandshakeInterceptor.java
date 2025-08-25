@@ -1,4 +1,4 @@
-package com.anonymouschat.anonymouschatserver.presentation.socket;
+package com.anonymouschat.anonymouschatserver.presentation.interceptor;
 
 import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.infra.security.jwt.JwtAuthenticationFactory;
