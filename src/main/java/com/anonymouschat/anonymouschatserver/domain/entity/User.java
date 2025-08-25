@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,15 +75,15 @@ public class User {
 
 	@Column(name = "created_at", nullable = false)
 	@Getter
-	private final LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at", nullable = false)
 	@Getter
-	private LocalDateTime updatedAt = LocalDateTime.now();
+	private LocalDateTime updatedAt;
 
 	@Column(name = "last_active_at", nullable = false)
 	@Getter
-	private final LocalDateTime lastActiveAt = LocalDateTime.now();
+	private LocalDateTime lastActiveAt;
 
 	// 활성 여부 (soft delete 대비)
 	@Column(name = "active", nullable = false)
@@ -91,6 +92,14 @@ public class User {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private final List<UserProfileImage> profileImages = new ArrayList<>();
+
+	@PrePersist
+	public void prePersist() {
+		LocalDateTime now = LocalDateTime.now();
+		this.createdAt = now;
+		this.updatedAt = now;
+		this.lastActiveAt = now;
+	}
 
 	@PreUpdate
 	public void preUpdate() {
@@ -138,6 +147,10 @@ public class User {
 				       .stream()
 				       .filter(userProfileImage -> !userProfileImage.isDeleted())
 				       .toList();
+	}
+
+	public void updateLastActiveAt(Clock clock) {
+		this.lastActiveAt = LocalDateTime.now(clock);
 	}
 
 	@Builder
