@@ -30,7 +30,7 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 						       lastExitedAt != null ? m.sentAt.goe(lastExitedAt) : null,
 						       lastMessageId != null ? m.id.lt(lastMessageId) : null
 				       )
-				       .orderBy(m.id.asc())
+				       .orderBy(m.id.desc())
 				       .limit(limit)
 				       .fetch();
 	}

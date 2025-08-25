@@ -1,15 +1,16 @@
 package com.anonymouschat.anonymouschatserver.application.service;
 
-import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.Message;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.repository.MessageRepository;
+import com.anonymouschat.anonymouschatserver.infra.log.LogTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -31,7 +32,10 @@ public class MessageService {
 	}
 
 	public List<Message> getMessages(ChatRoom chatRoom, LocalDateTime lastExitedAt, Long lastMessageId, int limit) {
-		return messageRepository.findMessagesAfterExitTimeWithCursor(chatRoom.getId(), lastExitedAt, lastMessageId, limit);
+		List<Message> messages = messageRepository.findMessagesAfterExitTimeWithCursor(chatRoom.getId(), lastExitedAt, lastMessageId, limit);
+		messages.sort(Comparator.comparing(Message::getId));
+		log.info("{}메시지 목록 조회 완료 - roomId={}, laseExitedAt={}, lastMessageId={}", LogTag.MESSAGE, chatRoom.getId(), lastExitedAt, lastMessageId);
+		return messages;
 	}
 
 	public Long markMessagesAsRead(Long roomId, Long userId) {
