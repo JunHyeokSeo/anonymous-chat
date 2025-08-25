@@ -120,6 +120,7 @@ class MessageServiceTest {
 			given(messageRepository.findMessagesAfterExitTimeWithCursor(any(), any(), any(), anyInt()))
 					.willReturn(List.of());
 
+
 			// when
 			List<Message> result = messageService.getMessages(chatRoom, LocalDateTime.now(), null, 10);
 

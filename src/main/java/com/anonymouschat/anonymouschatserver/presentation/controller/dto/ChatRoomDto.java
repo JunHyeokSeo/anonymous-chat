@@ -4,7 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomUseCaseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class ChatRoomDto {
 
@@ -43,7 +43,7 @@ public class ChatRoomDto {
 			String opponentProfileImageUrl,
 
 			@Schema(description = "마지막 메시지 전송 시각", example = "2025-08-19T15:30:00")
-			LocalDateTime lastMessageTime,
+			Instant lastMessageTime,
 
 			@Schema(description = "마지막 메시지 내용", example = "안녕하세요!")
 			String lastMessageContent,

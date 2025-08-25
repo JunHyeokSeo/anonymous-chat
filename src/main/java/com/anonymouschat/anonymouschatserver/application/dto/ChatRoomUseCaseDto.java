@@ -4,7 +4,9 @@ import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.entity.UserProfileImage;
 import lombok.Builder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class ChatRoomUseCaseDto {
 	@Builder
@@ -15,7 +17,7 @@ public class ChatRoomUseCaseDto {
 			int opponentAge,
 			String opponentRegion,
 			String opponentProfileImageUrl,
-			LocalDateTime lastMessageTime,
+			Instant lastMessageTime,
 			String lastMessageContent,
 			Long unreadCnt
 	) {
@@ -27,7 +29,7 @@ public class ChatRoomUseCaseDto {
 					       .opponentAge(result.opponentAge())
 					       .opponentRegion(result.opponentRegion())
 					       .opponentProfileImageUrl(result.opponentProfileImageUrl())
-					       .lastMessageTime(result.lastMessageTime())
+					       .lastMessageTime(result.lastMessageTime().toInstant(ZoneOffset.UTC))
 					       .lastMessageContent(result.lastMessageContent())
 					       .unreadCnt(result.unreadCnt())
 					       .build();
@@ -45,7 +47,7 @@ public class ChatRoomUseCaseDto {
 							                                .findFirst()
 							                                .map(UserProfileImage::getImageUrl)
 							                                .orElse(null))
-					       .lastMessageTime(lastMessageTime)
+					       .lastMessageTime(lastMessageTime.toInstant(ZoneOffset.UTC))
 					       .lastMessageContent("")
 					       .unreadCnt(0L)
 					       .build();
