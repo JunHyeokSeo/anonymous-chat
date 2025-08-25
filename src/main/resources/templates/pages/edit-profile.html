@@ -617,15 +617,6 @@
 						</div>
 						<input type="file" id="imageInput" class="file-input" accept="image/*" onchange="handleImageSelect(event)" multiple>
 					</div>
-					<div class="upload-buttons">
-						<button type="button" class="upload-button" onclick="triggerFileInput()">
-							사진 선택
-						</button>
-						<button type="button" class="upload-button secondary" onclick="removeProfileImage()" id="removeBtn" style="display: none;">
-							제거
-						</button>
-					</div>
-					<input type="file" id="profileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
 				</div>
 
 				<!-- 닉네임 -->
@@ -747,8 +738,8 @@
 <script>
     // 전역 상태 관리
     const editState = {
-        profileFile: null,
-        originalProfileImage: null,
+        profileImages: [],
+        originalImages: [],
         isSubmitting: false,
         hasChanges: false,
         originalData: null
@@ -894,7 +885,7 @@
 
         // 기존 이미지들
         editState.profileImages.forEach((image, index) => {
-            const slot = this.createImageSlot(image, index);
+            const slot = createImageSlot(image, index);
             grid.appendChild(slot);
         });
 
@@ -954,7 +945,18 @@
 
     // 이미지 제거
     function removeImage(index) {
-        editState.profileImages.splice(index, 1);
+        const image = editState.profileImages[index];
+
+        if (image.isNew) {
+            // 새로 추가된 이미지는 배열에서 제거
+            editState.profileImages.splice(index, 1);
+        } else {
+            // 기존 이미지는 삭제 플래그만 설정
+            image.toDelete = true;
+        }
+
+        // 삭제되지 않은 이미지들만 필터링하여 표시
+        editState.profileImages = editState.profileImages.filter(img => !img.toDelete);
 
         // 대표 이미지가 삭제되면 첫 번째를 대표로
         if (editState.profileImages.length > 0 &&
@@ -973,6 +975,44 @@
         });
         renderImagesGrid();
         editState.hasChanges = true;
+    }
+
+    function hasImageChanges() {
+        // 1. 개수 변화
+        if (editState.profileImages.length !== editState.originalImages.length) {
+            return true;
+        }
+
+        // 2. 새로운 이미지 추가
+        if (editState.profileImages.some(img => img.isNew)) {
+            return true;
+        }
+
+        // 3. 기존 이미지 삭제 (toDelete 플래그가 있는 삭제된 이미지들 확인)
+        const deletedImages = editState.originalImages.filter(original =>
+            !editState.profileImages.some(current => current.id === original.id)
+        );
+        if (deletedImages.length > 0) {
+            return true;
+        }
+
+        // 4. 대표 이미지 변경
+        const originalRep = editState.originalImages.find(img => img.isRepresentative);
+        const currentRep = editState.profileImages.find(img => img.isRepresentative);
+        if (originalRep?.id !== currentRep?.id) {
+            return true;
+        }
+
+        // 5. 순서 변경 (현재 순서와 원본 순서 비교)
+        for (let i = 0; i < editState.profileImages.length; i++) {
+            const currentImg = editState.profileImages[i];
+            const originalImg = editState.originalImages[i];
+            if (!currentImg.isNew && currentImg.id !== originalImg?.id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // 프로필 로드
@@ -1013,13 +1053,17 @@
 
                 // 프로필 이미지
                 editState.profileImages = [];
+                editState.originalImages = []; // 추가
                 if (profile.profileImages && profile.profileImages.length > 0) {
-                    editState.profileImages = profile.profileImages.map(img => ({
+                    const imageData = profile.profileImages.map(img => ({
                         id: img.id,
                         url: img.imageUrl,
                         isRepresentative: img.isRepresentative,
-                        isNew: false
+                        isNew: false,
+                        toDelete: false // 추가
                     }));
+                    editState.profileImages = [...imageData];
+                    editState.originalImages = JSON.parse(JSON.stringify(imageData)); // 깊은 복사
                 }
                 renderImagesGrid();
 
@@ -1083,21 +1127,25 @@
                 type: 'application/json'
             }));
 
-            // 프로필 이미지 처리
-            editState.profileImages.forEach((image, index) => {
-                if (image.isNew && image.file) {
-                    formData.append('images', image.file);
-                }
-            });
+            // 이미지 변경이 있을 때만 이미지 관련 데이터 전송
+            if (hasImageChanges()) {
+                // 새로운 이미지 파일들
+                editState.profileImages.forEach((image, index) => {
+                    if (image.isNew && image.file) {
+                        formData.append('images', image.file);
+                    }
+                });
 
-			// 이미지 메타데이터 추가
-            const imageMetadata = editState.profileImages.map((img, index) => ({
-                id: img.id || null,
-                isRepresentative: img.isRepresentative,
-                order: index
-            }));
-            formData.append('imageMetadata', JSON.stringify(imageMetadata));
-
+                // 현재 상태의 모든 이미지 메타데이터 (빈 배열도 포함)
+                const imageMetadata = editState.profileImages.map((img, index) => ({
+                    id: img.id || null,
+                    isRepresentative: img.isRepresentative,
+                    order: index,
+                    isNew: img.isNew || false
+                }));
+                formData.append('imageMetadata', JSON.stringify(imageMetadata));
+            }
+			// 변경이 없으면 이미지 관련 필드는 전송하지 않음
 
             const token = sessionStorage.getItem('accessToken');
             const response = await fetch('/api/v1/users/me', {
