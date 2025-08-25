@@ -49,7 +49,6 @@ public class ReadMessageHandler implements MessageHandler{
 							.roomId(roomId)
 							.build()
 			);
-
 			if (lastReadMessageId != null) {
 				ChatOutboundMessage outbound = ChatOutboundMessage.builder()
 						                               .roomId(roomId)
@@ -60,11 +59,12 @@ public class ReadMessageHandler implements MessageHandler{
 						                               .build();
 
 				//로깅
-				log.info("{}roomId={} userId={} lastReadMessageId={}", LogTag.WS_READ, roomId, userId, lastReadMessageId);
+				log.info("메시지 읽음 처리 완료 {}roomId={} userId={} lastReadMessageId={}", LogTag.WS_READ, roomId, userId, lastReadMessageId);
 
 				// 브로드 캐스트
 				broadcaster.broadcastExcept(roomId, outbound, userId);
-			}
+			} else
+				log.info("읽을 메시지 없음 {}roomId={} userId={}", LogTag.WS_READ, roomId, userId);
 		} catch (Exception e) {
 			log.error("{}message read error: userId={}, roomId={}, error={}", LogTag.WS_ERR, userId, roomId, e.getMessage(), e);
 			sessionManager.forceDisconnect(session, CloseStatus.SERVER_ERROR);
