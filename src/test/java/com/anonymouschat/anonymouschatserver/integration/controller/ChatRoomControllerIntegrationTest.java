@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.domain.type.Gender;
 import com.anonymouschat.anonymouschatserver.domain.type.Region;
 import com.anonymouschat.anonymouschatserver.integration.common.IntegrationTestHelper;
 import com.anonymouschat.anonymouschatserver.integration.config.TestConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -144,8 +145,9 @@ public class ChatRoomControllerIntegrationTest {
 					                             .content(testHelper.asJsonString(createRequest)))
 					             .andReturn();
 
-			// roomId 추출 (실제로는 JSON 파싱 필요)
-			Long roomId = 1L; // 테스트를 위한 간소화
+			String responseBody = result.getResponse().getContentAsString();
+			var jsonNode = new ObjectMapper().readTree(responseBody);
+			Long roomId = jsonNode.get("data").get("roomId").asLong();
 
 			// When & Then
 			mockMvc.perform(testHelper.withAuth(delete("/api/v1/chat-rooms/{roomId}", roomId), user1.accessToken()))
