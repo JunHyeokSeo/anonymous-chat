@@ -82,6 +82,7 @@ dependencies {
     }
     testImplementation("org.mockito:mockito-core:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.platform:junit-platform-suite:1.10.2")
 }
 
 val querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile

@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Transactional
 @Import(TestConfig.class)
-class ChatRoomControllerIntegrationTest {
+public class ChatRoomControllerIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;

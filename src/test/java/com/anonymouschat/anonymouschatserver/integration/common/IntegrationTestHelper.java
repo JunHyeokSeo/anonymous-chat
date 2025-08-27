@@ -1,8 +1,11 @@
 package com.anonymouschat.anonymouschatserver.integration.common;
 
+import com.anonymouschat.anonymouschatserver.application.dto.AuthUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
 import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.service.UserService;
+import com.anonymouschat.anonymouschatserver.application.usecase.AuthUseCase;
 import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
@@ -18,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @Component
 public class IntegrationTestHelper {
 	private final UserRepository userRepository;
+	private final UserService userService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final ObjectMapper objectMapper;
 	private final AuthService authService;
@@ -25,12 +29,14 @@ public class IntegrationTestHelper {
 	private final MessageUseCase messageUseCase;
 
 	public IntegrationTestHelper(UserRepository userRepository,
+	                             UserService userService,
 	                             JwtTokenProvider jwtTokenProvider,
 	                             ObjectMapper objectMapper,
 	                             AuthService authService,
 	                             ChatRoomService chatRoomService,
 	                             MessageUseCase messageUseCase) {
 		this.userRepository = userRepository;
+		this.userService = userService;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.objectMapper = objectMapper;
 		this.authService = authService;
@@ -120,6 +126,14 @@ public class IntegrationTestHelper {
 				                                  .roomId(roomId)
 				                                  .userId(userId)
 				                                  .build());
+	}
+
+	public String createAndStoreOAuthTempCode(User user) {
+		// 실제 토큰 발급 (임시 사용자 로그인 결과 시뮬레이션)
+		AuthUseCaseDto.AuthData authData = authService.issueTokensForUser(user, "test-agent", "127.0.0.1");
+
+		// 임시 토큰 저장 (storeOAuthTempData → Redis에 저장 후 임시 code 반환)
+		return new AuthUseCase(authService, userService).storeOAuthTempData(authData);
 	}
 
 	public record TestUser(User user, String accessToken, String refreshToken) {}
