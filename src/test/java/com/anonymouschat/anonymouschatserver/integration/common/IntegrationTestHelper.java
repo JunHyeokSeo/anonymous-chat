@@ -1,6 +1,9 @@
 package com.anonymouschat.anonymouschatserver.integration.common;
 
+import com.anonymouschat.anonymouschatserver.application.dto.MessageUseCaseDto;
 import com.anonymouschat.anonymouschatserver.application.service.AuthService;
+import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService;
+import com.anonymouschat.anonymouschatserver.application.usecase.MessageUseCase;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
 import com.anonymouschat.anonymouschatserver.domain.repository.UserRepository;
 import com.anonymouschat.anonymouschatserver.domain.type.Gender;
@@ -18,15 +21,21 @@ public class IntegrationTestHelper {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final ObjectMapper objectMapper;
 	private final AuthService authService;
+	private final ChatRoomService chatRoomService;
+	private final MessageUseCase messageUseCase;
 
 	public IntegrationTestHelper(UserRepository userRepository,
 	                             JwtTokenProvider jwtTokenProvider,
 	                             ObjectMapper objectMapper,
-	                             AuthService authService) {
+	                             AuthService authService,
+	                             ChatRoomService chatRoomService,
+	                             MessageUseCase messageUseCase) {
 		this.userRepository = userRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.objectMapper = objectMapper;
 		this.authService = authService;
+		this.chatRoomService = chatRoomService;
+		this.messageUseCase = messageUseCase;
 	}
 
 	/**
@@ -92,6 +101,25 @@ public class IntegrationTestHelper {
 	 */
 	public void cleanup() {
 		userRepository.deleteAll();
+	}
+
+	public Long createChatRoom(User user1, User user2) {
+		return chatRoomService.createOrFind(user1, user2).getId();
+	}
+
+	public Long createMessage(Long roomId, Long userId, String content){
+		 return messageUseCase.sendMessage(MessageUseCaseDto.SendMessageRequest.builder()
+				                                    .roomId(roomId)
+				                                    .senderId(userId)
+				                                    .content(content)
+				                                    .build());
+	}
+
+	public void markMessageAsRead(Long roomId, Long userId) {
+		messageUseCase.markMessagesAsRead(MessageUseCaseDto.MarkMessagesAsReadRequest.builder()
+				                                  .roomId(roomId)
+				                                  .userId(userId)
+				                                  .build());
 	}
 
 	public record TestUser(User user, String accessToken, String refreshToken) {}
