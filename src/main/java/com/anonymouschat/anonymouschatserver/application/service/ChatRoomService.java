@@ -37,7 +37,9 @@ public class ChatRoomService {
 		}
 
 		try {
-			ChatRoom newRoom = chatRoomRepository.save(new ChatRoom(initiator, recipient));
+			ChatRoom chatRoom = new ChatRoom(initiator, recipient);
+			chatRoom.validateDifferentParticipants();
+			ChatRoom newRoom = chatRoomRepository.save(chatRoom);
 			log.info("{}신규 채팅방 생성 - roomId={}, initiatorId={}, recipientId={}",
 					LogTag.CHAT, newRoom.getId(), initiator.getId(), recipient.getId());
 			return newRoom;

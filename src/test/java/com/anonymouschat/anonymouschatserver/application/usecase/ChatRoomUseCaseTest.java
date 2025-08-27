@@ -6,6 +6,7 @@ import com.anonymouschat.anonymouschatserver.application.service.ChatRoomService
 import com.anonymouschat.anonymouschatserver.application.service.UserService;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.DuplicateChatParticipant;
 import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
@@ -38,6 +39,7 @@ class ChatRoomUseCaseTest {
 	private User user1;
 	private User user2;
 	private ChatRoom chatRoom;
+	private ChatRoom duplicateChatRoom;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -45,6 +47,7 @@ class ChatRoomUseCaseTest {
 		user1 = TestUtils.createUser(1L);
 		user2 = TestUtils.createUser(2L);
 		chatRoom = TestUtils.createChatRoom(1L, user1, user2);
+		duplicateChatRoom = TestUtils.createChatRoom(2L, user1, user2);
 	}
 
 	@Nested
@@ -71,6 +74,20 @@ class ChatRoomUseCaseTest {
 			assertThatThrownBy(() -> chatRoomUseCase.createOrFind(999L, user2.getId()))
 					.isInstanceOf(NotFoundException.class)
 					.hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
+		}
+
+		@Test
+		@DisplayName("나 자신과 채팅방을 생성하면 DuplicateChatParticipant 예외가 발생한다")
+		void duplicateUserError() {
+			// given
+			given(userService.findUser(user1.getId())).willReturn(user1);
+			given(chatRoomService.createOrFind(user1, user1))
+					.willThrow(new DuplicateChatParticipant(ErrorCode.DUPLICATE_CHAT_PARTICIPANT));
+
+			// when & then
+			assertThatThrownBy(() -> chatRoomUseCase.createOrFind(user1.getId(), user1.getId()))
+					.isInstanceOf(DuplicateChatParticipant.class)
+					.hasMessage(ErrorCode.DUPLICATE_CHAT_PARTICIPANT.getMessage());
 		}
 	}
 

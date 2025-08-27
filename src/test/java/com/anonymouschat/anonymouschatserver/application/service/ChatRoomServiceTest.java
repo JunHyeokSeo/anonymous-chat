@@ -4,6 +4,7 @@ import com.anonymouschat.anonymouschatserver.application.dto.ChatRoomServiceDto;
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
 import com.anonymouschat.anonymouschatserver.common.exception.NotFoundException;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.DuplicateChatParticipant;
 import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import com.anonymouschat.anonymouschatserver.domain.entity.ChatRoom;
 import com.anonymouschat.anonymouschatserver.domain.entity.User;
@@ -108,6 +109,22 @@ class ChatRoomServiceTest {
             verify(chatRoomRepository).save(any(ChatRoom.class));
             verify(chatRoomRepository, times(2)).findLatestValidChatRoomByPair(1L, 2L);
         }
+
+		@Test
+	    @DisplayName("같은 사용자끼리 채팅방을 생성하려 하면 DuplicateChatParticipant 예외가 발생한다")
+	    void it_throws_exception_when_same_user() {
+		    // given
+		    User sameUser = initiator; // 같은 객체
+		    when(chatRoomRepository.findLatestValidChatRoomByPair(anyLong(), anyLong()))
+				    .thenReturn(Optional.empty());
+
+		    // when & then
+		    assertThatThrownBy(() -> chatRoomService.createOrFind(sameUser, sameUser))
+				    .isInstanceOf(DuplicateChatParticipant.class)
+				    .hasMessage(ErrorCode.DUPLICATE_CHAT_PARTICIPANT.getMessage());
+
+		    verify(chatRoomRepository, never()).save(any(ChatRoom.class));
+	    }
     }
 
     @Nested

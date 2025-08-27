@@ -2,6 +2,7 @@ package com.anonymouschat.anonymouschatserver.domain.entity;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.ConflictException;
+import com.anonymouschat.anonymouschatserver.common.exception.chat.DuplicateChatParticipant;
 import com.anonymouschat.anonymouschatserver.common.exception.chat.NotChatRoomMemberException;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -124,6 +125,12 @@ public class ChatRoom {
 	public void validateUsable() {
 		if (this.isArchived()) {
 			throw new ConflictException(ErrorCode.CHAT_ROOM_CLOSED);
+		}
+	}
+
+	public void validateDifferentParticipants() {
+		if (user1.getId().equals(user2.getId())) {
+			throw new DuplicateChatParticipant(ErrorCode.DUPLICATE_CHAT_PARTICIPANT);
 		}
 	}
 

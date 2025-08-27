@@ -77,11 +77,11 @@ dependencies {
     testImplementation("org.springframework:spring-messaging")
 
     // 테스트
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test"){
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
     testImplementation("org.mockito:mockito-core:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
 }
 
 val querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
