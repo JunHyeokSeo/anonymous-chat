@@ -2,14 +2,17 @@ package com.anonymouschat.anonymouschatserver.presentation;
 
 import com.anonymouschat.anonymouschatserver.common.code.ErrorCode;
 import com.anonymouschat.anonymouschatserver.common.exception.AbstractCustomException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
@@ -44,6 +47,26 @@ public class GlobalExceptionHandler {
 				       .body(CommonResponse.error(errorCode));
 	}
 
+	/**
+	 * JSON parse 실패 (enum 매핑 실패 등)
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<CommonResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+		String message = ex.getMessage();
+
+		// Jackson enum 매핑 실패일 때 조금 더 구체적인 메시지
+		if (ex.getCause() instanceof InvalidFormatException ife && ife.getTargetType().isEnum()) {
+			String field = ife.getPath().getFirst().getFieldName();
+			String invalidValue = String.valueOf(ife.getValue());
+			message = String.format("[%s] 값 '%s'은(는) 잘못된 ENUM 입니다.", field, invalidValue);
+		}
+
+		log.warn("[HttpMessageNotReadable] {}", message);
+
+		ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+		return ResponseEntity.status(errorCode.getStatus())
+				       .body(CommonResponse.error(errorCode));
+	}
 
 	/**
 	 * 파라미터 타입 불일치 (예: int 인데 문자 들어온 경우)
