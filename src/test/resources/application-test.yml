@@ -3,14 +3,33 @@ jwt:
   access-token-expiration: 3600
   refresh-token-expiration: 1209600
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: "test-google-client-id"
+            client-secret: "test-google-client-secret"
   jpa:
     hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+      ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 1000ms
+      lettuce:
+        pool:
+          max-active: 2
+          max-idle: 2
+  cache:
+    type: none
+
+logging:
+  level:
+    com.anonymouschat.anonymouschatserver.infra.security.jwt: DEBUG
+    org.springframework.security: INFO
