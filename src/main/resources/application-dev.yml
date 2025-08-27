@@ -1,0 +1,45 @@
+spring:
+  h2:
+    console:
+      enabled: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # Redis 연결 실패시 애플리케이션이 시작되지 않는 것을 방지
+      timeout: 1000ms
+      lettuce:
+        pool:
+          max-active: 2
+          max-idle: 2
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:h2:mem:anonymous-chat}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DRIVER_CLASS_NAME}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+        default_batch_fetch_size: 50
+    open-in-view: false
+
+logging:
+  level:
+    root: info
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace
+    com.anonymouschat: debug
+    org.springframework.data.redis: debug
+
+management:
+  health:
+    redis:
+      enabled: false  # 개발환경에서 Redis health check 비활성화
