@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -157,6 +158,8 @@ class UserUseCaseTest {
 					                                             .region(TestUtils.createUser(1L).getRegion())
 					                                             .bio("소개")
 					                                             .profileImages(Collections.emptyList())
+					                                             .createdAt(LocalDateTime.now())
+					                                             .lastActiveAt(LocalDateTime.now())
 					                                             .build();
 			given(userService.getProfile(1L)).willReturn(profileResult);
 
